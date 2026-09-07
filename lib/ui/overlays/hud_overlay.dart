@@ -23,6 +23,13 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   late final Animation<Offset> _sectorBannerSlide;
   SectorBiome? _announcedSector;
 
+  // Attack button: scale-punch + glow flash animation
+  late final AnimationController _attackPunchController;
+  late final Animation<double> _attackScaleAnim;
+  late final Animation<double> _attackGlowAnim;
+  bool _attackFlashing = false;
+
+
   int _lastJumpTime = 0;
   void _triggerJump() {
     if (widget.game.player.isAttacking) return; // no jump mid-swing
@@ -40,9 +47,14 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   }
 
   void _triggerAttack() {
+    if (widget.game.player.attackCooldown > 0) return;
     widget.game.player.startAttack();
+    // Fire punch-scale + glow flash animation
+    _attackPunchController.forward(from: 0.0);
+    if (mounted) setState(() => _attackFlashing = true);
+    Future.delayed(const Duration(milliseconds: 350),
+        () { if (mounted) setState(() => _attackFlashing = false); });
   }
-
 
   @override
   void initState() {
@@ -51,6 +63,25 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
+
+    // Attack button punch-scale + glow flash (300ms one-shot)
+    _attackPunchController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _attackScaleAnim = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.82).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 0.82, end: 1.08).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 70,
+      ),
+    ]).animate(_attackPunchController);
+    _attackGlowAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _attackPunchController, curve: Curves.easeOutCubic),
+    );
 
     _sectorBannerController = AnimationController(
       vsync: this,
@@ -102,8 +133,10 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   void dispose() {
     _pulseController.dispose();
     _sectorBannerController.dispose();
+    _attackPunchController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -533,65 +566,104 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: 18),
 
-                  // ATTACK Neon Pedal (Cyan / Stealth Blue – Dual-Ring)
+                  // ⚔️ ATTACK — Animated Neon Katana Battle Button
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => _triggerAttack(),
-                    child: Container(
-                      width: 82,
-                      height: 82,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F131D).withValues(alpha: 0.90),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF00E5FF),
-                          width: 2.4,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF00E5FF).withValues(alpha: 0.45),
-                            blurRadius: 18,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.all(4.5),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFF00E5FF).withValues(alpha: 0.5),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.flash_on_rounded,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              'ATTACK',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.4,
-                                color: Colors.white,
-                                fontFamily: 'monospace',
+                    onTapDown: (_) => _triggerAttack(),
+                    child: AnimatedBuilder(
+                      animation: _attackPunchController,
+                      builder: (context, _) {
+                        final scale = _attackPunchController.isAnimating
+                            ? _attackScaleAnim.value
+                            : 1.0;
+                        final glow = _attackFlashing
+                            ? (0.45 + 0.55 * _attackGlowAnim.value).clamp(0.0, 1.0)
+                            : 0.45;
+                        return Transform.scale(
+                          scale: scale,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Outer neon ring — crimson red katana aura
+                              Container(
+                                width: 88,
+                                height: 88,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFF0A0C14).withValues(alpha: 0.92),
+                                  border: Border.all(
+                                    color: _attackFlashing
+                                        ? const Color(0xFFFF2A2A)
+                                        : const Color(0xFFE53935),
+                                    width: 2.6,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFFF1744).withValues(alpha: glow),
+                                      blurRadius: _attackFlashing ? 28 : 16,
+                                      spreadRadius: _attackFlashing ? 6 : 2,
+                                    ),
+                                    BoxShadow(
+                                      color: const Color(0xFFFF6D00).withValues(alpha: glow * 0.5),
+                                      blurRadius: _attackFlashing ? 44 : 8,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
+                              // Inner ring
+                              Container(
+                                width: 74,
+                                height: 74,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFFFF1744).withValues(alpha: 0.35),
+                                    width: 1.2,
+                                  ),
+                                ),
+                              ),
+                              // Center content: katana icon + label
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Custom Katana Sword Painter
+                                  CustomPaint(
+                                    size: const Size(34, 34),
+                                    painter: _KatanaSwordPainter(
+                                      color: _attackFlashing
+                                          ? Colors.white
+                                          : const Color(0xFFFF6D6D),
+                                      glowColor: _attackFlashing
+                                          ? const Color(0xFFFF1744)
+                                          : const Color(0xFFE53935),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    '斬',
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                      color: _attackFlashing
+                                          ? Colors.white
+                                          : const Color(0xFFFF6D6D),
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 18),
 
-                  // JUMP Neon Pedal (Golden / Orange Glowing Dual-Ring)
 
+                  // JUMP Neon Pedal (Golden / Orange Glowing Dual-Ring)
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTapDown: (_) => _triggerJump(),
@@ -1267,4 +1339,91 @@ class _JumpRunnerIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _JumpRunnerIconPainter oldDelegate) => false;
+}
+
+/// Draws a stylized diagonal katana sword: guard, grip, blade, and glow.
+class _KatanaSwordPainter extends CustomPainter {
+  final Color color;
+  final Color glowColor;
+
+  _KatanaSwordPainter({required this.color, required this.glowColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+
+    // ── Glow halo behind blade ──
+    final glowPaint = Paint()
+      ..color = glowColor.withValues(alpha: 0.55)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    canvas.drawLine(
+      Offset(cx - 10, cy + 12),
+      Offset(cx + 12, cy - 14),
+      glowPaint,
+    );
+
+    // ── Blade (sharp diagonal line) ──
+    final bladePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(cx - 10, cy + 12), // tip bottom-left
+      Offset(cx + 12, cy - 14), // point top-right
+      bladePaint,
+    );
+
+    // ── Bright tip glint ──
+    canvas.drawCircle(
+      Offset(cx + 12, cy - 14),
+      1.8,
+      Paint()..color = Colors.white,
+    );
+
+    // ── Tsuba (guard) — small diamond ──
+    final guardPath = Path()
+      ..moveTo(cx - 0.5, cy + 1.5)
+      ..lineTo(cx + 3.5, cy - 2)
+      ..lineTo(cx + 1, cy - 4.5)
+      ..lineTo(cx - 3, cy - 1)
+      ..close();
+    canvas.drawPath(
+      guardPath,
+      Paint()
+        ..color = color.withValues(alpha: 0.85)
+        ..style = PaintingStyle.fill,
+    );
+
+    // ── Grip (tsuka) ──
+    final gripPaint = Paint()
+      ..color = color.withValues(alpha: 0.65)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(cx - 3, cy - 1),
+      Offset(cx - 10, cy + 6),
+      gripPaint,
+    );
+
+    // ── Wrap lines on grip ──
+    final wrapPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    for (int i = 0; i < 3; i++) {
+      final t = (i + 1) / 4.0;
+      final gx = cx - 3 - 7 * t;
+      final gy = cy - 1 + 7 * t;
+      canvas.drawLine(Offset(gx + 2, gy - 1), Offset(gx - 1, gy + 2), wrapPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _KatanaSwordPainter old) =>
+      old.color != color || old.glowColor != glowColor;
 }

@@ -9,7 +9,6 @@ import '../sqube_game.dart';
 import 'attack_hitbox.dart';
 import 'corner_hide_controller.dart';
 
-
 /// A recorded ghost silhouette for high-speed phantom afterimage trails.
 class GhostFrame {
   final Vector2 position;
@@ -252,7 +251,9 @@ abstract class RunnerPlayer extends PositionComponent
       }
     }
     // Decay attack cooldown
-    if (attackCooldown > 0) attackCooldown = (attackCooldown - dt).clamp(0.0, 2.0);
+    if (attackCooldown > 0) {
+      attackCooldown = (attackCooldown - dt).clamp(0.0, 2.0);
+    }
 
 
     squashFactorX += (1.0 - squashFactorX) * min(1.0, dt * 12.0);

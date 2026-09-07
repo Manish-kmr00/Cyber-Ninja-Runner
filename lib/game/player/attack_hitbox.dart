@@ -2,8 +2,8 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
-import '../../core/constants/app_constants.dart';
 import '../hazards/base_hazard.dart';
+
 import '../hazards/dark_box.dart';
 import '../sqube_game.dart';
 
@@ -93,11 +93,24 @@ class AttackHitbox extends PositionComponent with HasGameReference<SqubeGame> {
     super.render(canvas);
     for (final arc in _arcs) {
       if (arc.alpha <= 0) continue;
-      final paint = Paint()
-        ..color = AppConstants.stealthBlue.withValues(alpha: arc.alpha.clamp(0.0, 1.0))
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = arc.width
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+      final a = arc.alpha.clamp(0.0, 1.0);
+      // Outer glow ring
+      canvas.drawArc(
+        Rect.fromCenter(
+          center: Offset(0, size.y / 2),
+          width: arc.radius * 2 + 6,
+          height: arc.radius * 2 + 6,
+        ),
+        arc.startAngle,
+        arc.sweepAngle,
+        false,
+        Paint()
+          ..color = const Color(0xFFFF1744).withValues(alpha: a * 0.35)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = arc.width + 4
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      );
+      // Core arc (hot red/orange)
       canvas.drawArc(
         Rect.fromCenter(
           center: Offset(0, size.y / 2),
@@ -107,8 +120,33 @@ class AttackHitbox extends PositionComponent with HasGameReference<SqubeGame> {
         arc.startAngle,
         arc.sweepAngle,
         false,
-        paint,
+        Paint()
+          ..color = (arc.isWhite
+                  ? Colors.white
+                  : const Color(0xFFFF5722))
+              .withValues(alpha: a)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = arc.width
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
       );
+    }
+
+    // Diagonal blade streak lines across hitbox
+    final t = 1.0 - (_timer / 0.20).clamp(0.0, 1.0); // 0=fresh 1=fading
+    final streakAlpha = (1.0 - t * 1.8).clamp(0.0, 0.9);
+    if (streakAlpha > 0) {
+      for (int i = 0; i < 3; i++) {
+        final yOffset = -10.0 + i * 18.0;
+        canvas.drawLine(
+          Offset(-8, size.y / 2 + yOffset + 10),
+          Offset(size.x + 4, size.y / 2 + yOffset - 10),
+          Paint()
+            ..color = Colors.white.withValues(alpha: streakAlpha * (1.0 - i * 0.25))
+            ..strokeWidth = 2.0 - i * 0.4
+            ..strokeCap = StrokeCap.round
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5),
+        );
+      }
     }
   }
 }
@@ -118,12 +156,14 @@ class _SlashArc {
   final double startAngle;
   final double sweepAngle;
   final double width;
+  final bool isWhite;
   double alpha;
 
   _SlashArc({required Random rng})
-    : radius = 24.0 + rng.nextDouble() * 24.0,
-      startAngle = -pi / 2 + (rng.nextDouble() - 0.5) * 0.8,
-      sweepAngle = pi * 0.5 + rng.nextDouble() * 0.5,
-      width = 2.0 + rng.nextDouble() * 3.0,
-      alpha = 0.85 + rng.nextDouble() * 0.15;
+    : radius = 18.0 + rng.nextDouble() * 30.0,
+      startAngle = -pi * 0.8 + rng.nextDouble() * pi * 0.6,
+      sweepAngle = pi * 0.4 + rng.nextDouble() * pi * 0.4,
+      width = 1.8 + rng.nextDouble() * 2.8,
+      isWhite = rng.nextDouble() > 0.7,
+      alpha = 0.9 + rng.nextDouble() * 0.10;
 }
