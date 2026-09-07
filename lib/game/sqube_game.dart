@@ -10,6 +10,7 @@ import '../core/constants/game_enums.dart';
 import '../core/storage/save_service.dart';
 import 'boosters/booster_manager.dart';
 import 'hazards/base_hazard.dart';
+import 'hazards/dark_box.dart';
 import 'player/sqube_player.dart';
 import 'world/parallax_background.dart';
 import 'world/procedural_generator.dart';
@@ -273,17 +274,66 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
               boosterManager.isInvisibilityActive) {
             continue;
           }
+          if (hazard is DarkBox && hazard.isSliced && hazard.sliceTimer <= 0.0) {
+            hazardsToDestroy.add(hazard);
+            continue;
+          }
+
+          // Dual Katana Slash extended strike zone check (sword blade reach in front of ninja)
+          if (player.isSlashing &&
+              (hazard.obstacleType == ObstacleType.darkBox ||
+                  hazard.obstacleType == ObstacleType.bugCrawler)) {
+            final hPos = hazard.worldPosition;
+            final inStrikeX = (hPos.x - player.position.x) > -45.0 &&
+                (hPos.x - player.position.x) < (player.size.x + 140.0);
+            final inStrikeY = (hPos.y - player.position.y).abs() < 100.0;
+
+            if (inStrikeX && inStrikeY) {
+              if (hazard is DarkBox) {
+                if (!hazard.isSliced) {
+                  hazard.sliceAndDestroy();
+                  shakeCamera(0.60);
+                  AudioService().playClick();
+                  AudioService().playSfx('laser');
+                  final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
+                  collectedCP += cpBonus;
+                  saveService.addCubePoints(cpBonus);
+                }
+              } else {
+                hazardsToDestroy.add(hazard);
+                shakeCamera(0.45);
+                AudioService().playClick();
+                final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
+                collectedCP += cpBonus;
+                saveService.addCubePoints(cpBonus);
+              }
+              continue;
+            }
+          }
+
           if (hazard.checkCollision(player)) {
-            // Dual Katana Slash destroys patrol robots & bug crawlers!
+            // Dual Katana Slash destroys patrol robots & bug crawlers on contact!
             if (player.isSlashing &&
                 (hazard.obstacleType == ObstacleType.darkBox ||
                     hazard.obstacleType == ObstacleType.bugCrawler)) {
-              hazardsToDestroy.add(hazard);
-              shakeCamera(0.40);
-              AudioService().playClick();
-              final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
-              collectedCP += cpBonus;
-              saveService.addCubePoints(cpBonus);
+              if (hazard is DarkBox) {
+                if (!hazard.isSliced) {
+                  hazard.sliceAndDestroy();
+                  shakeCamera(0.60);
+                  AudioService().playClick();
+                  AudioService().playSfx('laser');
+                  final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
+                  collectedCP += cpBonus;
+                  saveService.addCubePoints(cpBonus);
+                }
+              } else {
+                hazardsToDestroy.add(hazard);
+                shakeCamera(0.40);
+                AudioService().playClick();
+                final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
+                collectedCP += cpBonus;
+                saveService.addCubePoints(cpBonus);
+              }
               continue;
             }
             if (!godMode) {

@@ -58,10 +58,33 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
   double muzzleFlash = 0.0;
   double armRecoil = 0.0;
   bool isAiming = false;
+  bool isSliced = false;
+  double sliceTimer = 0.0;
+  final List<Offset> scrapOffsets = [];
+  final List<Offset> scrapVelocities = [];
 
   final List<DroidBullet> activeBullets = [];
   final List<DroidImpactSpark> impactSparks = [];
   final Random _rng = Random();
+
+  void sliceAndDestroy() {
+    if (isSliced) return;
+    isSliced = true;
+    sliceTimer = 0.50; // 0.5s death slice & explosion duration
+
+    // Spawn 14 flying mechanical scrap chunks
+    for (int i = 0; i < 14; i++) {
+      final angle = -pi * 0.05 - (_rng.nextDouble() * pi * 0.9);
+      final spd = 120.0 + _rng.nextDouble() * 200.0;
+      scrapOffsets.add(const Offset(0, -32));
+      scrapVelocities.add(Offset(cos(angle) * spd, sin(angle) * spd));
+    }
+
+    // Spawn 20 hot slicing spark embers
+    for (int i = 0; i < 20; i++) {
+      _spawnImpactSparks(Vector2(0, -32));
+    }
+  }
 
   DarkBox({
     required super.position,
@@ -84,6 +107,23 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
   @override
   void update(double dt) {
     super.update(dt);
+
+    // If sliced by ninja's katana, update death physics and scraps
+    if (isSliced) {
+      sliceTimer -= dt;
+      for (int i = 0; i < scrapOffsets.length; i++) {
+        scrapOffsets[i] += scrapVelocities[i] * dt;
+        scrapVelocities[i] = Offset(
+          scrapVelocities[i].dx * 0.98,
+          scrapVelocities[i].dy + 750.0 * dt, // gravity
+        );
+      }
+      if (sliceTimer <= 0.0) {
+        removeFromParent();
+      }
+      return; // Sliced droid ceases fire and movement
+    }
+
     walkTimer += dt * 8.5; // Leg stride frequency
     eyeScanTimer += dt * 5.0; // Optic sweep frequency
 
@@ -200,6 +240,8 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
 
   @override
   bool checkCollision(SqubePlayer player) {
+    if (isSliced) return false; // Sliced droid is dead and non-hazardous
+
     // Camouflage / invisibility bypass
     if (player.hideController.isStealthActive) {
       return false;
@@ -215,6 +257,18 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
       if (bullet.isDead) continue;
       final bWorld = myWorld + bullet.position;
 
+      // Katana Slash Mechanic: Ninja slices all incoming bullets in front!
+      if (isSlashing) {
+        if (bWorld.x <= pPos.x + player.size.x + 140.0 &&
+            bWorld.x >= pPos.x - 35.0 &&
+            (bWorld.y - (pPos.y - player.size.y * 0.45)).abs() < 70.0) {
+          bullet.isDead = true;
+          _spawnImpactSparks(bullet.position);
+          AudioService().playClick();
+          continue;
+        }
+      }
+
       // Clean slide dodge under chest-height bullets (bullet at y ~ 566, player sliding height is low)
       if (isSliding && bWorld.y < pPos.y - player.size.y * 0.32) {
         continue;
@@ -225,23 +279,9 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
         radius: bullet.radius + 2.0,
       );
 
-      // Katana Slash Mechanic: Ninja cuts bullets in half!
-      if (isSlashing) {
-        final slashZone = Rect.fromCenter(
-          center: Offset(pPos.x + 20, pPos.y - player.size.y * 0.45),
-          width: 85,
-          height: 65,
-        );
-        if (slashZone.overlaps(bRect)) {
-          bullet.isDead = true;
-          _spawnImpactSparks(bullet.position);
-          AudioService().playClick();
-          continue;
-        }
-      }
-
       // Precise Player Hitbox
-      final boxHeight = isSliding ? player.size.y * 0.35 : player.size.y * 0.85;
+      final boxHeight =
+          isSliding ? player.size.y * 0.35 : player.size.y * 0.85;
       final pRect = Rect.fromLTWH(
         pPos.x - player.size.x * 0.30,
         pPos.y - boxHeight,
@@ -269,12 +309,108 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
       size.x * 0.8,
       size.y * 0.95,
     );
-    return pBodyRect.overlaps(bBodyRect);
+
+    if (pBodyRect.overlaps(bBodyRect)) {
+      if (isSlashing) {
+        // Ninja slices robot in two on contact!
+        sliceAndDestroy();
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+
+    // If sliced, render dramatic bisected robot death animation with sparks
+    if (isSliced) {
+      final t = (0.50 - sliceTimer) / 0.50; // 0.0 to 1.0
+      final fadeAlpha = (1.0 - t).clamp(0.0, 1.0);
+
+      canvas.save();
+      canvas.translate(size.x / 2, size.y);
+
+      // 1. Top-Right Bisected Half (Sliding up and away)
+      canvas.save();
+      canvas.translate(t * 38.0, -t * 26.0);
+      canvas.rotate(t * 0.45);
+      final topPath = Path()
+        ..moveTo(-16, -58)
+        ..lineTo(16, -58)
+        ..lineTo(16, -42)
+        ..lineTo(12, -32)
+        ..lineTo(-12, -45)
+        ..close();
+      canvas.drawPath(
+        topPath,
+        Paint()
+          ..color = const Color(0xFF141924).withValues(alpha: fadeAlpha)
+          ..style = PaintingStyle.fill,
+      );
+      // Glowing Neon Cutline on top piece
+      canvas.drawLine(
+        const Offset(-12, -45),
+        const Offset(12, -32),
+        Paint()
+          ..color = AppConstants.stealthBlue.withValues(alpha: fadeAlpha)
+          ..strokeWidth = 3.0
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+      canvas.restore();
+
+      // 2. Bottom-Left Bisected Half (Dropping down and backward)
+      canvas.save();
+      canvas.translate(-t * 22.0, t * 14.0);
+      canvas.rotate(-t * 0.35);
+      final bottomPath = Path()
+        ..moveTo(-12, -45)
+        ..lineTo(12, -32)
+        ..lineTo(12, -22)
+        ..lineTo(-12, -22)
+        ..close();
+      canvas.drawPath(
+        bottomPath,
+        Paint()
+          ..color = const Color(0xFF0F131C).withValues(alpha: fadeAlpha)
+          ..style = PaintingStyle.fill,
+      );
+      // Glowing Neon Cutline on bottom piece
+      canvas.drawLine(
+        const Offset(-12, -45),
+        const Offset(12, -32),
+        Paint()
+          ..color = AppConstants.stealthBlue.withValues(alpha: fadeAlpha)
+          ..strokeWidth = 3.0
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+      canvas.restore();
+
+      // 3. Flying Metal Debris Scraps
+      for (int i = 0; i < scrapOffsets.length; i++) {
+        final pos = scrapOffsets[i];
+        final scrapPaint = Paint()
+          ..color = (i % 2 == 0
+                  ? const Color(0xFF38435C)
+                  : AppConstants.hazardRed)
+              .withValues(alpha: fadeAlpha);
+        canvas.drawCircle(pos, 2.5, scrapPaint);
+      }
+
+      // 4. Expanding Plasma Flash & Slicing Sparks
+      if (t < 0.35) {
+        final flashRadius = 14.0 + t * 45.0;
+        final flashPaint = Paint()
+          ..color = Colors.white.withValues(alpha: (1.0 - t / 0.35))
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+        canvas.drawCircle(const Offset(0, -32), flashRadius, flashPaint);
+      }
+
+      canvas.restore();
+      return;
+    }
 
     canvas.save();
     // Translate to bottom-center pivot so robot feet contact ground surface exactly
