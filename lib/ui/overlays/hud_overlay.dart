@@ -25,6 +25,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
 
   int _lastJumpTime = 0;
   void _triggerJump() {
+    if (widget.game.player.isAttacking) return; // no jump mid-swing
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastJumpTime < 160) return;
     _lastJumpTime = now;
@@ -33,9 +34,15 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   }
 
   void _triggerSlide() {
+    if (widget.game.player.isAttacking) return; // no slide mid-swing
     widget.game.player.startSlide();
     AudioService().playSlide();
   }
+
+  void _triggerAttack() {
+    widget.game.player.startAttack();
+  }
+
 
   @override
   void initState() {
@@ -526,7 +533,65 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: 18),
 
+                  // ATTACK Neon Pedal (Cyan / Stealth Blue – Dual-Ring)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _triggerAttack(),
+                    child: Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F131D).withValues(alpha: 0.90),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF00E5FF),
+                          width: 2.4,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00E5FF).withValues(alpha: 0.45),
+                            blurRadius: 18,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.all(4.5),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF00E5FF).withValues(alpha: 0.5),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.flash_on_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'ATTACK',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.4,
+                                color: Colors.white,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+
                   // JUMP Neon Pedal (Golden / Orange Glowing Dual-Ring)
+
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTapDown: (_) => _triggerJump(),

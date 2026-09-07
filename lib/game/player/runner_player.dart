@@ -2,10 +2,13 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
+import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../sqube_game.dart';
+import 'attack_hitbox.dart';
 import 'corner_hide_controller.dart';
+
 
 /// A recorded ghost silhouette for high-speed phantom afterimage trails.
 class GhostFrame {
@@ -82,6 +85,25 @@ abstract class RunnerPlayer extends PositionComponent
   int jumpCount = 0;
 
   void onSlashAttack() {}
+
+  // Melee Attack State
+  bool isAttacking = false;
+  double attackCooldown = 0.0;
+
+  /// Initiates a sword attack if not on cooldown.
+  void startAttack() {
+    if (isAttacking || attackCooldown > 0) return;
+    // Begin attack
+    isAttacking = true;
+    attackCooldown = 0.5; // 0.5s cooldown after attack
+    isSlashing = true;
+    slashTimer = 0.35; // duration of attack animation/effect
+    // Play attack sound / animation hook
+    AudioService().playSfx('laser');
+    // Spawn temporary hitbox
+    game.add(AttackHitbox(position.clone(), size.clone()));
+    onSlashAttack();
+  }
 
   // Visual Effects & Particle Queues
   final List<GhostFrame> ghostTrails = [];
@@ -226,8 +248,12 @@ abstract class RunnerPlayer extends PositionComponent
       slashTimer -= dt;
       if (slashTimer <= 0) {
         isSlashing = false;
+        isAttacking = false; // Reset attack state when slash ends
       }
     }
+    // Decay attack cooldown
+    if (attackCooldown > 0) attackCooldown = (attackCooldown - dt).clamp(0.0, 2.0);
+
 
     squashFactorX += (1.0 - squashFactorX) * min(1.0, dt * 12.0);
     squashFactorY += (1.0 - squashFactorY) * min(1.0, dt * 12.0);
