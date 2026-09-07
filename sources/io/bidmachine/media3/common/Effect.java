@@ -1,0 +1,8 @@
+package io.bidmachine.media3.common;
+
+/* JADX INFO: loaded from: classes8.dex */
+public interface Effect {
+    default long getDurationAfterEffectApplied(long j) {
+        return j;
+    }
+}

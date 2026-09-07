@@ -1,0 +1,8 @@
+package io.bidmachine.media3.common;
+
+import java.io.IOException;
+
+/* JADX INFO: loaded from: classes12.dex */
+public interface DataReader {
+    int read(byte[] bArr, int i, int i2) throws IOException;
+}

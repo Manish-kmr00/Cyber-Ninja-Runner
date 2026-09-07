@@ -1,0 +1,31 @@
+package io.bidmachine.media3.extractor;
+
+/* JADX INFO: loaded from: classes10.dex */
+public final class SingleSampleSeekMap implements SeekMap {
+    private final long durationUs;
+    private final long startPosition;
+
+    @Override // io.bidmachine.media3.extractor.SeekMap
+    public boolean isSeekable() {
+        return true;
+    }
+
+    public SingleSampleSeekMap(long j) {
+        this(j, 0L);
+    }
+
+    public SingleSampleSeekMap(long j, long j2) {
+        this.durationUs = j;
+        this.startPosition = j2;
+    }
+
+    @Override // io.bidmachine.media3.extractor.SeekMap
+    public long getDurationUs() {
+        return this.durationUs;
+    }
+
+    @Override // io.bidmachine.media3.extractor.SeekMap
+    public SeekMap.SeekPoints getSeekPoints(long j) {
+        return new SeekMap.SeekPoints(new SeekPoint(j, this.startPosition));
+    }
+}

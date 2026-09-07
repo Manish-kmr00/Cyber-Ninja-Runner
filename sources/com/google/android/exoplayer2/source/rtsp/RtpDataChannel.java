@@ -1,0 +1,22 @@
+package com.google.android.exoplayer2.source.rtsp;
+
+import com.google.android.exoplayer2.upstream.DataSource;
+import java.io.IOException;
+
+/* JADX INFO: loaded from: classes9.dex */
+interface RtpDataChannel extends DataSource {
+
+    public interface Factory {
+        RtpDataChannel createAndOpenDataChannel(int i) throws IOException;
+
+        default Factory createFallbackDataChannelFactory() {
+            return null;
+        }
+    }
+
+    RtspMessageChannel.InterleavedBinaryDataListener getInterleavedBinaryDataListener();
+
+    int getLocalPort();
+
+    String getTransport();
+}

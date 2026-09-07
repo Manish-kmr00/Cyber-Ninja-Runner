@@ -1,0 +1,54 @@
+package com.pubmatic.sdk.video;
+
+/* JADX INFO: loaded from: classes3.dex */
+public class POBVideoLogConstants {
+    public static final String EMPTY_TRACKER_URL_LIST_LOG = "Empty click tracker URL list found at click event. Skipping tracker execution.";
+    public static final String INFO_MSG_BID_EVENT_PROCEED_ON_ERROR_CODE_AND_MSG = "Notified with error code - %s description - %s";
+    public static final String MSG_AD_SEQUENCE_NOT_FOUND = "Unable to find Vast ad sequence due to invalid value";
+    public static final String MSG_BID_EXPIRED = "Bid has expired.";
+    public static final String MSG_END_CARD_FOUND = "Suitable end-card found.";
+    public static final String MSG_END_CARD_NETWORK_ERROR = "End-card failed to render due to network connectivity.";
+    public static final String MSG_END_CARD_NO_CLICK_THROUGH_URL = "Click through URL is not available in matching companion.";
+    public static final String MSG_END_CARD_NO_CLICK_TRACKERS = "Click trackers are not available in matching companion.";
+    public static final String MSG_END_CARD_NO_SUPPORTED_RESOURCE = "No supported resource found for end-card.";
+    public static final String MSG_END_CARD_RENDERING_ERROR = "End-card failed to render.";
+    public static final String MSG_ERROR_HANDLER_ERROR_EMPTY_TRACKER_URLS = "Tracker url list is empty for vast error: %d";
+    public static final String MSG_ERROR_HANDLER_ERROR_EXECUTING_TRACKER = "Skipped tracker execution for vast error: %d";
+    public static final String MSG_ERROR_HANDLER_VAST_ERROR = "Vast error occurred: %s";
+    public static final String MSG_EXPECTED_BIT_RATE = "Expected bitrate for %s resolution & %s network is %d";
+    public static final String MSG_ICON_CLICKED = "Icon clicked.";
+    public static final String MSG_ICON_LOADED = "Icon loaded.";
+    public static final String MSG_ICON_OPEN_LANDING_PAGE = "Opening landing page of icon with url: %s";
+    public static final String MSG_ICON_RENDERING_FAILURE = "Unable to render Icon due to invalid details.";
+    public static final String MSG_ICON_UNAVAILABLE_RESOURCE = "Icon resource is unavailable.";
+    public static final String MSG_NO_END_CARD = "No companion found as an end-card.";
+    public static final String MSG_NO_MATCHING_END_CARD_FOUND = "Couldn't find suitable end-card.";
+    public static final String MSG_NO_VAST_RESPONSE = "Empty vast ad received.";
+    public static final String MSG_REMOVING_ICON = "Removing Icon from UI.";
+    public static final String MSG_RENDERING_COMPANION_END_CARD = "Rendering Companion End Card: %s";
+    public static final String MSG_RENDERING_END_CARD = "Rendering end-card.";
+    public static final String MSG_RENDERING_ICON = "Rendering icon for program %s after offset %s for duration %s";
+    public static final String MSG_RENDERING_ICON_FAILURE = "Failed to render icon.";
+    public static final String MSG_RENDERING_ICON_FAILURE_NO_NETWORK = "Failed to render icon due to network connectivity issue.";
+    public static final String MSG_RENDERING_LEARN_MORE = "Rendering Learn More button on end-card.";
+    public static final String MSG_SCHEMA_VALIDATION_ERROR = "Ad tag URI is missing in wrapper vast response.";
+    public static final String MSG_SELECTED_END_CARD = "Selected end card - ";
+    public static final String MSG_SELECTED_MEDIAL_FILE = "Selected media file: %s from media files: %s, for bitrate: %d & size: %s & supported mimes: %s";
+    public static final String MSG_UNSUPPORTED_VAST_VERSION = "Received vast version is unsupported.";
+    public static final String MSG_VAST_ICON_MISSING_CLICKTHROUGH = "Icon clickThrough url is missing.";
+    public static final String MSG_VAST_LEARN_MORE_CLICKED = "Opening landing page with url: %s";
+    public static final String MSG_VAST_PLAYER_DESTROY = "Vast player destroy called!";
+    public static final String MSG_VAST_PLAYER_EXECUTE_TRACKER_EVENT = "Event occurred: %s";
+    public static final String MSG_VAST_PLAYER_LINEARITY_NOT_FOUND = "Expected linearity not found.";
+    public static final String MSG_VAST_PLAYER_LINEAR_MEDIA_NOT_FOUND = "Media file not found for linear ad.";
+    public static final String MSG_VAST_PLAYER_LINEAR_MEDIA_NOT_SUPPORTED = "No supported media file found for linear ad.";
+    public static final String MSG_VAST_PLAYER_NO_CREATIVE = "No ad creative found.";
+    public static final String MSG_VAST_PLAYER_RENDERING_STARTED = "Vast player started rendering.";
+    public static final String MSG_VAST_PLAYER_SKIP_OFFSET = "Video duration: %s seconds, skip option will be available after %s seconds.";
+    public static final String MSG_VAST_PLAYER_VIDEO_PLAYER_PAUSED = "Playback paused.";
+    public static final String MSG_VAST_PLAYER_VIDEO_PLAYER_PLAY = "Playback started.";
+    public static final String MSG_VAST_SELECTED_MEDIA_FILE = "Selected media file: %s";
+    public static final String MSG_VAST_VIDEO_MISSING_CLICKTHROUGH = "Video clickThrough url is missing.";
+    public static final String MSG_WRAPPER_THRESHOLD = "Maximum wrapper attempts reached.";
+    public static final String MSG_XML_PARSING_ERROR = "Failed to parse vast response.";
+}

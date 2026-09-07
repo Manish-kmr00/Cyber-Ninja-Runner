@@ -1,0 +1,18 @@
+package com.bykv.vk.openvk.preload.a.a;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/* JADX INFO: compiled from: SerializedName.java */
+/* JADX INFO: loaded from: classes9.dex */
+@Target({ElementType.FIELD, ElementType.METHOD})
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface b {
+    String a();
+
+    String[] b() default {};
+}

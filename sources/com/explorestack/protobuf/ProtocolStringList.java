@@ -1,0 +1,8 @@
+package com.explorestack.protobuf;
+
+import java.util.List;
+
+/* JADX INFO: loaded from: classes7.dex */
+public interface ProtocolStringList extends List<String> {
+    List<ByteString> asByteStringList();
+}

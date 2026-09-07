@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "681353485826",
+    "firebase_url": "https://sqube-darkness-default-rtdb.firebaseio.com",
+    "project_id": "sqube-darkness",
+    "storage_bucket": "sqube-darkness.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681353485826:android:0d2c739d9bcb0556e8d11b",
+        "android_client_info": {
+          "package_name": "com.RHPOSITIVE.squbedarkness"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "681353485826-6qv9arv2cesu82shomvtnbatdlngijuj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARRQ8c8HoKYZ0mifTxb6QdMV6nNlDBW3A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "681353485826-6qv9arv2cesu82shomvtnbatdlngijuj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "681353485826-ase35h3hin7qje743lmlbk9ca33tb6v4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rhpositive.squbedarkness"
+              }
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-8581147771630968~7649482357"
+    }
+  ],
+  "configuration_version": "1"
+}

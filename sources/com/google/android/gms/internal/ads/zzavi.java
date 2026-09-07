@@ -1,0 +1,22 @@
+package com.google.android.gms.internal.ads;
+
+import android.app.Activity;
+import android.app.Application;
+import android.os.Bundle;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@24.2.0 */
+/* JADX INFO: loaded from: classes10.dex */
+final class zzavi implements zzavp {
+    final /* synthetic */ Activity zza;
+    final /* synthetic */ Bundle zzb;
+
+    zzavi(zzavq zzavqVar, Activity activity, Bundle bundle) {
+        this.zza = activity;
+        this.zzb = bundle;
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzavp
+    public final void zza(Application.ActivityLifecycleCallbacks activityLifecycleCallbacks) {
+        activityLifecycleCallbacks.onActivityCreated(this.zza, this.zzb);
+    }
+}

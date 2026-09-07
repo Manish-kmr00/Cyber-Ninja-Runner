@@ -1,0 +1,9 @@
+package com.yandex.div.logging;
+
+/* JADX INFO: loaded from: classes10.dex */
+public final class BuildConfig {
+    public static final String BUILD_TYPE = "release";
+    public static final boolean DEBUG = false;
+    public static final boolean DISABLE_LOGS = false;
+    public static final String LIBRARY_PACKAGE_NAME = "com.yandex.div.logging";
+}

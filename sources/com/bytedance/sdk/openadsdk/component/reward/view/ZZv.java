@@ -1,0 +1,116 @@
+package com.bytedance.sdk.openadsdk.component.reward.view;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import androidx.core.view.ViewCompat;
+import com.bytedance.sdk.component.utils.yFO;
+import com.bytedance.sdk.openadsdk.common.WV;
+import com.bytedance.sdk.openadsdk.core.widget.PAGLogoView;
+import com.bytedance.sdk.openadsdk.core.widget.aBv;
+import com.bytedance.sdk.openadsdk.utils.Sn;
+import com.bytedance.sdk.openadsdk.utils.Vgu;
+
+/* JADX INFO: loaded from: classes11.dex */
+public class ZZv {
+    public static void pA(FrameLayout frameLayout) {
+        Context context = frameLayout.getContext();
+        com.bytedance.sdk.openadsdk.core.ML.SD sd = new com.bytedance.sdk.openadsdk.core.ML.SD(context);
+        sd.setId(Sn.WQf);
+        sd.setBackgroundColor(Color.parseColor("#F8F8F8"));
+        frameLayout.addView(sd, new FrameLayout.LayoutParams(-1, -1));
+        WV wv = new WV(context);
+        wv.setId(Sn.TV);
+        sd.addView(wv, new RelativeLayout.LayoutParams(-1, -1));
+        com.bytedance.sdk.openadsdk.core.ML.ML ml = new com.bytedance.sdk.openadsdk.core.ML.ML(context);
+        ml.setId(Sn.du);
+        ml.setOrientation(1);
+        ml.setVisibility(8);
+        ml.setGravity(1);
+        ml.setId(Sn.gbA);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(-1, -2);
+        layoutParams.addRule(13);
+        sd.addView(ml, layoutParams);
+        aBv abv = new aBv(context);
+        abv.setId(Sn.roi);
+        ml.addView(abv, new LinearLayout.LayoutParams(Vgu.KZx(context, 80.0f), Vgu.KZx(context, 80.0f)));
+        com.bytedance.sdk.openadsdk.core.ML.omh omhVar = new com.bytedance.sdk.openadsdk.core.ML.omh(context);
+        omhVar.setId(Sn.Mc);
+        omhVar.setTextColor(Color.parseColor("#161823"));
+        omhVar.setTextSize(2, 24.0f);
+        LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(-2, -2);
+        layoutParams2.topMargin = Vgu.KZx(context, 12.0f);
+        ml.addView(omhVar, layoutParams2);
+        com.bytedance.sdk.openadsdk.core.ML.omh omhVar2 = new com.bytedance.sdk.openadsdk.core.ML.omh(context);
+        omhVar2.setId(Sn.IG);
+        omhVar2.setGravity(17);
+        omhVar2.setTextColor(Color.parseColor("#80161823"));
+        omhVar2.setTextSize(2, 16.0f);
+        omhVar2.setTextAlignment(4);
+        LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(-2, -2);
+        int iKZx = Vgu.KZx(context, 60.0f);
+        layoutParams3.leftMargin = iKZx;
+        layoutParams3.rightMargin = iKZx;
+        layoutParams3.setMarginStart(layoutParams3.leftMargin);
+        layoutParams3.setMarginEnd(layoutParams3.rightMargin);
+        layoutParams3.topMargin = Vgu.KZx(context, 8.0f);
+        ml.addView(omhVar2, layoutParams3);
+        com.bytedance.sdk.openadsdk.core.ML.omh omhVar3 = new com.bytedance.sdk.openadsdk.core.ML.omh(context);
+        omhVar3.setId(Sn.lT);
+        omhVar3.setGravity(17);
+        omhVar3.setTextColor(-1);
+        omhVar3.setText(yFO.pA(context, "tt_video_mobile_go_detail"));
+        omhVar3.setBackground(com.bytedance.sdk.openadsdk.utils.Bzk.pA(context, "tt_reward_video_download_btn_bg"));
+        LinearLayout.LayoutParams layoutParams4 = new LinearLayout.LayoutParams(Vgu.KZx(context, 255.0f), Vgu.KZx(context, 44.0f));
+        layoutParams4.topMargin = Vgu.KZx(context, 32.0f);
+        ml.addView(omhVar3, layoutParams4);
+        com.bytedance.sdk.openadsdk.core.ML.omh omhVar4 = new com.bytedance.sdk.openadsdk.core.ML.omh(context);
+        omhVar4.setId(Sn.eG);
+        omhVar4.setGravity(17);
+        omhVar4.setTextColor(ViewCompat.MEASURED_STATE_MASK);
+        omhVar4.setText("Sorry,this AD fails to load...");
+        omhVar4.setVisibility(8);
+        omhVar4.setGravity(1);
+        RelativeLayout.LayoutParams layoutParams5 = new RelativeLayout.LayoutParams(-1, -2);
+        layoutParams5.addRule(13);
+        sd.addView(omhVar4, layoutParams5);
+        PAGLogoView pAGLogoView = new PAGLogoView(context);
+        pAGLogoView.setId(Sn.rB);
+        RelativeLayout.LayoutParams layoutParams6 = new RelativeLayout.LayoutParams(-2, Vgu.KZx(context, 14.0f));
+        layoutParams6.addRule(12);
+        layoutParams6.leftMargin = Vgu.KZx(context, 16.0f);
+        layoutParams6.setMarginStart(layoutParams6.leftMargin);
+        layoutParams6.bottomMargin = Vgu.KZx(context, 20.0f);
+        sd.addView(pAGLogoView, layoutParams6);
+    }
+
+    public static void Og(FrameLayout frameLayout) {
+        Context context = frameLayout.getContext();
+        KZx kZx = new KZx(context);
+        kZx.setId(Sn.WV);
+        kZx.setVisibility(8);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(-1, -2);
+        layoutParams.gravity = 80;
+        frameLayout.addView(kZx, layoutParams);
+        com.bytedance.sdk.openadsdk.core.ML.ML ml = new com.bytedance.sdk.openadsdk.core.ML.ML(context);
+        ml.setId(Sn.Wx);
+        ml.setVisibility(8);
+        frameLayout.addView(ml, new FrameLayout.LayoutParams(-1, -1));
+        com.bytedance.sdk.component.Bzk.ZZv zZv = new com.bytedance.sdk.component.Bzk.ZZv(context, true);
+        zZv.setLayerType(2, null);
+        zZv.setVisibility(4);
+        zZv.setId(Sn.Sn);
+        frameLayout.addView(zZv, new FrameLayout.LayoutParams(-1, -1));
+        FrameLayout frameLayout2 = new FrameLayout(context);
+        frameLayout2.setId(Sn.DX);
+        frameLayout2.setVisibility(4);
+        frameLayout.addView(frameLayout2, new FrameLayout.LayoutParams(-1, -1));
+        com.bytedance.sdk.component.Bzk.ZZv zZv2 = new com.bytedance.sdk.component.Bzk.ZZv(context, true);
+        zZv2.setVisibility(8);
+        zZv2.setId(Sn.oX);
+        frameLayout.addView(zZv2, new FrameLayout.LayoutParams(-1, -1));
+        frameLayout.addView(new RFEndCardBackUpLayout(context), new FrameLayout.LayoutParams(-1, -1));
+    }
+}

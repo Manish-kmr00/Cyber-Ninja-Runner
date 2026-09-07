@@ -1,0 +1,23 @@
+package io.bidmachine.media3.exoplayer.mediacodec;
+
+import android.os.Bundle;
+import io.bidmachine.media3.decoder.CryptoInfo;
+
+/* JADX INFO: loaded from: classes13.dex */
+interface MediaCodecBufferEnqueuer {
+    void flush();
+
+    void maybeThrowException();
+
+    void queueInputBuffer(int i, int i2, int i3, long j, int i4);
+
+    void queueSecureInputBuffer(int i, int i2, CryptoInfo cryptoInfo, long j, int i3);
+
+    void setParameters(Bundle bundle);
+
+    void shutdown();
+
+    void start();
+
+    void waitUntilQueueingComplete() throws InterruptedException;
+}

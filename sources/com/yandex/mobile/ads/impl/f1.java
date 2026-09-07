@@ -1,0 +1,8 @@
+package com.yandex.mobile.ads.impl;
+
+/* JADX INFO: loaded from: classes4.dex */
+public interface f1 {
+    void a();
+
+    void b();
+}

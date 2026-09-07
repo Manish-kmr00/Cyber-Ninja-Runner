@@ -1,0 +1,74 @@
+Manifest-Version: 1.0
+
+Name: AndroidManifest.xml
+SHA1-Digest: UdLdHTyoTDJNG+M61j8A7Xpzkzc=
+
+Name: lib/arm64-v8a/libFirebaseCppAnalytics.so
+SHA1-Digest: SbIXFTBKVrXVTlxgojZUuAxM4g0=
+
+Name: lib/arm64-v8a/libFirebaseCppApp-12_1_0.so
+SHA1-Digest: ySVDRYce9L3Cdi7KeBXPwZyl140=
+
+Name: lib/arm64-v8a/libFirebaseCppCrashlytics.so
+SHA1-Digest: ERXSxFGeaLulByZAKJv5iJt/zAw=
+
+Name: lib/arm64-v8a/libFirebaseCppRemoteConfig.so
+SHA1-Digest: zN2zmt0SYHokxCIt2qBolYukkwo=
+
+Name: lib/arm64-v8a/lib_burst_generated.so
+SHA1-Digest: st+OlQWKiami89jSJD+zL/wI7J0=
+
+Name: lib/arm64-v8a/libapminsighta.so
+SHA1-Digest: a5bnTdRajj4PMtve2txZZlRButw=
+
+Name: lib/arm64-v8a/libapminsightb.so
+SHA1-Digest: nHirWnTMtHujR8726fq/gI22pOA=
+
+Name: lib/arm64-v8a/libapplovin-native-crash-reporter.so
+SHA1-Digest: qmJbO8GdFOYTgw5Prbg1Mcj8a2M=
+
+Name: lib/arm64-v8a/libbuffer.so
+SHA1-Digest: DpdPfslo756IYQVkC6Ri/Edi3Eo=
+
+Name: lib/arm64-v8a/libcrashlytics-common.so
+SHA1-Digest: ESVMpJcwi4WSEosGfX/YQx8hyxk=
+
+Name: lib/arm64-v8a/libcrashlytics-handler.so
+SHA1-Digest: flk2cLX04uPi5ro9sM3w92FdtyU=
+
+Name: lib/arm64-v8a/libcrashlytics-trampoline.so
+SHA1-Digest: O9IO3kZACn46zhtFA7rTOvsu/Qo=
+
+Name: lib/arm64-v8a/libcrashlytics.so
+SHA1-Digest: XqU4Dxglg/iTpO0PXkS/HmVbr9o=
+
+Name: lib/arm64-v8a/libfile_lock.so
+SHA1-Digest: 3LuU50KBvmOrUAOqACbOZTIBXqM=
+
+Name: lib/arm64-v8a/libil2cpp.so
+SHA1-Digest: pWK9S23Vucg7nmya7RNChuzIasw=
+
+Name: lib/arm64-v8a/libmain.so
+SHA1-Digest: peJ1ekUWBmHHIVzpmXv9/Ef+AAk=
+
+Name: lib/arm64-v8a/libnms.so
+SHA1-Digest: Gvr5emWI16MpS0jr2tvIlRXaZbk=
+
+Name: lib/arm64-v8a/libpglarmor.so
+SHA1-Digest: XCNNNcnKl3VAnCMvHoAjxaWe4Y0=
+
+Name: lib/arm64-v8a/libsigner.so
+SHA1-Digest: gzWwK2zjKl0X6TDZjwEPY5HJ8ek=
+
+Name: lib/arm64-v8a/libtobEmbedPagEncrypt.so
+SHA1-Digest: SUu/jCJ0JJR6YPlzjvFLSOixoqQ=
+
+Name: lib/arm64-v8a/libtt_ugen_layout.so
+SHA1-Digest: efM55ZoMeStna2ylhyc/MPN/nXI=
+
+Name: lib/arm64-v8a/libunity.so
+SHA1-Digest: 3NOnq9Fjf1muueAUH27BZM8o12s=
+
+Name: stamp-cert-sha256
+SHA1-Digest: 5vTkm69vqAbusD/fho7oWwc7j+I=
+

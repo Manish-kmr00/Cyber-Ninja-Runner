@@ -1,0 +1,39 @@
+package androidx.compose.material;
+
+import androidx.compose.foundation.layout.RowScope;
+import androidx.compose.runtime.Composer;
+import androidx.compose.runtime.ComposerKt;
+import androidx.compose.runtime.internal.ComposableLambdaKt;
+import kotlin.Metadata;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function3;
+import kotlin.jvm.internal.Intrinsics;
+
+/* JADX INFO: compiled from: AppBar.kt */
+/* JADX INFO: loaded from: classes5.dex */
+@Metadata(k = 3, mv = {1, 6, 0}, xi = 48)
+public final class ComposableSingletons$AppBarKt {
+    public static final ComposableSingletons$AppBarKt INSTANCE = new ComposableSingletons$AppBarKt();
+
+    /* JADX INFO: renamed from: lambda-1, reason: not valid java name */
+    public static Function3<RowScope, Composer, Integer, Unit> f4lambda1 = ComposableLambdaKt.composableLambdaInstance(-771938130, false, new Function3<RowScope, Composer, Integer, Unit>() { // from class: androidx.compose.material.ComposableSingletons$AppBarKt$lambda-1$1
+        @Override // kotlin.jvm.functions.Function3
+        public /* bridge */ /* synthetic */ Unit invoke(RowScope rowScope, Composer composer, Integer num) {
+            invoke(rowScope, composer, num.intValue());
+            return Unit.INSTANCE;
+        }
+
+        public final void invoke(RowScope rowScope, Composer composer, int i) {
+            Intrinsics.checkNotNullParameter(rowScope, "$this$null");
+            ComposerKt.sourceInformation(composer, "C:AppBar.kt#jmzs0o");
+            if ((i & 81) == 16 && composer.getSkipping()) {
+                composer.skipToGroupEnd();
+            }
+        }
+    });
+
+    /* JADX INFO: renamed from: getLambda-1$material_release, reason: not valid java name */
+    public final Function3<RowScope, Composer, Integer, Unit> m1002getLambda1$material_release() {
+        return f4lambda1;
+    }
+}

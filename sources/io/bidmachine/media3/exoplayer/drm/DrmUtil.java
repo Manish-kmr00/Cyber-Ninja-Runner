@@ -1,0 +1,92 @@
+package io.bidmachine.media3.exoplayer.drm;
+
+import android.media.DeniedByServerException;
+import android.media.MediaDrm;
+import android.media.MediaDrmResetException;
+import android.media.NotProvisionedException;
+import io.bidmachine.media3.common.util.Util;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/* JADX INFO: loaded from: classes2.dex */
+public final class DrmUtil {
+    public static final int ERROR_SOURCE_EXO_MEDIA_DRM = 1;
+    public static final int ERROR_SOURCE_LICENSE_ACQUISITION = 2;
+    public static final int ERROR_SOURCE_PROVISIONING = 3;
+
+    @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.TYPE_USE})
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ErrorSource {
+    }
+
+    public static int getErrorCodeForMediaDrmException(Throwable th, int i) {
+        if (Util.SDK_INT >= 21 && Api21.isMediaDrmStateException(th)) {
+            return Api21.mediaDrmStateExceptionToErrorCode(th);
+        }
+        if (Util.SDK_INT >= 23 && Api23.isMediaDrmResetException(th)) {
+            return 6006;
+        }
+        if ((th instanceof NotProvisionedException) || isFailureToConstructNotProvisionedException(th)) {
+            return 6002;
+        }
+        if (th instanceof DeniedByServerException) {
+            return 6007;
+        }
+        if (th instanceof UnsupportedDrmException) {
+            return 6001;
+        }
+        if (th instanceof DefaultDrmSessionManager.MissingSchemeDataException) {
+            return 6003;
+        }
+        if (th instanceof KeysExpiredException) {
+            return 6008;
+        }
+        if (i == 1) {
+            return 6006;
+        }
+        if (i == 2) {
+            return 6004;
+        }
+        if (i == 3) {
+            return 6002;
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public static boolean isFailureToConstructNotProvisionedException(Throwable th) {
+        return Util.SDK_INT == 34 && (th instanceof NoSuchMethodError) && th.getMessage() != null && th.getMessage().contains("Landroid/media/NotProvisionedException;.<init>(");
+    }
+
+    public static boolean isFailureToConstructResourceBusyException(Throwable th) {
+        return Util.SDK_INT == 34 && (th instanceof NoSuchMethodError) && th.getMessage() != null && th.getMessage().contains("Landroid/media/ResourceBusyException;.<init>(");
+    }
+
+    private static final class Api21 {
+        private Api21() {
+        }
+
+        public static boolean isMediaDrmStateException(Throwable th) {
+            return th instanceof MediaDrm.MediaDrmStateException;
+        }
+
+        public static int mediaDrmStateExceptionToErrorCode(Throwable th) {
+            return Util.getErrorCodeForMediaDrmErrorCode(Util.getErrorCodeFromPlatformDiagnosticsInfo(((MediaDrm.MediaDrmStateException) th).getDiagnosticInfo()));
+        }
+    }
+
+    private static final class Api23 {
+        private Api23() {
+        }
+
+        public static boolean isMediaDrmResetException(Throwable th) {
+            return th instanceof MediaDrmResetException;
+        }
+    }
+
+    private DrmUtil() {
+    }
+}
