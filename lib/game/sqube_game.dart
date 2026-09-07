@@ -312,13 +312,15 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 }
               } else if (hazard is CyberTitan) {
                 if (!hazard.isSliced) {
-                  hazard.sliceAndDestroy();
-                  shakeCamera(0.75); // massive boss explosion shake
+                  hazard.takeDamage(amount: 1);
+                  shakeCamera(0.80); // massive boss explosion shake
                   AudioService().playClick();
                   AudioService().playSfx('laser');
-                  final cpBonus = mode == GameMode.tenXChallenge ? 150 : 75;
-                  collectedCP += cpBonus;
-                  saveService.addCubePoints(cpBonus);
+                  if (hazard.isSliced) {
+                    final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
+                    collectedCP += cpBonus;
+                    saveService.addCubePoints(cpBonus);
+                  }
                 }
               } else {
                 hazardsToDestroy.add(hazard);
@@ -350,13 +352,15 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 }
               } else if (hazard is CyberTitan) {
                 if (!hazard.isSliced) {
-                  hazard.sliceAndDestroy();
-                  shakeCamera(0.75);
+                  hazard.takeDamage(amount: 1);
+                  shakeCamera(0.80);
                   AudioService().playClick();
                   AudioService().playSfx('laser');
-                  final cpBonus = mode == GameMode.tenXChallenge ? 150 : 75;
-                  collectedCP += cpBonus;
-                  saveService.addCubePoints(cpBonus);
+                  if (hazard.isSliced) {
+                    final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
+                    collectedCP += cpBonus;
+                    saveService.addCubePoints(cpBonus);
+                  }
                 }
               } else {
                 hazardsToDestroy.add(hazard);

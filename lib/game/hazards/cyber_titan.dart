@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../player/sqube_player.dart';
 import '../sqube_game.dart';
@@ -214,6 +215,12 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
   bool isTargeting = false;
   bool nextShotIsHigh = true;
 
+  // Boss state and Combat
+  final bool isBoss;
+  final int maxHp;
+  int currentHp;
+  double hitFlashTimer = 0.0;
+
   // Destruction state when sliced by Ninja
   bool isSliced = false;
   double sliceTimer = 0.0;
@@ -232,7 +239,10 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
     this.spawnDistanceMeters = 0,
     this.minX,
     this.maxX,
-  }) : super(
+    this.isBoss = true,
+    this.maxHp = 1,
+  }) : currentHp = maxHp,
+       super(
          size: Vector2(98, 120),
          obstacleType: ObstacleType.cyberTitan,
          deathType: DeathType.hitByTitan,
@@ -245,10 +255,30 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
     theme = TitanTheme.fromDistanceMeters(dist);
   }
 
+  void takeDamage({int amount = 1}) {
+    if (isSliced) return;
+    currentHp = max(0, currentHp - amount);
+    hitFlashTimer = 0.25;
+    AudioService().playClick();
+    AudioService().playSfx('laser');
+    if (currentHp <= 0) {
+      sliceAndDestroy();
+    }
+  }
+
   void sliceAndDestroy() {
     if (isSliced) return;
     isSliced = true;
     sliceTimer = 0.75; // 750ms ultra cinematic blast
+
+    try {
+      game.shakeCamera(0.85);
+      final cpBonus = isBoss
+          ? (game.mode == GameMode.tenXChallenge ? 1000 : 500)
+          : (game.mode == GameMode.tenXChallenge ? 250 : 100);
+      game.collectedCP += cpBonus;
+      game.saveService.addCubePoints(cpBonus);
+    } catch (_) {}
 
     // Spawn 36 heavy flying mechanical scrap, armor shards & circuit sparks
     for (int i = 0; i < 36; i++) {
@@ -301,6 +331,9 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
     }
     if (muzzleFlash > 0.0) {
       muzzleFlash = max(0.0, muzzleFlash - dt * 7.0);
+    }
+    if (hitFlashTimer > 0.0) {
+      hitFlashTimer = max(0.0, hitFlashTimer - dt);
     }
 
     // Exhaust Vent Smoke Emitter (Sci-Fi Steam Venting)
@@ -501,9 +534,18 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
       size.y * 0.96,
     );
 
+    // Jump Stomp attack from above (acrobatic head bounce)
+    if (player.velocity.y > 60.0 &&
+        pPos.y < (myWorld.y - size.y * 0.70) &&
+        (pPos.x - myWorld.x).abs() < size.x * 0.55) {
+      player.velocity.y = -640.0; // high acrobatic bounce
+      takeDamage(amount: 1);
+      return false; // player lands hit safely
+    }
+
     if (pBodyRect.overlaps(titanBodyRect)) {
       if (isSlashing) {
-        sliceAndDestroy();
+        takeDamage(amount: 1);
         return false;
       }
       return true;
@@ -804,6 +846,85 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
       _renderPlasmaRound(canvas, round);
     }
     canvas.restore();
+
+    // 12. Floating Boss HUD & Health Bar (rendered in unflipped, upright world space)
+    if (isBoss && !isSliced) {
+      canvas.save();
+      canvas.translate(size.x / 2, size.y);
+
+      const hudWidth = 112.0;
+      const hudHeight = 8.0;
+      const hudTop = -145.0;
+      const hudLeft = -hudWidth / 2;
+
+      // Boss Indicator Tag
+      final tp = TextPainter(
+        text: TextSpan(
+          text: '⚠️ BOSS // ${theme.name}',
+          style: TextStyle(
+            fontSize: 8.5,
+            fontWeight: FontWeight.w900,
+            color: theme.coreEnergy,
+            letterSpacing: 1.2,
+            shadows: [Shadow(color: theme.coreAura, blurRadius: 6.0)],
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(-tp.width / 2, hudTop - 14));
+
+      // Health Bar Container
+      final bgRect = Rect.fromLTWH(hudLeft, hudTop, hudWidth, hudHeight);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(bgRect, const Radius.circular(3)),
+        Paint()..color = const Color(0xDD0C101A),
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(bgRect, const Radius.circular(3)),
+        Paint()
+          ..color = theme.coreAura.withValues(alpha: 0.7)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+
+      // Health Fill Segment
+      final hpFraction = (currentHp / maxHp).clamp(0.0, 1.0);
+      if (hpFraction > 0) {
+        final fillRect = Rect.fromLTWH(
+          hudLeft + 1.5,
+          hudTop + 1.5,
+          (hudWidth - 3.0) * hpFraction,
+          hudHeight - 3.0,
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(fillRect, const Radius.circular(2)),
+          Paint()
+            ..color = hpFraction > 0.5
+                ? const Color(0xFF00FF66)
+                : (hpFraction > 0.25
+                      ? AppConstants.coinGold
+                      : AppConstants.hazardRed),
+        );
+      }
+
+      // Hit Flash Overlay when taking damage
+      if (hitFlashTimer > 0.0) {
+        final flashPaint = Paint()
+          ..color = Colors.white.withValues(
+            alpha: (hitFlashTimer / 0.25).clamp(0.0, 0.75),
+          )
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(-48, -120, 96, 120),
+            const Radius.circular(12),
+          ),
+          flashPaint,
+        );
+      }
+
+      canvas.restore();
+    }
   }
 
   void _drawHeadCrest(Canvas canvas) {

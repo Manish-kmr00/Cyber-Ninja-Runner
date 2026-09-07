@@ -136,8 +136,17 @@ class ProceduralGenerator {
     final groundY = AppConstants.virtualHeight - AppConstants.groundHeight;
     const roofY = 60.0;
 
+    final chunkStartM = (startX / 10).round();
+
+    // Check if a 200m Cyber Titan Milestone (200, 400, 600, 800m...) begins this chunk
+    final isTitanArena = (chunkStartM % 200 == 0) && chunkStartM > 0;
+    final isBossArena = (chunkStartM % 800 == 0) && chunkStartM > 0;
+
     final hasPit =
-        !isSafeHaven && difficultyTier > 0 && random.nextDouble() < 0.38;
+        !isSafeHaven &&
+        !isTitanArena &&
+        difficultyTier > 0 &&
+        random.nextDouble() < 0.38;
     final pitWidth = hasPit ? 130.0 + random.nextDouble() * 90.0 : 0.0;
     final pitStartX = hasPit
         ? 320.0 + random.nextDouble() * (length - 320 - pitWidth)
@@ -158,7 +167,7 @@ class ProceduralGenerator {
     );
 
     // 1. Dynamic Multi-Tier Layout Architectures (Prevents repetitive linear boring layouts!)
-    if (!isSafeHaven && difficultyTier >= 1) {
+    if (!isSafeHaven && !isTitanArena && difficultyTier >= 1) {
       final layoutType = random.nextInt(
         4,
       ); // 4 distinct structural chunk archetypes!
@@ -263,6 +272,25 @@ class ProceduralGenerator {
     // If safe haven requested, don't inject hazards
     if (isSafeHaven) return chunk;
 
+    // Titan Encounter Arena: Cyber Titan Mech every 200m! (Every 800m is the Grand Boss)
+    if (isTitanArena) {
+      final titanX = length * 0.52;
+      chunk.hazards.add(
+        _createTrackTitan(
+          chunk,
+          titanX,
+          groundY,
+          patrolDist: 210.0,
+          speed: isBossArena
+              ? (95.0 + min(50.0, (chunkStartM / 800) * 12.0))
+              : (75.0 + min(40.0, (chunkStartM / 200) * 6.0)),
+          isBoss: isBossArena,
+          maxHp: 1,
+        ),
+      );
+      return chunk;
+    }
+
     // 4. Inject Hazards based on Difficulty Tier & Sector
     _injectHazards(chunk, difficultyTier, groundY, roofY);
 
@@ -342,6 +370,8 @@ class ProceduralGenerator {
     double trackDeckY, {
     double patrolDist = 180.0,
     double speed = 65.0,
+    bool isBoss = true,
+    int maxHp = 1,
   }) {
     double targetX = preferredX;
     double safeMinX = 60.0;
@@ -378,6 +408,10 @@ class ProceduralGenerator {
       patrolDistance: effectiveDist,
       patrolSpeed: speed,
       spawnDistanceMeters: worldDistMeters,
+      isBoss: isBoss,
+      maxHp: maxHp,
+      bulletSpeed: 480.0,
+      fireInterval: 0.95,
       minX: max(safeMinX, targetX - effectiveDist),
       maxX: min(safeMaxX, targetX + effectiveDist),
     );
@@ -390,65 +424,64 @@ class ProceduralGenerator {
     double roofY,
   ) {
     if (tier == 0) {
-      // Tier 0 (Game Start): Fast aggressive Cyber Titan Mech
+      // Tier 0 (Game Start: 0-300m): Sentry Cannon + Patrol Droid
       chunk.hazards.add(CyberCannon(position: Vector2(400, roofY + 45)));
       chunk.hazards.add(
-        _createTrackTitan(chunk, 680, groundY, patrolDist: 140.0, speed: 110.0),
+        _createTrackDroid(chunk, 680, groundY, patrolDist: 140.0, speed: 85.0),
       );
       return;
     }
 
     if (tier == 1) {
-      // Tier 1 (Early Run): Fast Cyber Titan Mech + Patrol Droid + Cyber Cannon
+      // Tier 1 (Early Run: 300-1000m): Patrol Droid + Cyber Cannon + Bug Crawler
       chunk.hazards.add(CyberCannon(position: Vector2(380, roofY + 45)));
       chunk.hazards.add(
-        _createTrackTitan(chunk, 560, groundY, patrolDist: 150.0, speed: 120.0),
+        _createTrackDroid(chunk, 600, groundY, patrolDist: 140.0, speed: 95.0),
       );
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 820, groundY, patrolDist: 110.0, speed: 90.0),
-      );
+      chunk.hazards.add(BugCrawler(position: Vector2(840, groundY)));
       return;
     }
 
     if (tier == 2) {
-      // Tier 2: Cyber Titan Boss Mech + Patrol Droid
+      // Tier 2 (1000-2000m): Dual Patrol Droids + Cyber Cannon
       chunk.hazards.add(
-        _createTrackTitan(chunk, 580, groundY, patrolDist: 160.0, speed: 125.0),
+        _createTrackDroid(chunk, 480, groundY, patrolDist: 140.0, speed: 100.0),
       );
       chunk.hazards.add(
-        _createTrackDroid(chunk, 840, groundY, patrolDist: 130.0, speed: 100.0),
+        _createTrackDroid(chunk, 780, groundY, patrolDist: 130.0, speed: 105.0),
       );
       chunk.hazards.add(CyberCannon(position: Vector2(340, roofY + 45)));
       return;
     }
 
     if (tier == 3) {
-      // Tier 3: Death Column smasher + Rapid Cyber Titan Boss Mech
+      // Tier 3 (2000-3000m): Death Column Smasher + Patrol Droid + Bug Crawler
       chunk.hazards.add(
         DeathColumn(position: Vector2(280, roofY), maxHeight: 220),
       );
       chunk.hazards.add(
-        _createTrackTitan(chunk, 650, groundY, patrolDist: 180.0, speed: 130.0),
+        _createTrackDroid(chunk, 650, groundY, patrolDist: 150.0, speed: 110.0),
       );
+      chunk.hazards.add(BugCrawler(position: Vector2(850, groundY)));
       return;
     }
 
     if (tier == 4) {
-      // Tier 4: Fast Cyber Titan Mech + Cyber Cannon + Bug Crawler
+      // Tier 4 (3000-4000m): Fast Patrol Droid + Cyber Cannon + Bug Crawler
       chunk.hazards.add(CyberCannon(position: Vector2(300, roofY + 45)));
       chunk.hazards.add(
-        _createTrackTitan(chunk, 660, groundY, patrolDist: 190.0, speed: 140.0),
+        _createTrackDroid(chunk, 660, groundY, patrolDist: 160.0, speed: 120.0),
       );
       chunk.hazards.add(BugCrawler(position: Vector2(860, groundY)));
       return;
     }
 
-    // Tier 5: Extreme Gauntlet (High-Speed Cyber Titan Boss Mech + Death Column + Cyber Cannon + Spikes)
+    // Tier 5: Extreme Gauntlet (Death Column + Patrol Droid + Cyber Cannon + Spikes)
     chunk.hazards.add(
       DeathColumn(position: Vector2(260, roofY), maxHeight: 230),
     );
     chunk.hazards.add(
-      _createTrackTitan(chunk, 540, groundY, patrolDist: 180.0, speed: 145.0),
+      _createTrackDroid(chunk, 540, groundY, patrolDist: 160.0, speed: 125.0),
     );
     chunk.hazards.add(CyberCannon(position: Vector2(760, roofY + 45)));
     chunk.hazards.add(

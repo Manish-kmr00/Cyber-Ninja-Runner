@@ -16,6 +16,8 @@ class PlayerData {
   };
 
   bool removeAdsPurchased = false;
+  bool isTenXUnlocked = false;
+  bool isFlightUnlocked = false;
   int dailyStreak = 1;
   int lastDailyClaimEpoch = 0;
 
@@ -26,6 +28,8 @@ class PlayerData {
     'unlockedSkins': unlockedSkins.map((s) => s.name).toList(),
     'boosters': boosters.map((k, v) => MapEntry(k.name, v.value)),
     'removeAdsPurchased': removeAdsPurchased,
+    'isTenXUnlocked': isTenXUnlocked,
+    'isFlightUnlocked': isFlightUnlocked,
     'dailyStreak': dailyStreak,
     'lastDailyClaimEpoch': lastDailyClaimEpoch,
   };
@@ -62,6 +66,8 @@ class PlayerData {
       });
     }
     removeAdsPurchased = json['removeAdsPurchased'] ?? false;
+    isTenXUnlocked = json['isTenXUnlocked'] ?? false;
+    isFlightUnlocked = json['isFlightUnlocked'] ?? false;
     dailyStreak = json['dailyStreak'] ?? 1;
     lastDailyClaimEpoch = json['lastDailyClaimEpoch'] ?? 0;
   }

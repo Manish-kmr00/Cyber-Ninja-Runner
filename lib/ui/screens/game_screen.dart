@@ -8,25 +8,50 @@ import '../overlays/death_overlay.dart';
 import '../overlays/hud_overlay.dart';
 import '../overlays/pause_overlay.dart';
 
-class GameScreen extends StatelessWidget {
+class GameScreen extends StatefulWidget {
   final GameMode mode;
 
   const GameScreen({super.key, required this.mode});
 
   @override
-  Widget build(BuildContext context) {
-    final saveService = context.read<SaveService>();
+  State<GameScreen> createState() => _GameScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: GameWidget<SqubeGame>(
-        game: SqubeGame(mode: mode, saveService: saveService),
-        initialActiveOverlays: const ['HudOverlay'],
-        overlayBuilderMap: {
-          'HudOverlay': (context, game) => HudOverlay(game: game),
-          'PauseOverlay': (context, game) => PauseOverlay(game: game),
-          'DeathOverlay': (context, game) => DeathOverlay(game: game),
-        },
+class _GameScreenState extends State<GameScreen> {
+  late final SqubeGame _game;
+
+  @override
+  void initState() {
+    super.initState();
+    final saveService = context.read<SaveService>();
+    _game = SqubeGame(mode: widget.mode, saveService: saveService);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (!_game.isGamePaused && !_game.isGameOver) {
+          _game.pauseGame();
+        } else if (_game.isGamePaused) {
+          _game.resumeGame();
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: GameWidget<SqubeGame>(
+          game: _game,
+          initialActiveOverlays: const ['HudOverlay'],
+          overlayBuilderMap: {
+            'HudOverlay': (context, game) => HudOverlay(game: game),
+            'PauseOverlay': (context, game) => PauseOverlay(game: game),
+            'DeathOverlay': (context, game) => DeathOverlay(game: game),
+          },
+        ),
       ),
     );
   }

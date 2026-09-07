@@ -95,6 +95,33 @@ class SaveService extends ChangeNotifier {
     saveAll();
   }
 
+  void setRemoveAds(bool val) {
+    player.removeAdsPurchased = val;
+    saveAll();
+  }
+
+  bool unlockTenXMode() {
+    const cost = 50000;
+    if (player.cubePoints.value >= cost) {
+      player.cubePoints.subtract(cost);
+      player.isTenXUnlocked = true;
+      saveAll();
+      return true;
+    }
+    return false;
+  }
+
+  bool unlockFlightMode() {
+    const cost = 100000;
+    if (player.cubePoints.value >= cost) {
+      player.cubePoints.subtract(cost);
+      player.isFlightUnlocked = true;
+      saveAll();
+      return true;
+    }
+    return false;
+  }
+
   bool useBooster(BoosterType type) {
     final current = player.boosters[type]?.value ?? 0;
     if (current > 0) {

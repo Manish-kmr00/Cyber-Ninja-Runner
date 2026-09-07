@@ -37,7 +37,6 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
     AudioService().playSlide();
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -47,7 +46,6 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
     )..repeat(reverse: true);
 
     _sectorBannerController = AnimationController(
-
       vsync: this,
       duration: const Duration(milliseconds: 550),
     );
@@ -99,7 +97,6 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
     _sectorBannerController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -360,25 +357,37 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Sci-Fi Chamfered Pause Button
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          AudioService().playClick();
-                          widget.game.pauseGame();
-                        },
-                        child: CustomPaint(
-                          painter: _SciFiSquareBorderPainter(
-                            color: const Color(0xFF00E5FF),
-                          ),
-                          child: Container(
-                            width: 46,
-                            height: 46,
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.pause_rounded,
-                              color: Colors.white,
-                              size: 28,
+                      // Sci-Fi Chamfered Pause Button with generous tap target
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          splashColor: const Color(
+                            0xFF00E5FF,
+                          ).withValues(alpha: 0.3),
+                          highlightColor: const Color(
+                            0xFF00E5FF,
+                          ).withValues(alpha: 0.15),
+                          onTap: () {
+                            AudioService().playClick();
+                            widget.game.pauseGame();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: CustomPaint(
+                              painter: _SciFiSquareBorderPainter(
+                                color: const Color(0xFF00E5FF),
+                              ),
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.pause_rounded,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -530,7 +539,6 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                   const SizedBox(width: 18),
 
                   // JUMP Neon Pedal (Golden / Orange Glowing Dual-Ring)
-
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTapDown: (_) => _triggerJump(),

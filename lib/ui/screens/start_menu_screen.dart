@@ -399,6 +399,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
   }
 
   Widget _buildModeCarousel(BuildContext context, SaveService saveService) {
+    final isTenXUnlocked = saveService.player.isTenXUnlocked;
+    final isFlightUnlocked = saveService.player.isFlightUnlocked;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -439,7 +441,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             icon: Icons.flash_on_rounded,
             accentColor: AppConstants.hazardRed,
             bestScore: saveService.stats.bestDistance10x,
-            onTap: () => _launchGame(context, GameMode.tenXChallenge),
+            isLocked: !isTenXUnlocked,
+            unlockPrice: 50000,
+            onTap: isTenXUnlocked
+                ? () => _launchGame(context, GameMode.tenXChallenge)
+                : () => _promptTenXUnlock(context, saveService),
           ),
           const SizedBox(width: 16),
           _buildModernModeCard(
@@ -456,7 +462,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             icon: Icons.flight_takeoff_rounded,
             accentColor: const Color(0xFFD500F9),
             bestScore: saveService.stats.bestDistanceSqubeBird,
-            onTap: () => _launchGame(context, GameMode.squbeBird),
+            isLocked: !isFlightUnlocked,
+            unlockPrice: 100000,
+            onTap: isFlightUnlocked
+                ? () => _launchGame(context, GameMode.squbeBird)
+                : () => _promptFlightUnlock(context, saveService),
           ),
         ],
       ),
@@ -478,7 +488,13 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     required Color accentColor,
     required int bestScore,
     required VoidCallback onTap,
+    bool isLocked = false,
+    int unlockPrice = 0,
   }) {
+    final formattedPrice = unlockPrice.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
+    );
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -486,19 +502,25 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         width: 290,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF131926), Color(0xFF0C101A)],
+            colors: isLocked
+                ? const [Color(0xFF15141E), Color(0xFF0D0C14)]
+                : const [Color(0xFF131926), Color(0xFF0C101A)],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: accentColor.withValues(alpha: 0.45),
+            color: isLocked
+                ? AppConstants.coinGold.withValues(alpha: 0.5)
+                : accentColor.withValues(alpha: 0.45),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: 0.14),
+              color: isLocked
+                  ? AppConstants.coinGold.withValues(alpha: 0.15)
+                  : accentColor.withValues(alpha: 0.14),
               blurRadius: 16,
               spreadRadius: 1,
             ),
@@ -520,10 +542,13 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         vertical: 3.5,
                       ),
                       decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.18),
+                        color: (isLocked ? AppConstants.hazardRed : accentColor)
+                            .withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: accentColor.withValues(alpha: 0.4),
+                          color:
+                              (isLocked ? AppConstants.hazardRed : accentColor)
+                                  .withValues(alpha: 0.4),
                         ),
                       ),
                       child: Text(
@@ -531,57 +556,101 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w900,
-                          color: accentColor,
+                          color: isLocked
+                              ? AppConstants.hazardRed
+                              : accentColor,
                           letterSpacing: 0.8,
                         ),
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 3.5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppConstants.coinGold.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: AppConstants.coinGold.withValues(alpha: 0.35),
+                    if (isLocked)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3.5,
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.bolt,
-                            color: AppConstants.coinGold,
-                            size: 11,
+                        decoration: BoxDecoration(
+                          color: AppConstants.coinGold.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppConstants.coinGold.withValues(alpha: 0.5),
                           ),
-                          const SizedBox(width: 2),
-                          Text(
-                            rewardMultiplier,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.lock_rounded,
                               color: AppConstants.coinGold,
-                              letterSpacing: 0.5,
+                              size: 11,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              '$formattedPrice CP',
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: AppConstants.coinGold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppConstants.coinGold.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppConstants.coinGold.withValues(
+                              alpha: 0.35,
                             ),
                           ),
-                        ],
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.bolt,
+                              color: AppConstants.coinGold,
+                              size: 11,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              rewardMultiplier,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: AppConstants.coinGold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 Container(
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.18),
+                    color: (isLocked ? AppConstants.coinGold : accentColor)
+                        .withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: accentColor.withValues(alpha: 0.5),
+                      color: (isLocked ? AppConstants.coinGold : accentColor)
+                          .withValues(alpha: 0.5),
                     ),
                   ),
-                  child: Icon(icon, color: accentColor, size: 19),
+                  child: Icon(
+                    isLocked ? Icons.lock_rounded : icon,
+                    color: isLocked ? AppConstants.coinGold : accentColor,
+                    size: isLocked ? 17 : 19,
+                  ),
                 ),
               ],
             ),
@@ -621,7 +690,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.radar_rounded, color: accentColor, size: 14),
+                  Icon(
+                    isLocked ? Icons.lock_outline_rounded : Icons.radar_rounded,
+                    color: isLocked ? AppConstants.coinGold : accentColor,
+                    size: 14,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Column(
@@ -632,7 +705,9 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                           style: TextStyle(
                             fontSize: 9.5,
                             fontWeight: FontWeight.w900,
-                            color: accentColor,
+                            color: isLocked
+                                ? AppConstants.coinGold
+                                : accentColor,
                             letterSpacing: 0.6,
                           ),
                           maxLines: 1,
@@ -710,7 +785,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             ),
             const SizedBox(height: 8),
 
-            // 5. Threat Level & Best Record Pill
+            // 5. Threat Level & Best Record Pill OR Unlock Pill
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -753,33 +828,395 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     ],
                   ),
 
-                  // Best score record
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.emoji_events_outlined,
-                        color: AppConstants.coinGold,
-                        size: 13,
+                  // Best score record OR Unlock CTA
+                  if (isLocked)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${bestScore}M',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
+                      decoration: BoxDecoration(
+                        color: AppConstants.coinGold.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppConstants.coinGold.withValues(alpha: 0.6),
                         ),
                       ),
-                    ],
-                  ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.key_rounded,
+                            color: AppConstants.coinGold,
+                            size: 11,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'UNLOCK MAP',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: AppConstants.coinGold,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.emoji_events_outlined,
+                          color: AppConstants.coinGold,
+                          size: 13,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${bestScore}M',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _promptMapUnlock({
+    required BuildContext context,
+    required SaveService saveService,
+    required String modeTitle,
+    required String modeSubtitle,
+    required int unlockCost,
+    required bool Function() onUnlock,
+    required String successMessage,
+  }) {
+    AudioService().playClick();
+    final currentCP = saveService.player.cubePoints.value;
+    final canAfford = currentCP >= unlockCost;
+    final formattedCost = unlockCost.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
+    );
+    final neededCP = (unlockCost - currentCP).toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
+    );
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 24,
+          ),
+          child: Container(
+            width: 460,
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0C101A),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: canAfford
+                    ? AppConstants.coinGold.withValues(alpha: 0.6)
+                    : AppConstants.hazardRed.withValues(alpha: 0.6),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      (canAfford
+                              ? AppConstants.coinGold
+                              : AppConstants.hazardRed)
+                          .withValues(alpha: 0.2),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Top Tag
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppConstants.hazardRed.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppConstants.hazardRed.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.security_rounded,
+                            size: 12,
+                            color: AppConstants.hazardRed,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            'SECTOR CLEARANCE REQUIRED',
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              color: AppConstants.hazardRed,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.lock_outline_rounded,
+                      color: AppConstants.coinGold,
+                      size: 18,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Title
+                Text(
+                  modeTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 1.0,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  modeSubtitle,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.hazardRed.withValues(alpha: 0.8),
+                    letterSpacing: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+
+                // Telemetry Card
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF131926),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'UNLOCK CLEARANCE FEE:',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white60,
+                            ),
+                          ),
+                          Text(
+                            '$formattedCost CP',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: AppConstants.coinGold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(color: Colors.white10, height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'YOUR CURRENT BALANCE:',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white60,
+                            ),
+                          ),
+                          Text(
+                            '$currentCP CP',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              color: canAfford
+                                  ? const Color(0xFF00FF88)
+                                  : AppConstants.hazardRed,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (!canAfford) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'ADDITIONAL CP NEEDED:',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppConstants.hazardRed,
+                              ),
+                            ),
+                            Text(
+                              '$neededCP CP',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                color: AppConstants.hazardRed,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white60,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: const BorderSide(color: Colors.white24),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
+                        child: const Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: canAfford
+                              ? AppConstants.coinGold
+                              : const Color(0xFF161E2E),
+                          foregroundColor: canAfford
+                              ? Colors.black
+                              : Colors.white70,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                              color: canAfford
+                                  ? AppConstants.coinGold
+                                  : Colors.white24,
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(dialogCtx).pop();
+                          if (canAfford) {
+                            final success = onUnlock();
+                            if (success) {
+                              AudioService().playCollect();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: const Color(0xFF0C101A),
+                                  content: Text(
+                                    successMessage,
+                                    style: const TextStyle(
+                                      color: AppConstants.coinGold,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          } else {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const ShopScreen(),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(
+                          canAfford
+                              ? 'AUTHORIZE & UNLOCK'
+                              : 'ACQUIRE CP (SHOP)',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _promptTenXUnlock(BuildContext context, SaveService saveService) {
+    _promptMapUnlock(
+      context: context,
+      saveService: saveService,
+      modeTitle: '10X HYPER RUN // OVERCHARGED FORGE',
+      modeSubtitle: 'HIGH-RISK REACTOR CORE // 10.0X CP MULTIPLIER',
+      unlockCost: 50000,
+      onUnlock: () => saveService.unlockTenXMode(),
+      successMessage: '10X HYPER RUN MAP UNLOCKED // ACCESS GRANTED!',
+    );
+  }
+
+  void _promptFlightUnlock(BuildContext context, SaveService saveService) {
+    _promptMapUnlock(
+      context: context,
+      saveService: saveService,
+      modeTitle: 'JET SHINOBI FLIGHT // STRATOSPHERE SKYWAY',
+      modeSubtitle: 'AERIAL ZERO-G VECTOR // 2.5X CP MULTIPLIER',
+      unlockCost: 100000,
+      onUnlock: () => saveService.unlockFlightMode(),
+      successMessage: 'JET SHINOBI FLIGHT UNLOCKED // ACCESS GRANTED!',
     );
   }
 
