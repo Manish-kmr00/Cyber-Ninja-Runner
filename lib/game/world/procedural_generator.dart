@@ -4,6 +4,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../hazards/bug_crawler.dart';
 import '../hazards/cyber_cannon.dart';
+import '../hazards/cyber_titan.dart';
 import '../hazards/dark_box.dart';
 import '../hazards/death_column.dart';
 import '../hazards/stakes.dart';
@@ -335,6 +336,53 @@ class ProceduralGenerator {
     );
   }
 
+  CyberTitan _createTrackTitan(
+    WorldChunk chunk,
+    double preferredX,
+    double trackDeckY, {
+    double patrolDist = 180.0,
+    double speed = 65.0,
+  }) {
+    double targetX = preferredX;
+    double safeMinX = 60.0;
+    double safeMaxX = chunk.length - 60.0;
+
+    if (chunk.hasPit) {
+      final pitLeft = chunk.pitStartX;
+      final pitRight = chunk.pitStartX + chunk.pitWidth;
+
+      final zone1Len = (pitLeft - 60.0) - 60.0;
+      final zone2Len = (chunk.length - 60.0) - (pitRight + 60.0);
+
+      if (preferredX < pitLeft - 30 && zone1Len >= 160.0) {
+        safeMinX = 60.0;
+        safeMaxX = pitLeft - 50.0;
+        targetX = preferredX.clamp(safeMinX + 45.0, safeMaxX - 45.0);
+      } else if (zone2Len >= 160.0) {
+        safeMinX = pitRight + 50.0;
+        safeMaxX = chunk.length - 60.0;
+        targetX = preferredX.clamp(safeMinX + 45.0, safeMaxX - 45.0);
+      } else {
+        safeMinX = 60.0;
+        safeMaxX = (pitLeft - 50.0).clamp(60.0, chunk.length);
+        targetX = (safeMinX + safeMaxX) / 2;
+      }
+    } else {
+      targetX = preferredX.clamp(safeMinX + 45.0, safeMaxX - 45.0);
+    }
+
+    final effectiveDist = min(patrolDist, (safeMaxX - safeMinX) / 2);
+    final worldDistMeters = ((chunk.startX + targetX) / 10).round();
+    return CyberTitan(
+      position: Vector2(targetX, trackDeckY),
+      patrolDistance: effectiveDist,
+      patrolSpeed: speed,
+      spawnDistanceMeters: worldDistMeters,
+      minX: max(safeMinX, targetX - effectiveDist),
+      maxX: min(safeMaxX, targetX + effectiveDist),
+    );
+  }
+
   void _injectHazards(
     WorldChunk chunk,
     int tier,
@@ -342,62 +390,70 @@ class ProceduralGenerator {
     double roofY,
   ) {
     if (tier == 0) {
-      // Tier 0: Cyber Cannon introduction
-      chunk.hazards.add(CyberCannon(position: Vector2(550, roofY + 45)));
+      // Tier 0 (Game Start): Fast aggressive Cyber Titan Mech
+      chunk.hazards.add(CyberCannon(position: Vector2(400, roofY + 45)));
+      chunk.hazards.add(
+        _createTrackTitan(chunk, 680, groundY, patrolDist: 140.0, speed: 110.0),
+      );
       return;
     }
 
     if (tier == 1) {
-      // Tier 1: Cyber Cannon + Patrol Droid
-      chunk.hazards.add(CyberCannon(position: Vector2(450, roofY + 45)));
+      // Tier 1 (Early Run): Fast Cyber Titan Mech + Patrol Droid + Cyber Cannon
+      chunk.hazards.add(CyberCannon(position: Vector2(380, roofY + 45)));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 760, groundY, patrolDist: 110.0, speed: 75.0),
+        _createTrackTitan(chunk, 560, groundY, patrolDist: 150.0, speed: 120.0),
+      );
+      chunk.hazards.add(
+        _createTrackDroid(chunk, 820, groundY, patrolDist: 110.0, speed: 90.0),
       );
       return;
     }
 
     if (tier == 2) {
-      // Tier 2: Cyber Patrol Droid + Cyber Cannon turret combo
-      chunk.hazards.add(CyberCannon(position: Vector2(350, roofY + 45)));
+      // Tier 2: Cyber Titan Boss Mech + Patrol Droid
       chunk.hazards.add(
-        _createTrackDroid(chunk, 700, groundY, patrolDist: 150.0, speed: 90.0),
+        _createTrackTitan(chunk, 580, groundY, patrolDist: 160.0, speed: 125.0),
       );
+      chunk.hazards.add(
+        _createTrackDroid(chunk, 840, groundY, patrolDist: 130.0, speed: 100.0),
+      );
+      chunk.hazards.add(CyberCannon(position: Vector2(340, roofY + 45)));
       return;
     }
 
     if (tier == 3) {
-      // Tier 3: Death Column smasher + Cyber Patrol Droid
+      // Tier 3: Death Column smasher + Rapid Cyber Titan Boss Mech
       chunk.hazards.add(
         DeathColumn(position: Vector2(280, roofY), maxHeight: 220),
       );
       chunk.hazards.add(
-        _createTrackDroid(chunk, 620, groundY, patrolDist: 170.0, speed: 100.0),
+        _createTrackTitan(chunk, 650, groundY, patrolDist: 180.0, speed: 130.0),
       );
-      chunk.hazards.add(Stakes(position: Vector2(880, groundY), spikeCount: 3));
       return;
     }
 
     if (tier == 4) {
-      // Tier 4: Fast Patrol Droid + Bug Crawler + Cyber Cannon
-      chunk.hazards.add(CyberCannon(position: Vector2(340, roofY + 45)));
+      // Tier 4: Fast Cyber Titan Mech + Cyber Cannon + Bug Crawler
+      chunk.hazards.add(CyberCannon(position: Vector2(300, roofY + 45)));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 600, groundY, patrolDist: 180.0, speed: 115.0),
+        _createTrackTitan(chunk, 660, groundY, patrolDist: 190.0, speed: 140.0),
       );
-      chunk.hazards.add(BugCrawler(position: Vector2(840, groundY)));
+      chunk.hazards.add(BugCrawler(position: Vector2(860, groundY)));
       return;
     }
 
-    // Tier 5: Extreme Gauntlet (Dual Droids + Death Column + Cyber Cannon + Retracting Spikes)
+    // Tier 5: Extreme Gauntlet (High-Speed Cyber Titan Boss Mech + Death Column + Cyber Cannon + Spikes)
     chunk.hazards.add(
       DeathColumn(position: Vector2(260, roofY), maxHeight: 230),
     );
     chunk.hazards.add(
-      _createTrackDroid(chunk, 520, groundY, patrolDist: 160.0, speed: 125.0),
+      _createTrackTitan(chunk, 540, groundY, patrolDist: 180.0, speed: 145.0),
     );
-    chunk.hazards.add(CyberCannon(position: Vector2(740, roofY + 45)));
+    chunk.hazards.add(CyberCannon(position: Vector2(760, roofY + 45)));
     chunk.hazards.add(
       Stakes(
-        position: Vector2(890, groundY),
+        position: Vector2(910, groundY),
         spikeCount: 4,
         isRetracting: true,
       ),

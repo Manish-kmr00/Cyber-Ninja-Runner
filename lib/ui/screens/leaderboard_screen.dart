@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
 
 class LeaderboardScreen extends StatefulWidget {
@@ -29,15 +30,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   @override
   Widget build(BuildContext context) {
     final saveService = context.watch<SaveService>();
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundDark,
       appBar: AppBar(
         backgroundColor: AppConstants.backgroundDark,
         elevation: 0,
-        title: const Text(
-          'GLOBAL LEADERBOARDS',
-          style: TextStyle(
+        title: Text(
+          l10n.tr('hall_of_fame'),
+          style: const TextStyle(
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
             fontSize: 18,
@@ -48,10 +50,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           indicatorColor: AppConstants.coinGold,
           labelColor: AppConstants.coinGold,
           unselectedLabelColor: Colors.white60,
-          tabs: const [
-            Tab(text: 'ENDLESS RUN'),
-            Tab(text: '10X CHALLENGE'),
-            Tab(text: 'SQUBE BIRD'),
+          tabs: [
+            Tab(text: l10n.tr('core_campaign')),
+            Tab(text: l10n.tr('extreme_risk')),
+            Tab(text: l10n.tr('aerial_zero_g')),
           ],
         ),
       ),
@@ -59,6 +61,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         controller: _tabController,
         children: [
           _buildLeaderboardTab(
+            context,
             modeTitle: 'Endless Run',
             personalBest: saveService.stats.bestDistanceRun,
             mockLeaderboard: [
@@ -70,6 +73,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             ],
           ),
           _buildLeaderboardTab(
+            context,
             modeTitle: '10X Challenge',
             personalBest: saveService.stats.bestDistance10x,
             mockLeaderboard: [
@@ -80,6 +84,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             ],
           ),
           _buildLeaderboardTab(
+            context,
             modeTitle: 'Sqube Bird',
             personalBest: saveService.stats.bestDistanceSqubeBird,
             mockLeaderboard: [
@@ -97,7 +102,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  Widget _buildLeaderboardTab({
+  Widget _buildLeaderboardTab(
+    BuildContext context, {
     required String modeTitle,
     required int personalBest,
     required List<_RankEntry> mockLeaderboard,
@@ -127,9 +133,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'YOUR PERSONAL BEST',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.tr('best_record'),
+                      style: const TextStyle(
                         color: Colors.white60,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,

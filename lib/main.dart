@@ -35,9 +35,19 @@ class SqubeDarknessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final saveService = context.watch<SaveService>();
+    final isArabic = saveService.settings.languageCode == 'ar';
+
     return MaterialApp(
       title: 'Cyber Ninja Runner',
       debugShowCheckedModeBanner: false,
+      locale: Locale(saveService.settings.languageCode),
+      builder: (context, child) {
+        return Directionality(
+          textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+          child: child ?? const SizedBox(),
+        );
+      },
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AppConstants.backgroundDark,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
 import 'game_screen.dart';
 import 'leaderboard_screen.dart';
@@ -183,14 +184,14 @@ class _StartMenuScreenState extends State<StartMenuScreen>
               ),
             ),
             const SizedBox(width: 12),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Text(
-                      'CYBER',
-                      style: TextStyle(
+                      context.l10n.tr('game_title_cyber'),
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                         color: AppConstants.stealthBlue,
@@ -198,10 +199,10 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         height: 1.0,
                       ),
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Text(
-                      'RUNNER',
-                      style: TextStyle(
+                      context.l10n.tr('game_title_runner'),
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
@@ -211,10 +212,10 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     ),
                   ],
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
-                  'SHADOW & STEEL // PROTOCOL V2.5',
-                  style: TextStyle(
+                  context.l10n.tr('game_protocol'),
+                  style: const TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
                     color: Colors.white38,
@@ -365,9 +366,9 @@ class _StartMenuScreenState extends State<StartMenuScreen>
               size: 18,
             ),
             const SizedBox(width: 8),
-            const Text(
-              'ACTIVE OPERATIVE // SHADOW SHINOBI',
-              style: TextStyle(
+            Text(
+              context.l10n.tr('active_operative'),
+              style: const TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 11,
                 letterSpacing: 1.4,
@@ -381,9 +382,9 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 color: AppConstants.stealthBlue.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Text(
-                'DEPLOYED',
-                style: TextStyle(
+              child: Text(
+                context.l10n.tr('deployed'),
+                style: const TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w900,
                   color: AppConstants.stealthBlue,
@@ -405,9 +406,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         children: [
           _buildModernModeCard(
             context,
-            title: 'ENDLESS OVERDRIVE',
-            subtitle: 'Survive shadows, spikes & laser drones',
-            tag: 'CORE CAMPAIGN',
+            title: context.l10n.tr('endless_title'),
+            tag: context.l10n.tr('core_campaign'),
+            mapName: context.l10n.tr('endless_map'),
+            mapSector: context.l10n.tr('endless_sector'),
+            threatLevel: context.l10n.tr('threat_lvl_3'),
+            threatColor: AppConstants.stealthBlue,
+            hazardTags: const ['TITAN MECH', 'DROID CANNONS', 'PLASMA SPIKES'],
+            rewardMultiplier: '1.0X CP',
+            objective: context.l10n.tr('endless_obj'),
             icon: Icons.play_arrow_rounded,
             accentColor: AppConstants.stealthBlue,
             bestScore: saveService.stats.bestDistanceRun,
@@ -416,9 +423,19 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           const SizedBox(width: 16),
           _buildModernModeCard(
             context,
-            title: '10X HYPER RUN',
-            subtitle: 'Lethal difficulty • 10x CP rewards',
-            tag: 'HIGH RISK // HIGH REWARD',
+            title: context.l10n.tr('tenx_title'),
+            tag: context.l10n.tr('extreme_risk'),
+            mapName: context.l10n.tr('tenx_map'),
+            mapSector: context.l10n.tr('tenx_sector'),
+            threatLevel: context.l10n.tr('threat_lvl_5'),
+            threatColor: AppConstants.hazardRed,
+            hazardTags: const [
+              'OVERCHARGED TITAN',
+              'RAPID CANNONS',
+              'WARP TRAPS',
+            ],
+            rewardMultiplier: '10.0X CP',
+            objective: context.l10n.tr('tenx_obj'),
             icon: Icons.flash_on_rounded,
             accentColor: AppConstants.hazardRed,
             bestScore: saveService.stats.bestDistance10x,
@@ -427,9 +444,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           const SizedBox(width: 16),
           _buildModernModeCard(
             context,
-            title: 'JET SHINOBI FLIGHT',
-            subtitle: 'Aerial thrusters & laser webs',
-            tag: 'AERIAL MODE',
+            title: context.l10n.tr('flight_title'),
+            tag: context.l10n.tr('aerial_zero_g'),
+            mapName: context.l10n.tr('flight_map'),
+            mapSector: context.l10n.tr('flight_sector'),
+            threatLevel: context.l10n.tr('threat_lvl_4'),
+            threatColor: const Color(0xFFD500F9),
+            hazardTags: const ['LASER WEBS', 'AERIAL MINES', 'ION CEILINGS'],
+            rewardMultiplier: '2.5X CP',
+            objective: context.l10n.tr('flight_obj'),
             icon: Icons.flight_takeoff_rounded,
             accentColor: const Color(0xFFD500F9),
             bestScore: saveService.stats.bestDistanceSqubeBird,
@@ -443,8 +466,14 @@ class _StartMenuScreenState extends State<StartMenuScreen>
   Widget _buildModernModeCard(
     BuildContext context, {
     required String title,
-    required String subtitle,
     required String tag,
+    required String mapName,
+    required String mapSector,
+    required String threatLevel,
+    required Color threatColor,
+    required List<String> hazardTags,
+    required String rewardMultiplier,
+    required String objective,
     required IconData icon,
     required Color accentColor,
     required int bestScore,
@@ -454,18 +483,22 @@ class _StartMenuScreenState extends State<StartMenuScreen>
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        width: 250,
-        padding: const EdgeInsets.all(20),
+        width: 290,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
-          color: const Color(0xFF111520),
-          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF131926), Color(0xFF0C101A)],
+          ),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: accentColor.withValues(alpha: 0.4),
+            color: accentColor.withValues(alpha: 0.45),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: 0.12),
+              color: accentColor.withValues(alpha: 0.14),
               blurRadius: 16,
               spreadRadius: 1,
             ),
@@ -473,90 +506,275 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Top Row: Tag & Action Icon
+            // 1. Top Row: Tag, Multiplier Pill & Action Icon
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    tag,
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: accentColor,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: accentColor, size: 24),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Mode Title & Subtitle
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.white54,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Best Distance Telemetry Pill
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 9),
-              decoration: BoxDecoration(
-                color: const Color(0xFF181E2C),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white10),
-              ),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                Row(
                   children: [
-                    Icon(Icons.flag_rounded, color: accentColor, size: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        tag,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: accentColor,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 6),
-                    Text(
-                      'BEST RECORD: $bestScore M',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: accentColor,
-                        letterSpacing: 0.8,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppConstants.coinGold.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppConstants.coinGold.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.bolt,
+                            color: AppConstants.coinGold,
+                            size: 11,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            rewardMultiplier,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: AppConstants.coinGold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: accentColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 19),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // 2. Mode Title & Tactical Objective
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              objective,
+              style: const TextStyle(
+                fontSize: 10,
+                color: Colors.white54,
+                height: 1.2,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+
+            // 3. Map & Sector Telemetry Banner
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF161E2E),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.radar_rounded, color: accentColor, size: 14),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          mapName,
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            color: accentColor,
+                            letterSpacing: 0.6,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          mapSector,
+                          style: const TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white54,
+                            letterSpacing: 0.4,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // 4. Hazard Intel Tags
+            Row(
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white38,
+                  size: 11,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  context.l10n.tr('hazards_label'),
+                  style: const TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white38,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: hazardTags.map((hazard) {
+                        return Container(
+                          margin: const EdgeInsets.only(right: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.white12),
+                          ),
+                          child: Text(
+                            hazard,
+                            style: const TextStyle(
+                              fontSize: 7.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white70,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // 5. Threat Level & Best Record Pill
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF161E2E),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Threat level with indicator dot
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: threatColor,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: threatColor.withValues(alpha: 0.8),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        threatLevel,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: threatColor,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Best score record
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.emoji_events_outlined,
+                        color: AppConstants.coinGold,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${bestScore}M',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -571,7 +789,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
       children: [
         // 1. Daily Gift Button
         _buildDockButton(
-          title: 'DAILY CRATE',
+          title: context.l10n.tr('daily_crate'),
           icon: Icons.card_giftcard_rounded,
           accentColor: AppConstants.coinGold,
           onTap: () => _claimDailyGift(context),
@@ -579,7 +797,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
 
         // 2. Skins & Arsenal Button
         _buildDockButton(
-          title: 'ARSENAL & HANGAR',
+          title: context.l10n.tr('arsenal_hangar'),
           icon: Icons.shopping_bag_rounded,
           accentColor: AppConstants.stealthBlue,
           isHighlight: true,
@@ -593,7 +811,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
 
         // 3. Global Leaderboards Button
         _buildDockButton(
-          title: 'HALL OF FAME',
+          title: context.l10n.tr('hall_of_fame'),
           icon: Icons.leaderboard_rounded,
           accentColor: const Color(0xFFFF007F),
           onTap: () {

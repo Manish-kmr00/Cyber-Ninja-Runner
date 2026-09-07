@@ -12,6 +12,7 @@ enum ObstacleType {
   cyberCannon,
   bugCrawler,
   darkBox,
+  cyberTitan,
   deathColumn,
   darkMud,
   stakesStatic,
@@ -28,6 +29,7 @@ enum DeathType {
   hitBySpikes,
   sunkInDarkMud,
   hitByDarkBox,
+  hitByTitan,
   hitByBug,
   fallInPit,
 }

@@ -10,6 +10,7 @@ import '../core/constants/game_enums.dart';
 import '../core/storage/save_service.dart';
 import 'boosters/booster_manager.dart';
 import 'hazards/base_hazard.dart';
+import 'hazards/cyber_titan.dart';
 import 'hazards/dark_box.dart';
 import 'player/sqube_player.dart';
 import 'world/parallax_background.dart';
@@ -280,16 +281,23 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
             hazardsToDestroy.add(hazard);
             continue;
           }
+          if (hazard is CyberTitan &&
+              hazard.isSliced &&
+              hazard.sliceTimer <= 0.0) {
+            hazardsToDestroy.add(hazard);
+            continue;
+          }
 
           // Dual Katana Slash extended strike zone check (sword blade reach in front of ninja)
           if (player.isSlashing &&
               (hazard.obstacleType == ObstacleType.darkBox ||
+                  hazard.obstacleType == ObstacleType.cyberTitan ||
                   hazard.obstacleType == ObstacleType.bugCrawler)) {
             final hPos = hazard.worldPosition;
             final inStrikeX =
                 (hPos.x - player.position.x) > -45.0 &&
-                (hPos.x - player.position.x) < (player.size.x + 140.0);
-            final inStrikeY = (hPos.y - player.position.y).abs() < 100.0;
+                (hPos.x - player.position.x) < (player.size.x + 160.0);
+            final inStrikeY = (hPos.y - player.position.y).abs() < 120.0;
 
             if (inStrikeX && inStrikeY) {
               if (hazard is DarkBox) {
@@ -299,6 +307,16 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   AudioService().playClick();
                   AudioService().playSfx('laser');
                   final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
+                  collectedCP += cpBonus;
+                  saveService.addCubePoints(cpBonus);
+                }
+              } else if (hazard is CyberTitan) {
+                if (!hazard.isSliced) {
+                  hazard.sliceAndDestroy();
+                  shakeCamera(0.75); // massive boss explosion shake
+                  AudioService().playClick();
+                  AudioService().playSfx('laser');
+                  final cpBonus = mode == GameMode.tenXChallenge ? 150 : 75;
                   collectedCP += cpBonus;
                   saveService.addCubePoints(cpBonus);
                 }
@@ -315,9 +333,10 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
           }
 
           if (hazard.checkCollision(player)) {
-            // Dual Katana Slash destroys patrol robots & bug crawlers on contact!
+            // Dual Katana Slash destroys patrol robots, cyber titans & bug crawlers on contact!
             if (player.isSlashing &&
                 (hazard.obstacleType == ObstacleType.darkBox ||
+                    hazard.obstacleType == ObstacleType.cyberTitan ||
                     hazard.obstacleType == ObstacleType.bugCrawler)) {
               if (hazard is DarkBox) {
                 if (!hazard.isSliced) {
@@ -326,6 +345,16 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   AudioService().playClick();
                   AudioService().playSfx('laser');
                   final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
+                  collectedCP += cpBonus;
+                  saveService.addCubePoints(cpBonus);
+                }
+              } else if (hazard is CyberTitan) {
+                if (!hazard.isSliced) {
+                  hazard.sliceAndDestroy();
+                  shakeCamera(0.75);
+                  AudioService().playClick();
+                  AudioService().playSfx('laser');
+                  final cpBonus = mode == GameMode.tenXChallenge ? 150 : 75;
                   collectedCP += cpBonus;
                   saveService.addCubePoints(cpBonus);
                 }

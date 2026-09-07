@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../game/sqube_game.dart';
 
 class PauseOverlay extends StatelessWidget {
@@ -67,17 +68,17 @@ class PauseOverlay extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.pause_circle_outline_rounded,
                               size: 13,
                               color: AppConstants.stealthBlue,
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             Text(
-                              'TACTICAL PAUSE',
-                              style: TextStyle(
+                              context.l10n.tr('tactical_pause'),
+                              style: const TextStyle(
                                 color: AppConstants.stealthBlue,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w900,
@@ -88,7 +89,7 @@ class PauseOverlay extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'SYS_STATE // FROZEN',
+                        context.l10n.tr('sys_frozen'),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.4),
                           fontSize: 10,
@@ -230,9 +231,9 @@ class PauseOverlay extends StatelessWidget {
                         size: 24,
                         color: Colors.black,
                       ),
-                      label: const Text(
-                        'RESUME MISSION',
-                        style: TextStyle(
+                      label: Text(
+                        context.l10n.tr('resume'),
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 14,
                           letterSpacing: 1.5,
@@ -263,9 +264,9 @@ class PauseOverlay extends StatelessWidget {
                         Navigator.of(context).pop();
                       },
                       icon: const Icon(Icons.home_filled, size: 18),
-                      label: const Text(
-                        'ABORT TO COCKPIT',
-                        style: TextStyle(
+                      label: Text(
+                        context.l10n.tr('abort'),
+                        style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
                           letterSpacing: 1.2,

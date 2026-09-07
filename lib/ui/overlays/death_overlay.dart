@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
 import '../../game/sqube_game.dart';
 
@@ -72,17 +73,17 @@ class DeathOverlay extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.warning_amber_rounded,
                               size: 13,
                               color: AppConstants.hazardRed,
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             Text(
-                              'SIGNAL LOST // FAULT',
-                              style: TextStyle(
+                              context.l10n.tr('mission_failed'),
+                              style: const TextStyle(
                                 color: AppConstants.hazardRed,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w900,
@@ -326,9 +327,9 @@ class DeathOverlay extends StatelessWidget {
                         size: 24,
                         color: Colors.black,
                       ),
-                      label: const Text(
-                        'RE-INITIALIZE RUN',
-                        style: TextStyle(
+                      label: Text(
+                        context.l10n.tr('deploy_again'),
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 14,
                           letterSpacing: 1.5,
@@ -359,9 +360,9 @@ class DeathOverlay extends StatelessWidget {
                         Navigator.of(context).pop();
                       },
                       icon: const Icon(Icons.logout_rounded, size: 18),
-                      label: const Text(
-                        'ABORT TO COCKPIT',
-                        style: TextStyle(
+                      label: Text(
+                        context.l10n.tr('exit_hub'),
+                        style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
                           letterSpacing: 1.2,

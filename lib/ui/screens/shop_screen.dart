@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
 
 class ShopScreen extends StatelessWidget {
@@ -20,9 +21,9 @@ class ShopScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'MECHA ARSENAL & HANGAR',
-              style: TextStyle(
+            Text(
+              context.l10n.tr('arsenal_hangar'),
+              style: const TextStyle(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.8,
                 fontSize: 16,
@@ -310,9 +311,9 @@ class ShopScreen extends StatelessWidget {
                 color: AppConstants.coinGold,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
-                'EQUIPPED',
-                style: TextStyle(
+              child: Text(
+                context.l10n.tr('equipped'),
+                style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w900,
                   fontSize: 10,
@@ -331,9 +332,12 @@ class ShopScreen extends StatelessWidget {
                 AudioService().playClick();
                 saveService.equipSkin(skin);
               },
-              child: const Text(
-                'EQUIP',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+              child: Text(
+                context.l10n.tr('equip'),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           else
