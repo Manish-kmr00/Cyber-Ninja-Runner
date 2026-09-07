@@ -274,7 +274,9 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
               boosterManager.isInvisibilityActive) {
             continue;
           }
-          if (hazard is DarkBox && hazard.isSliced && hazard.sliceTimer <= 0.0) {
+          if (hazard is DarkBox &&
+              hazard.isSliced &&
+              hazard.sliceTimer <= 0.0) {
             hazardsToDestroy.add(hazard);
             continue;
           }
@@ -284,7 +286,8 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
               (hazard.obstacleType == ObstacleType.darkBox ||
                   hazard.obstacleType == ObstacleType.bugCrawler)) {
             final hPos = hazard.worldPosition;
-            final inStrikeX = (hPos.x - player.position.x) > -45.0 &&
+            final inStrikeX =
+                (hPos.x - player.position.x) > -45.0 &&
                 (hPos.x - player.position.x) < (player.size.x + 140.0);
             final inStrikeY = (hPos.y - player.position.y).abs() < 100.0;
 

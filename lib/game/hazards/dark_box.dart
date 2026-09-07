@@ -280,8 +280,7 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
       );
 
       // Precise Player Hitbox
-      final boxHeight =
-          isSliding ? player.size.y * 0.35 : player.size.y * 0.85;
+      final boxHeight = isSliding ? player.size.y * 0.35 : player.size.y * 0.85;
       final pRect = Rect.fromLTWH(
         pPos.x - player.size.x * 0.30,
         pPos.y - boxHeight,
@@ -392,10 +391,9 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
       for (int i = 0; i < scrapOffsets.length; i++) {
         final pos = scrapOffsets[i];
         final scrapPaint = Paint()
-          ..color = (i % 2 == 0
-                  ? const Color(0xFF38435C)
-                  : AppConstants.hazardRed)
-              .withValues(alpha: fadeAlpha);
+          ..color =
+              (i % 2 == 0 ? const Color(0xFF38435C) : AppConstants.hazardRed)
+                  .withValues(alpha: fadeAlpha);
         canvas.drawCircle(pos, 2.5, scrapPaint);
       }
 

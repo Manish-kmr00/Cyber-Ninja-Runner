@@ -10,8 +10,8 @@ enum BoosterType { safeGround, matrixSlowMo, invisibility, killEyes }
 enum ObstacleType {
   darkEye,
   cyberCannon,
-  darkBox,
   bugCrawler,
+  darkBox,
   deathColumn,
   darkMud,
   stakesStatic,
