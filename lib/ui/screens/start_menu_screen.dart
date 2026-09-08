@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
@@ -95,6 +96,266 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         ),
       );
     }
+  }
+
+  Future<void> _openDeveloperPage() async {
+    AudioService().playClick();
+    final Uri url = Uri.parse(
+      'https://play.google.com/store/apps/developer?id=Moon+Edge+Studio',
+    );
+    try {
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(url);
+      }
+    } catch (e) {
+      debugPrint('Could not launch developer URL: $e');
+    }
+  }
+
+  Future<void> _openImgResizer() async {
+    AudioService().playClick();
+    final Uri url = Uri.parse(
+      'https://play.google.com/store/apps/details?id=com.moonedgestudio.imageresizer',
+    );
+    try {
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(url);
+      }
+    } catch (e) {
+      debugPrint('Could not launch Img Resizer URL: $e');
+    }
+  }
+
+  void _showStudioDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 16,
+          ),
+          child: Container(
+            width: 480,
+            constraints: const BoxConstraints(maxHeight: 360),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D0F18),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: const Color(0xFFFF007F).withValues(alpha: 0.65),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF007F).withValues(alpha: 0.25),
+                  blurRadius: 24,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Top Header Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFFF007F,
+                          ).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFFF007F,
+                            ).withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.verified_rounded,
+                              color: Color(0xFFFF007F),
+                              size: 14,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'OFFICIAL DEVELOPER',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFFF007F),
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white60,
+                          size: 20,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Studio Emblem / Logo
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF007F), Color(0xFF7928CA)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF007F).withValues(alpha: 0.4),
+                          blurRadius: 16,
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.nightlight_round,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Studio Title
+                  const Text(
+                    'MOON EDGE STUDIO',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 1.8,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'INNOVATIVE MOBILE GAMING & ACTION EXPERIENCES',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppConstants.stealthBlue,
+                      letterSpacing: 1.3,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Description Box
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF141724),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: const Text(
+                      'Explore our full catalog of games, updates, and upcoming releases directly on Google Play Store.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: Colors.white70,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Action Button
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      AudioService().playClick();
+                      _openDeveloperPage();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF007F), Color(0xFFE0006C)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFFFF007F,
+                            ).withValues(alpha: 0.4),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.shop_2_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'VIEW ON GOOGLE PLAY',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -227,9 +488,13 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           ],
         ),
 
-        // Header Actions: CP Counter & Settings/Leaderboard
+        // Header Actions: Img Resizer, CP Counter & Settings/Leaderboard
         Row(
           children: [
+            // Also Try Now: Img Resizer
+            _buildImgResizerButton(),
+            const SizedBox(width: 10),
+
             // Currency Pill
             GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -308,6 +573,70 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildImgResizerButton() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _openImgResizer,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0D2338), Color(0xFF131A28)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFF00C6FF).withValues(alpha: 0.75),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00C6FF).withValues(alpha: 0.22),
+              blurRadius: 8,
+              spreadRadius: 0.5,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(3.5),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF0072FF), Color(0xFF00C6FF)],
+                ),
+              ),
+              child: const Icon(
+                Icons.auto_fix_high_rounded,
+                color: Colors.white,
+                size: 11,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              'TRY: IMG RESIZER',
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.open_in_new_rounded,
+              color: const Color(0xFF00C6FF).withValues(alpha: 0.85),
+              size: 11,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1246,19 +1575,113 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           },
         ),
 
-        // 3. Global Leaderboards Button
-        _buildDockButton(
-          title: context.l10n.tr('hall_of_fame'),
-          icon: Icons.leaderboard_rounded,
-          accentColor: const Color(0xFFFF007F),
+        // 3. Moon Edge Studio Developer Page
+        _buildStudioDockButton(context),
+      ],
+    );
+  }
+
+  Widget _buildStudioDockButton(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        final glowAlpha = 0.20 + 0.15 * _pulseController.value;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             AudioService().playClick();
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
-            );
+            _showStudioDialog(context);
           },
-        ),
-      ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF26102E), Color(0xFF131722)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Color.lerp(
+                  const Color(0xFFFF007F),
+                  const Color(0xFFA855F7),
+                  _pulseController.value,
+                )!,
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF007F).withValues(alpha: glowAlpha),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF007F), Color(0xFF7928CA)],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF007F).withValues(alpha: 0.4),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.nightlight_round,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'MOON EDGE STUDIO',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 10.5,
+                            letterSpacing: 0.8,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.open_in_new_rounded,
+                          color: const Color(0xFFFF007F).withValues(alpha: 0.9),
+                          size: 11,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'DEV HUB // GOOGLE PLAY',
+                      style: TextStyle(
+                        fontSize: 7.5,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFFF77A9).withValues(alpha: 0.85),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

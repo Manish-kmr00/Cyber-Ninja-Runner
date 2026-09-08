@@ -76,7 +76,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                         isVerified: true,
                       ),
                       _RankEntry(
-                        callSign: 'DarkSqubeMaster',
+                        callSign: 'CyberNinjaMaster',
                         title: 'VOID INFILTRATOR',
                         sector: 'CYBER-CORE',
                         distance: 3910,
@@ -188,7 +188,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     saveService: saveService,
                     baseRoster: [
                       _RankEntry(
-                        callSign: 'FlappySqube_Sky',
+                        callSign: 'CyberNinja_Sky',
                         title: 'ZERO-G ACE',
                         sector: 'STRATOSPHERE',
                         distance: 2650,
@@ -196,7 +196,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                         isVerified: true,
                       ),
                       _RankEntry(
-                        callSign: 'WingedCube_07',
+                        callSign: 'WingedNinja_07',
                         title: 'SKY VECTOR MASTER',
                         sector: 'ORBITAL-7',
                         distance: 2100,

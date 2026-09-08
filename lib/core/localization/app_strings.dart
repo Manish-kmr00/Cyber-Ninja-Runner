@@ -1,7 +1,7 @@
 class AppStrings {
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'game_title': 'CYBER NINJA RUNNER',
+      'game_title': 'CYBER NINJA',
       'play': 'PLAY',
       'mode_run': 'ENDLESS RUN',
       'mode_10x': '10X CHALLENGE',
@@ -33,11 +33,11 @@ class AppStrings {
       'unlock': 'UNLOCK',
     },
     'es': {
-      'game_title': 'SQUBE DARKNESS',
+      'game_title': 'CYBER NINJA',
       'play': 'JUGAR',
       'mode_run': 'CARRERA SIN FIN',
       'mode_10x': 'DESAFÍO 10X',
-      'mode_bird': 'PÁJARO SQUBE',
+      'mode_bird': 'VUELO CYBER SHINOBI',
       'mode_multiplayer': 'CARRERA MULTIJUGADOR',
       'shop': 'TIENDA',
       'settings': 'AJUSTES',
@@ -65,11 +65,11 @@ class AppStrings {
       'unlock': 'DESBLOQUEAR',
     },
     'ar': {
-      'game_title': 'سكوب داركنس',
+      'game_title': 'سايبر نينجا',
       'play': 'لعب',
       'mode_run': 'ركض لانهائي',
       'mode_10x': 'تحدي 10X',
-      'mode_bird': 'طائر سكوب',
+      'mode_bird': 'طيران سايبر نينجا',
       'mode_multiplayer': 'سباق متعدد اللاعبين',
       'shop': 'المتجر',
       'settings': 'الإعدادات',

@@ -106,7 +106,7 @@ class AppLocalizations {
     // 1. English
     'en': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'RUNNER',
+      'game_title_runner': 'NINJA',
       'game_protocol': 'SHADOW & STEEL // PROTOCOL V2.5',
       'active_operative': 'ACTIVE OPERATIVE // SHADOW SHINOBI',
       'deployed': 'DEPLOYED',
@@ -189,7 +189,7 @@ class AppLocalizations {
     // 2. Hindi
     'hi': {
       'game_title_cyber': 'साइबर',
-      'game_title_runner': 'रनर',
+      'game_title_runner': 'निंजा',
       'game_protocol': 'शैडो और स्टील // प्रोटोकॉल V2.5',
       'active_operative': 'सक्रिय ऑपरेटिव // शैडो शिनोबी',
       'deployed': 'तैनात',
@@ -272,7 +272,7 @@ class AppLocalizations {
     // 3. Spanish
     'es': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'RUNNER',
+      'game_title_runner': 'NINJA',
       'game_protocol': 'SOMBRA Y ACERO // PROTOCOLO V2.5',
       'active_operative': 'OPERATIVO ACTIVO // SHINOBI SOMBRA',
       'deployed': 'DESPLEGADO',
@@ -343,7 +343,7 @@ class AppLocalizations {
     // 4. Japanese
     'ja': {
       'game_title_cyber': 'サイバー',
-      'game_title_runner': 'ランナー',
+      'game_title_runner': 'ニンジャ',
       'game_protocol': '影と鋼 // プロトコル V2.5',
       'active_operative': '作戦エージェント // シャドウ・シノビ',
       'deployed': '配備完了',
@@ -413,7 +413,7 @@ class AppLocalizations {
     // 5. French
     'fr': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'RUNNER',
+      'game_title_runner': 'NINJA',
       'game_protocol': 'OMBRE & ACIER // PROTOCOLE V2.5',
       'active_operative': 'AGENT ACTIF // SHINOBI DE L\'OMBRE',
       'deployed': 'DÉPLOYÉ',
@@ -484,7 +484,7 @@ class AppLocalizations {
     // 6. German
     'de': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'RUNNER',
+      'game_title_runner': 'NINJA',
       'game_protocol': 'SCHATTEN & STAHL // PROTOKOLL V2.5',
       'active_operative': 'AKTIVER AGENT // SCHATTEN-SHINOBI',
       'deployed': 'EINGESETZT',
@@ -555,7 +555,7 @@ class AppLocalizations {
     // 7. Russian
     'ru': {
       'game_title_cyber': 'КИБЕР',
-      'game_title_runner': 'РАННЕР',
+      'game_title_runner': 'НИНДЗЯ',
       'game_protocol': 'ТЕНЬ И СТАЛЬ // ПРОТОКОЛ V2.5',
       'active_operative': 'АКТИВНЫЙ АГЕНТ // ТЕНЕВОЙ СИНОБИ',
       'deployed': 'В СТРОЮ',
@@ -625,7 +625,7 @@ class AppLocalizations {
     // 8. Chinese (Simplified)
     'zh': {
       'game_title_cyber': '赛博',
-      'game_title_runner': '跑者',
+      'game_title_runner': '忍者',
       'game_protocol': '暗影与钢铁 // 协议 V2.5',
       'active_operative': '当前特工 // 暗影忍者',
       'deployed': '已部署',
@@ -695,7 +695,7 @@ class AppLocalizations {
     // 9. Portuguese
     'pt': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'RUNNER',
+      'game_title_runner': 'NINJA',
       'game_protocol': 'SOMBRA E AÇO // PROTOCOLO V2.5',
       'active_operative': 'OPERATIVO ATIVO // SHINOBI SOMBRA',
       'deployed': 'EM CAMPO',
@@ -766,7 +766,7 @@ class AppLocalizations {
     // 10. Arabic
     'ar': {
       'game_title_cyber': 'سايبر',
-      'game_title_runner': 'رنر',
+      'game_title_runner': 'نينجا',
       'game_protocol': 'الظل والصلب // بروتوكول V2.5',
       'active_operative': 'العميل النشط // شينوبي الظل',
       'deployed': 'تم النشر',
@@ -837,7 +837,7 @@ class AppLocalizations {
     // 11. Korean
     'ko': {
       'game_title_cyber': '사이버',
-      'game_title_runner': '러너',
+      'game_title_runner': '닌자',
       'game_protocol': '그림자와 강철 // 프로토콜 V2.5',
       'active_operative': '작전 요원 // 섀도우 시노비',
       'deployed': '출격 완료',
@@ -907,7 +907,7 @@ class AppLocalizations {
     // 12. Italian
     'it': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'RUNNER',
+      'game_title_runner': 'NINJA',
       'game_protocol': 'OMBRA E ACCIAIO // PROTOCOLLO V2.5',
       'active_operative': 'OPERATIVO ATTIVO // SHINOBI OMBRA',
       'deployed': 'SCHIERATO',

@@ -55,6 +55,7 @@ class PlayerData {
         );
       }
     }
+    unlockedSkins.add(PlayerSkin.classicWhite);
     if (json['boosters'] != null) {
       final bMap = json['boosters'] as Map<String, dynamic>;
       bMap.forEach((k, v) {

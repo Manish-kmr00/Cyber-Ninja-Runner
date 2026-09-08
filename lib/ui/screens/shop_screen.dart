@@ -146,7 +146,7 @@ class ShopScreen extends StatelessWidget {
                     skin: PlayerSkin.stealthBlack,
                     name: 'Blackout Phantom',
                     color: const Color(0xFF2C3440),
-                    price: 250,
+                    price: 50000,
                     saveService: saveService,
                   ),
                   const SizedBox(width: 14),
@@ -155,7 +155,7 @@ class ShopScreen extends StatelessWidget {
                     skin: PlayerSkin.cyberNeon,
                     name: 'Synthwave Shinobi',
                     color: const Color(0xFFFF007F),
-                    price: 500,
+                    price: 100000,
                     saveService: saveService,
                   ),
                   const SizedBox(width: 14),
@@ -164,7 +164,7 @@ class ShopScreen extends StatelessWidget {
                     skin: PlayerSkin.crimsonShadow,
                     name: 'Bloodblade Assassin',
                     color: AppConstants.hazardRed,
-                    price: 800,
+                    price: 150000,
                     saveService: saveService,
                   ),
                   const SizedBox(width: 14),
@@ -173,7 +173,7 @@ class ShopScreen extends StatelessWidget {
                     skin: PlayerSkin.goldenAura,
                     name: 'Shogun Mecha',
                     color: AppConstants.coinGold,
-                    price: 1500,
+                    price: 200000,
                     saveService: saveService,
                   ),
                 ],
@@ -450,112 +450,156 @@ class ShopScreen extends StatelessWidget {
     final isUnlocked = saveService.player.unlockedSkins.contains(skin);
     final isEquipped = saveService.player.equippedSkin == skin;
 
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppConstants.surfaceDark,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
+    void onCardTap() {
+      if (isEquipped) {
+        AudioService().playClick();
+        return;
+      }
+      if (isUnlocked) {
+        AudioService().playClick();
+        saveService.equipSkin(skin);
+      } else {
+        if (saveService.spendCubePoints(price)) {
+          AudioService().playCollect();
+          saveService.unlockSkin(skin);
+          _showPurchasedToast(context, '$name Unlocked & Equipped!');
+        } else {
+          _showPurchasedToast(context, 'Not enough Cube Points!');
+        }
+      }
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onCardTap,
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
           color: isEquipped
-              ? AppConstants.coinGold
-              : (isUnlocked ? Colors.white24 : Colors.transparent),
-          width: isEquipped ? 2 : 1,
+              ? color.withValues(alpha: 0.14)
+              : AppConstants.surfaceDark,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isEquipped
+                ? AppConstants.coinGold
+                : (isUnlocked ? color.withValues(alpha: 0.5) : Colors.white12),
+            width: isEquipped ? 2 : 1,
+          ),
+          boxShadow: isEquipped
+              ? [
+                  BoxShadow(
+                    color: AppConstants.coinGold.withValues(alpha: 0.25),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
-      ),
-      child: Column(
-        children: [
-          // Cyber Cat Skin Preview Box
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppConstants.backgroundDark,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withValues(alpha: 0.8), width: 2),
-              boxShadow: [
-                BoxShadow(color: color.withValues(alpha: 0.25), blurRadius: 14),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                Icons.sports_martial_arts_rounded,
-                color: color,
-                size: 32,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            name,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (isEquipped)
+        child: Column(
+          children: [
+            // Cyber Cat Skin Preview Box
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                color: AppConstants.coinGold,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                context.l10n.tr('equipped'),
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 10,
+                color: AppConstants.backgroundDark,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: color.withValues(alpha: isEquipped ? 1.0 : 0.6),
+                  width: 2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: isEquipped ? 0.35 : 0.15),
+                    blurRadius: 14,
+                  ),
+                ],
               ),
-            )
-          else if (isUnlocked)
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: const BorderSide(color: Colors.white30),
-                minimumSize: const Size(double.infinity, 30),
-                padding: EdgeInsets.zero,
-              ),
-              onPressed: () {
-                AudioService().playClick();
-                saveService.equipSkin(skin);
-              },
-              child: Text(
-                context.l10n.tr('equip'),
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          else
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.cardDark,
-                foregroundColor: AppConstants.coinGold,
-                minimumSize: const Size(double.infinity, 30),
-                padding: EdgeInsets.zero,
-              ),
-              onPressed: () {
-                if (saveService.spendCubePoints(price)) {
-                  AudioService().playCollect();
-                  saveService.unlockSkin(skin);
-                } else {
-                  _showPurchasedToast(context, 'Not enough Cube Points!');
-                }
-              },
-              child: Text(
-                '$price CP',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+              child: Center(
+                child: Icon(
+                  Icons.sports_martial_arts_rounded,
+                  color: color,
+                  size: 32,
                 ),
               ),
             ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: isEquipped ? Colors.white : Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (isEquipped)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppConstants.coinGold,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    context.l10n.tr('equipped'),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 10.5,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              )
+            else if (isUnlocked)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white30),
+                ),
+                child: Center(
+                  child: Text(
+                    context.l10n.tr('equip'),
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppConstants.cardDark,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppConstants.coinGold.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    price >= 1000 ? '${price ~/ 1000},000 CP' : '$price CP',
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: AppConstants.coinGold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

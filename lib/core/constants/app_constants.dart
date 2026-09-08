@@ -6,7 +6,8 @@ class AppConstants {
   static const Color surfaceDark = Color(0xFF171B24);
   static const Color cardDark = Color(0xFF1F2430);
   static const Color groundColor = Color(0xFF08090C);
-  static const Color squbeWhite = Color(0xFFFFFFFF);
+  static const Color ninjaWhite = Color(0xFFFFFFFF);
+  static const Color squbeWhite = ninjaWhite;
   static const Color eyeIrisBlack = Color(0xFF111111);
   static const Color eyeGlintWhite = Color(0xFFFFFFFF);
 
