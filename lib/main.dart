@@ -25,13 +25,13 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => SaveService())],
-      child: const CyberNinjaApp(),
+      child: const CyberNinjaRunnerApp(),
     ),
   );
 }
 
-class CyberNinjaApp extends StatelessWidget {
-  const CyberNinjaApp({super.key});
+class CyberNinjaRunnerApp extends StatelessWidget {
+  const CyberNinjaRunnerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class CyberNinjaApp extends StatelessWidget {
     final isArabic = saveService.settings.languageCode == 'ar';
 
     return MaterialApp(
-      title: 'Cyber Ninja',
+      title: 'Cyber Ninja Runner',
       debugShowCheckedModeBanner: false,
       locale: Locale(saveService.settings.languageCode),
       builder: (context, child) {
@@ -63,5 +63,6 @@ class CyberNinjaApp extends StatelessWidget {
   }
 }
 
-/// Backward compatibility alias
-typedef SqubeDarknessApp = CyberNinjaApp;
+/// Backward compatibility aliases
+typedef CyberNinjaApp = CyberNinjaRunnerApp;
+typedef SqubeDarknessApp = CyberNinjaRunnerApp;

@@ -184,7 +184,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     modeName: l10n.tr('aerial_zero_g'),
                     modeTag: 'STRATOSPHERE SKYWAY // FLIGHT VECTOR',
                     modeColor: const Color(0xFFB026FF),
-                    personalBest: saveService.stats.bestDistanceSqubeBird,
+                    personalBest: saveService.stats.bestDistanceFlight,
                     saveService: saveService,
                     baseRoster: [
                       _RankEntry(
@@ -404,7 +404,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${saveService.player.cubePoints.value}',
+                      '${saveService.player.cyberPoints.value}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         color: AppConstants.coinGold,

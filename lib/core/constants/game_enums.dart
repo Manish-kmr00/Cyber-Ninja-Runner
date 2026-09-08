@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 /// Core Game Modes matching architecture specification
-enum GameMode { run, tenXChallenge, squbeBird, multiplayer }
+enum GameMode {
+  run,
+  tenXChallenge,
+  flightRunner,
+  multiplayer;
+
+  static const GameMode squbeBird = flightRunner;
+}
 
 /// Consumable Boosters
 enum BoosterType { safeGround, matrixSlowMo, invisibility, killEyes }

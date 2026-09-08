@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 
 /// Procedural eye pupil that rotates and gazes towards motion vectors and threats.
-class SqubeEye extends PositionComponent {
+class CyberNinjaRunnerEye extends PositionComponent {
   Vector2 gazeDirection = Vector2(1, 0);
   double blinkProgress = 0.0;
   bool isBlinking = false;
   double _blinkTimer = 0.0;
 
-  SqubeEye({required Vector2 position})
+  CyberNinjaRunnerEye({required Vector2 position})
     : super(position: position, size: Vector2(12, 12));
 
   @override
@@ -84,3 +84,6 @@ class SqubeEye extends PositionComponent {
     canvas.drawCircle(glintOffset, 1.0, glintPaint);
   }
 }
+
+typedef CyberNinjaEye = CyberNinjaRunnerEye;
+typedef SqubeEye = CyberNinjaRunnerEye;

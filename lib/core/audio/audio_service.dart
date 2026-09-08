@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 class AudioService {
   static final AudioService _instance = AudioService._internal();
@@ -13,6 +14,7 @@ class AudioService {
   double musicVolume = 0.8;
   double sfxVolume = 1.0;
   bool isMuted = false;
+  bool hapticsEnabled = true;
 
   Future<void> init() async {
     _musicPlayer.setReleaseMode(ReleaseMode.loop);
@@ -21,9 +23,14 @@ class AudioService {
     }
   }
 
-  void updateVolumes({required double music, required double sfx}) {
+  void updateVolumes({
+    required double music,
+    required double sfx,
+    bool? muted,
+  }) {
     musicVolume = music;
     sfxVolume = sfx;
+    if (muted != null) isMuted = muted;
     _musicPlayer.setVolume(isMuted ? 0 : musicVolume);
   }
 
@@ -58,11 +65,41 @@ class AudioService {
     }
   }
 
-  void playJump() => playSfx('jump');
-  void playSlide() => playSfx('slide');
+  void triggerHaptic({bool heavy = false}) {
+    if (!hapticsEnabled) return;
+    try {
+      if (heavy) {
+        HapticFeedback.mediumImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
+    } catch (_) {}
+  }
+
+  void playJump() {
+    triggerHaptic(heavy: true);
+    playSfx('jump');
+  }
+
+  void playSlide() {
+    triggerHaptic();
+    playSfx('slide');
+  }
+
   void playHide() => playSfx('hide');
-  void playDeath() => playSfx('death');
+  void playDeath() {
+    triggerHaptic(heavy: true);
+    playSfx('death');
+  }
+
   void playCollect() => playSfx('collect');
-  void playBooster() => playSfx('booster');
-  void playClick() => playSfx('click');
+  void playBooster() {
+    triggerHaptic();
+    playSfx('booster');
+  }
+
+  void playClick() {
+    triggerHaptic();
+    playSfx('click');
+  }
 }

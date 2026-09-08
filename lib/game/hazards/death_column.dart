@@ -3,7 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 import 'base_hazard.dart';
 
 /// Vertical crushing pillar that moves down and up rhythmically.
@@ -38,7 +38,7 @@ class DeathColumn extends BaseHazard {
   }
 
   @override
-  bool checkCollision(SqubePlayer player) {
+  bool checkCollision(RunnerPlayer player) {
     final pRect = Rect.fromLTWH(
       player.position.x - player.size.x / 2,
       player.position.y - player.size.y,

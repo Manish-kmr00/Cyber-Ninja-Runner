@@ -63,10 +63,13 @@ class ProceduralGenerator {
 
     // 2. Subsequent initial chunks
     for (int i = 1; i < AppConstants.activeChunkCount; i++) {
+      final tier = _calculateDifficultyTier(
+        (currentEndCoordinateX / 10).round(),
+      );
       final chunk = _createChunk(
         startX: currentEndCoordinateX,
         length: AppConstants.chunkLength,
-        difficultyTier: 1,
+        difficultyTier: tier,
       );
       activeChunks.add(chunk);
       currentEndCoordinateX += AppConstants.chunkLength;
@@ -257,7 +260,7 @@ class ProceduralGenerator {
       );
     }
 
-    // 3. Spawn Collectible Cube Points (CP) along ground
+    // 3. Spawn Collectible Cyber Ninja Points (CP) along ground
     for (int i = 0; i < 3; i++) {
       final cpX = 150.0 + (i * 250.0) + random.nextDouble() * 50.0;
       if (!hasPit || (cpX < pitStartX || cpX > pitStartX + pitWidth)) {
@@ -417,6 +420,51 @@ class ProceduralGenerator {
     );
   }
 
+  Stakes _createTrackStakes(
+    WorldChunk chunk,
+    double preferredX,
+    double groundY, {
+    int spikeCount = 3,
+  }) {
+    final trackDeckY = groundY - 8.0;
+    final spikeTotalWidth = spikeCount * Stakes.spikeWidth;
+
+    double targetX = preferredX;
+    double safeMinX = 50.0;
+    double safeMaxX = chunk.length - spikeTotalWidth - 50.0;
+
+    if (chunk.hasPit) {
+      final pitLeft = chunk.pitStartX;
+      final pitRight = chunk.pitStartX + chunk.pitWidth;
+
+      // Safe buffer of 80px from pit edge so jump trajectory clears smoothly
+      final zone1Max = pitLeft - 80.0 - spikeTotalWidth;
+      final zone2Min = pitRight + 80.0;
+
+      final zone1Valid = zone1Max >= safeMinX;
+      final zone2Valid =
+          (chunk.length - safeMinX) >= (zone2Min + spikeTotalWidth);
+
+      if (preferredX < pitLeft && zone1Valid) {
+        targetX = preferredX.clamp(safeMinX, zone1Max);
+      } else if (zone2Valid) {
+        targetX = preferredX.clamp(zone2Min, safeMaxX);
+      } else if (zone1Valid) {
+        targetX = (safeMinX + zone1Max) / 2;
+      } else {
+        targetX = preferredX.clamp(safeMinX, safeMaxX);
+      }
+    } else {
+      targetX = preferredX.clamp(safeMinX, safeMaxX);
+    }
+
+    return Stakes(
+      position: Vector2(targetX, trackDeckY),
+      spikeCount: spikeCount,
+      isRetracting: false,
+    );
+  }
+
   void _injectHazards(
     WorldChunk chunk,
     int tier,
@@ -424,72 +472,75 @@ class ProceduralGenerator {
     double roofY,
   ) {
     if (tier == 0) {
-      // Tier 0 (Game Start: 0-300m): Sentry Cannon + Patrol Droid
-      chunk.hazards.add(CyberCannon(position: Vector2(400, roofY + 45)));
+      // Tier 0 (Game Start: 0-300m): Red Spikes + Cyber Cannon + Patrol Droid
+      chunk.hazards.add(_createTrackStakes(chunk, 220, groundY, spikeCount: 3));
+      chunk.hazards.add(CyberCannon(position: Vector2(460, roofY + 45)));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 680, groundY, patrolDist: 140.0, speed: 85.0),
+        _createTrackDroid(chunk, 720, groundY, patrolDist: 140.0, speed: 85.0),
       );
       return;
     }
 
     if (tier == 1) {
-      // Tier 1 (Early Run: 300-1000m): Patrol Droid + Cyber Cannon + Bug Crawler
-      chunk.hazards.add(CyberCannon(position: Vector2(380, roofY + 45)));
+      // Tier 1 (Early Run: 300-1000m): Red Spikes + Cyber Cannon + Patrol Droid + Red Spikes + Bug Crawler
+      chunk.hazards.add(_createTrackStakes(chunk, 200, groundY, spikeCount: 3));
+      chunk.hazards.add(CyberCannon(position: Vector2(400, roofY + 45)));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 600, groundY, patrolDist: 140.0, speed: 95.0),
+        _createTrackDroid(chunk, 620, groundY, patrolDist: 140.0, speed: 95.0),
       );
-      chunk.hazards.add(BugCrawler(position: Vector2(840, groundY)));
+      chunk.hazards.add(_createTrackStakes(chunk, 800, groundY, spikeCount: 3));
+      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY)));
       return;
     }
 
     if (tier == 2) {
-      // Tier 2 (1000-2000m): Dual Patrol Droids + Cyber Cannon
+      // Tier 2 (1000-2000m): Red Spikes + Dual Droids + Cyber Cannon + Red Spikes
+      chunk.hazards.add(_createTrackStakes(chunk, 180, groundY, spikeCount: 4));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 480, groundY, patrolDist: 140.0, speed: 100.0),
-      );
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 780, groundY, patrolDist: 130.0, speed: 105.0),
+        _createTrackDroid(chunk, 450, groundY, patrolDist: 130.0, speed: 100.0),
       );
       chunk.hazards.add(CyberCannon(position: Vector2(340, roofY + 45)));
+      chunk.hazards.add(
+        _createTrackDroid(chunk, 720, groundY, patrolDist: 130.0, speed: 105.0),
+      );
+      chunk.hazards.add(_createTrackStakes(chunk, 880, groundY, spikeCount: 3));
       return;
     }
 
     if (tier == 3) {
-      // Tier 3 (2000-3000m): Death Column Smasher + Patrol Droid + Bug Crawler
+      // Tier 3 (2000-3000m): Death Column + Red Spikes + Patrol Droid + Bug Crawler
       chunk.hazards.add(
-        DeathColumn(position: Vector2(280, roofY), maxHeight: 220),
+        DeathColumn(position: Vector2(260, roofY), maxHeight: 220),
       );
+      chunk.hazards.add(_createTrackStakes(chunk, 460, groundY, spikeCount: 4));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 650, groundY, patrolDist: 150.0, speed: 110.0),
+        _createTrackDroid(chunk, 660, groundY, patrolDist: 150.0, speed: 110.0),
       );
       chunk.hazards.add(BugCrawler(position: Vector2(850, groundY)));
       return;
     }
 
     if (tier == 4) {
-      // Tier 4 (3000-4000m): Fast Patrol Droid + Cyber Cannon + Bug Crawler
-      chunk.hazards.add(CyberCannon(position: Vector2(300, roofY + 45)));
+      // Tier 4 (3000-4000m): Red Spikes + Cyber Cannon + Fast Patrol Droid + Red Spikes + Bug Crawler
+      chunk.hazards.add(_createTrackStakes(chunk, 180, groundY, spikeCount: 4));
+      chunk.hazards.add(CyberCannon(position: Vector2(320, roofY + 45)));
       chunk.hazards.add(
-        _createTrackDroid(chunk, 660, groundY, patrolDist: 160.0, speed: 120.0),
+        _createTrackDroid(chunk, 580, groundY, patrolDist: 160.0, speed: 120.0),
       );
-      chunk.hazards.add(BugCrawler(position: Vector2(860, groundY)));
+      chunk.hazards.add(_createTrackStakes(chunk, 780, groundY, spikeCount: 4));
+      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY)));
       return;
     }
 
-    // Tier 5: Extreme Gauntlet (Death Column + Patrol Droid + Cyber Cannon + Spikes)
+    // Tier 5: Extreme Gauntlet (Death Column + Red Spikes + Patrol Droid + Cyber Cannon + Red Spikes)
     chunk.hazards.add(
-      DeathColumn(position: Vector2(260, roofY), maxHeight: 230),
+      DeathColumn(position: Vector2(240, roofY), maxHeight: 230),
     );
+    chunk.hazards.add(_createTrackStakes(chunk, 420, groundY, spikeCount: 4));
     chunk.hazards.add(
-      _createTrackDroid(chunk, 540, groundY, patrolDist: 160.0, speed: 125.0),
+      _createTrackDroid(chunk, 620, groundY, patrolDist: 160.0, speed: 125.0),
     );
     chunk.hazards.add(CyberCannon(position: Vector2(760, roofY + 45)));
-    chunk.hazards.add(
-      Stakes(
-        position: Vector2(910, groundY),
-        spikeCount: 4,
-        isRetracting: true,
-      ),
-    );
+    chunk.hazards.add(_createTrackStakes(chunk, 900, groundY, spikeCount: 5));
   }
 }

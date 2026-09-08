@@ -106,7 +106,7 @@ class AppLocalizations {
     // 1. English
     'en': {
       'game_title_cyber': 'CYBER',
-      'game_title_runner': 'NINJA',
+      'game_title_runner': 'NINJA RUNNER',
       'game_protocol': 'SHADOW & STEEL // PROTOCOL V2.5',
       'active_operative': 'ACTIVE OPERATIVE // SHADOW SHINOBI',
       'deployed': 'DEPLOYED',

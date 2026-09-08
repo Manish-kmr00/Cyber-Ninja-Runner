@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 import '../sqube_game.dart';
 import 'base_hazard.dart';
 
@@ -42,7 +42,8 @@ class CannonImpactSpark {
 /// Mounted directly on the overhead roof girders.
 /// Dynamically tracks oncoming runner and shoots lethal plasma projectiles/bullets!
 /// Features telegraphed aiming lock, predictable timing, and generous dodge windows (slide under / jump over).
-class CyberCannon extends BaseHazard with HasGameReference<SqubeGame> {
+class CyberCannon extends BaseHazard
+    with HasGameReference<CyberNinjaRunnerGame> {
   final double fireInterval;
   final double bulletSpeed;
   final double targetingRange;
@@ -205,7 +206,7 @@ class CyberCannon extends BaseHazard with HasGameReference<SqubeGame> {
   }
 
   @override
-  bool checkCollision(SqubePlayer player) {
+  bool checkCollision(RunnerPlayer player) {
     // Shadow camouflage allows the player to evade targeting
     if (player.hideController.isStealthActive) {
       return false;

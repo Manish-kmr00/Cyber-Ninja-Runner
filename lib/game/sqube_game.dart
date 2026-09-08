@@ -12,16 +12,17 @@ import 'boosters/booster_manager.dart';
 import 'hazards/base_hazard.dart';
 import 'hazards/cyber_titan.dart';
 import 'hazards/dark_box.dart';
-import 'player/sqube_player.dart';
+import 'player/cyber_ninja_player.dart';
+import 'player/runner_player.dart';
 import 'world/parallax_background.dart';
 import 'world/procedural_generator.dart';
 
-class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
+class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   final GameMode mode;
   final SaveService saveService;
   final BoosterManager boosterManager = BoosterManager();
 
-  late final SqubePlayer player;
+  late final RunnerPlayer player;
   late final ProceduralGenerator worldGen;
 
   int currentDistance = 0;
@@ -50,9 +51,9 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
   SectorBiome currentSector = SectorBiome.neonMetropolis;
 
   // Developer Test Mode (Player Immortality / God Mode)
-  bool godMode = AppConstants.testGodMode;
+  bool get godMode => saveService.settings.godModeEnabled;
 
-  SqubeGame({required this.mode, required this.saveService})
+  CyberNinjaRunnerGame({required this.mode, required this.saveService})
     : super(
         camera: CameraComponent.withFixedResolution(
           width: AppConstants.virtualWidth,
@@ -257,7 +258,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
             cp.isCollected = true;
             final cpMultiplier = mode == GameMode.tenXChallenge ? 10 : 1;
             collectedCP += cpMultiplier;
-            saveService.addCubePoints(cpMultiplier);
+            saveService.addCyberPoints(cpMultiplier);
             AudioService().playCollect();
           }
         }
@@ -308,7 +309,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   AudioService().playSfx('laser');
                   final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
                   collectedCP += cpBonus;
-                  saveService.addCubePoints(cpBonus);
+                  saveService.addCyberPoints(cpBonus);
                 }
               } else if (hazard is CyberTitan) {
                 if (!hazard.isSliced) {
@@ -319,7 +320,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   if (hazard.isSliced) {
                     final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
                     collectedCP += cpBonus;
-                    saveService.addCubePoints(cpBonus);
+                    saveService.addCyberPoints(cpBonus);
                   }
                 }
               } else {
@@ -328,7 +329,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 AudioService().playClick();
                 final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
                 collectedCP += cpBonus;
-                saveService.addCubePoints(cpBonus);
+                saveService.addCyberPoints(cpBonus);
               }
               continue;
             }
@@ -348,7 +349,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   AudioService().playSfx('laser');
                   final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
                   collectedCP += cpBonus;
-                  saveService.addCubePoints(cpBonus);
+                  saveService.addCyberPoints(cpBonus);
                 }
               } else if (hazard is CyberTitan) {
                 if (!hazard.isSliced) {
@@ -359,7 +360,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   if (hazard.isSliced) {
                     final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
                     collectedCP += cpBonus;
-                    saveService.addCubePoints(cpBonus);
+                    saveService.addCyberPoints(cpBonus);
                   }
                 }
               } else {
@@ -368,7 +369,7 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 AudioService().playClick();
                 final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
                 collectedCP += cpBonus;
-                saveService.addCubePoints(cpBonus);
+                saveService.addCyberPoints(cpBonus);
               }
               continue;
             }
@@ -442,14 +443,10 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
     overlays.remove('PauseOverlay');
   }
 
-  // Touch and Gesture Controls
+  // Touch and Gesture Controls - Jump only triggers via on-screen Jump Button
   @override
   void onTapDown(TapDownEvent event) {
-    if (isGameOver || isGamePaused) return;
-    if (player.isGrounded || player.canDoubleJump) {
-      player.jump();
-      AudioService().playJump();
-    }
+    // Screen tap jump disabled: Jump triggers strictly via Jump button.
   }
 
   // Keyboard controls for PC / Web / Emulator testing
@@ -512,5 +509,6 @@ class SqubeGame extends FlameGame with KeyboardEvents, TapCallbacks {
   }
 }
 
-/// CyberNinjaGame alias for modern branding
-typedef CyberNinjaGame = SqubeGame;
+/// Compatibility aliases for game class
+typedef SqubeGame = CyberNinjaRunnerGame;
+typedef CyberNinjaGame = CyberNinjaRunnerGame;

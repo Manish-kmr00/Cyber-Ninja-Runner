@@ -1,11 +1,11 @@
 {
-    "name": "sqube_darkness_cleanroom",
-    "short_name": "sqube_darkness_cleanroom",
+    "name": "Cyber Ninja Runner",
+    "short_name": "Cyber Ninja Runner",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Cyber Ninja Runner game.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -100,7 +100,7 @@ class ShopScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '${saveService.player.cubePoints.value}',
+                  '${saveService.player.cyberPoints.value}',
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     color: AppConstants.coinGold,
@@ -305,7 +305,7 @@ class ShopScreen extends StatelessWidget {
                       ),
                       onPressed: () {
                         saveService.setRemoveAds(true);
-                        saveService.addCubePoints(500);
+                        saveService.addCyberPoints(500);
                         AudioService().playCollect();
                         _showPurchasedToast(
                           context,
@@ -382,7 +382,7 @@ class ShopScreen extends StatelessWidget {
                     label: '+500 CP',
                     priceTag: '\$0.99',
                     onTap: () {
-                      saveService.addCubePoints(500);
+                      saveService.addCyberPoints(500);
                       AudioService().playCollect();
                       _showPurchasedToast(context, '500 CP Added!');
                     },
@@ -396,7 +396,7 @@ class ShopScreen extends StatelessWidget {
                     priceTag: '\$2.99',
                     isBestValue: true,
                     onTap: () {
-                      saveService.addCubePoints(2000);
+                      saveService.addCyberPoints(2000);
                       AudioService().playCollect();
                       _showPurchasedToast(context, '2000 CP Added!');
                     },
@@ -409,7 +409,7 @@ class ShopScreen extends StatelessWidget {
                     label: '+5000 CP',
                     priceTag: '\$5.99',
                     onTap: () {
-                      saveService.addCubePoints(5000);
+                      saveService.addCyberPoints(5000);
                       AudioService().playCollect();
                       _showPurchasedToast(context, '5000 CP Added!');
                     },
@@ -459,12 +459,12 @@ class ShopScreen extends StatelessWidget {
         AudioService().playClick();
         saveService.equipSkin(skin);
       } else {
-        if (saveService.spendCubePoints(price)) {
+        if (saveService.spendCyberPoints(price)) {
           AudioService().playCollect();
           saveService.unlockSkin(skin);
           _showPurchasedToast(context, '$name Unlocked & Equipped!');
         } else {
-          _showPurchasedToast(context, 'Not enough Cube Points!');
+          _showPurchasedToast(context, 'Not enough Cyber Ninja Points!');
         }
       }
     }
@@ -538,7 +538,10 @@ class ShopScreen extends StatelessWidget {
             if (isEquipped)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppConstants.coinGold,
                   borderRadius: BorderRadius.circular(8),
@@ -558,7 +561,10 @@ class ShopScreen extends StatelessWidget {
             else if (isUnlocked)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
@@ -579,7 +585,10 @@ class ShopScreen extends StatelessWidget {
             else
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppConstants.cardDark,
                   borderRadius: BorderRadius.circular(8),
@@ -663,12 +672,12 @@ class ShopScreen extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              if (saveService.spendCubePoints(price)) {
+              if (saveService.spendCyberPoints(price)) {
                 saveService.addBooster(type, count);
                 AudioService().playCollect();
                 _showPurchasedToast(context, 'Purchased +$count Boosters!');
               } else {
-                _showPurchasedToast(context, 'Not enough Cube Points!');
+                _showPurchasedToast(context, 'Not enough Cyber Ninja Points!');
               }
             },
             child: Text(

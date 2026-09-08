@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 import 'base_hazard.dart';
 
 /// Hazard pit that traps and sinks the player.
@@ -16,7 +16,7 @@ class DarkMud extends BaseHazard {
       );
 
   @override
-  bool checkCollision(SqubePlayer player) {
+  bool checkCollision(RunnerPlayer player) {
     final pRect = Rect.fromLTWH(
       player.position.x - player.size.x / 2,
       player.position.y - player.size.y,

@@ -80,7 +80,7 @@ class ShadowHaven extends PositionComponent {
   }
 }
 
-/// 3D Collectible Cube Point (CP): Floating rotating 3D octahedron crystal.
+/// 3D Collectible Cyber Point (CP): Floating rotating 3D octahedron crystal.
 class CollectibleCP extends PositionComponent {
   double bobTimer = 0.0;
   bool isCollected = false;

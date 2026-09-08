@@ -18,13 +18,13 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late final SqubeGame _game;
+  late final CyberNinjaRunnerGame _game;
 
   @override
   void initState() {
     super.initState();
     final saveService = context.read<SaveService>();
-    _game = SqubeGame(mode: widget.mode, saveService: saveService);
+    _game = CyberNinjaRunnerGame(mode: widget.mode, saveService: saveService);
   }
 
   @override
@@ -43,7 +43,7 @@ class _GameScreenState extends State<GameScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: GameWidget<SqubeGame>(
+        body: GameWidget<CyberNinjaRunnerGame>(
           game: _game,
           initialActiveOverlays: const ['HudOverlay'],
           overlayBuilderMap: {

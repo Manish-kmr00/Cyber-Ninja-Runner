@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../audio/audio_service.dart';
 import '../constants/game_enums.dart';
 import 'save_models.dart';
 
 class SaveService extends ChangeNotifier {
-  static const String _keyPlayer = 'sqube_player_save_v1';
-  static const String _keyStats = 'sqube_stats_save_v1';
-  static const String _keySettings = 'sqube_settings_save_v1';
+  static const String _keyPlayer = 'cyber_ninja_runner_player_save_v1';
+  static const String _legacyKeyPlayer = 'sqube_player_save_v1';
+  static const String _keyStats = 'cyber_ninja_runner_stats_save_v1';
+  static const String _legacyKeyStats = 'sqube_stats_save_v1';
+  static const String _keySettings = 'cyber_ninja_runner_settings_save_v1';
+  static const String _legacyKeySettings = 'sqube_settings_save_v1';
 
   final PlayerData player = PlayerData();
   final StatsData stats = StatsData();
@@ -19,7 +23,8 @@ class SaveService extends ChangeNotifier {
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final playerRaw = prefs.getString(_keyPlayer);
+    final playerRaw =
+        prefs.getString(_keyPlayer) ?? prefs.getString(_legacyKeyPlayer);
     if (playerRaw != null) {
       try {
         player.loadJson(jsonDecode(playerRaw));
@@ -28,7 +33,8 @@ class SaveService extends ChangeNotifier {
       }
     }
 
-    final statsRaw = prefs.getString(_keyStats);
+    final statsRaw =
+        prefs.getString(_keyStats) ?? prefs.getString(_legacyKeyStats);
     if (statsRaw != null) {
       try {
         stats.loadJson(jsonDecode(statsRaw));
@@ -37,7 +43,8 @@ class SaveService extends ChangeNotifier {
       }
     }
 
-    final settingsRaw = prefs.getString(_keySettings);
+    final settingsRaw =
+        prefs.getString(_keySettings) ?? prefs.getString(_legacyKeySettings);
     if (settingsRaw != null) {
       try {
         settings.loadJson(jsonDecode(settingsRaw));
@@ -45,6 +52,14 @@ class SaveService extends ChangeNotifier {
         debugPrint('Error loading settings data: $e');
       }
     }
+
+    // Sync audio and haptics preferences on launch
+    AudioService().updateVolumes(
+      music: settings.musicVolume,
+      sfx: settings.sfxVolume,
+      muted: settings.isMuted,
+    );
+    AudioService().hapticsEnabled = settings.hapticsEnabled;
 
     _isLoaded = true;
     notifyListeners();
@@ -58,19 +73,47 @@ class SaveService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addCubePoints(int amount) {
-    player.cubePoints.add(amount);
+  void resetStatsOnly() {
+    stats.bestDistanceRun = 0;
+    stats.bestDistance10x = 0;
+    stats.bestDistanceFlight = 0;
+    stats.totalRuns = 0;
+    stats.totalJumps = 0;
+    stats.totalShadowHides = 0;
+    stats.totalDeaths = 0;
     saveAll();
   }
 
-  bool spendCubePoints(int amount) {
-    if (player.cubePoints.value >= amount) {
-      player.cubePoints.subtract(amount);
+  void resetAllProgress() {
+    player.cyberPoints.value = 0;
+    player.equippedSkin = PlayerSkin.classicWhite;
+    player.unlockedSkins.clear();
+    player.unlockedSkins.add(PlayerSkin.classicWhite);
+    player.isTenXUnlocked = false;
+    player.isFlightUnlocked = false;
+    player.boosters.forEach((_, count) => count.value = 3);
+    resetStatsOnly();
+  }
+
+  void addCyberPoints(int amount) => addCyberNinjaPoints(amount);
+  void addCyberNinjaPoints(int amount) {
+    player.cyberPoints.add(amount);
+    saveAll();
+  }
+
+  void addCubePoints(int amount) => addCyberNinjaPoints(amount);
+
+  bool spendCyberPoints(int amount) => spendCyberNinjaPoints(amount);
+  bool spendCyberNinjaPoints(int amount) {
+    if (player.cyberPoints.value >= amount) {
+      player.cyberPoints.subtract(amount);
       saveAll();
       return true;
     }
     return false;
   }
+
+  bool spendCubePoints(int amount) => spendCyberNinjaPoints(amount);
 
   void unlockSkin(PlayerSkin skin) {
     player.unlockedSkins.add(skin);
@@ -102,8 +145,8 @@ class SaveService extends ChangeNotifier {
 
   bool unlockTenXMode() {
     const cost = 50000;
-    if (player.cubePoints.value >= cost) {
-      player.cubePoints.subtract(cost);
+    if (player.cyberPoints.value >= cost) {
+      player.cyberPoints.subtract(cost);
       player.isTenXUnlocked = true;
       saveAll();
       return true;
@@ -113,8 +156,8 @@ class SaveService extends ChangeNotifier {
 
   bool unlockFlightMode() {
     const cost = 100000;
-    if (player.cubePoints.value >= cost) {
-      player.cubePoints.subtract(cost);
+    if (player.cyberPoints.value >= cost) {
+      player.cyberPoints.subtract(cost);
       player.isFlightUnlocked = true;
       saveAll();
       return true;
@@ -148,7 +191,7 @@ class SaveService extends ChangeNotifier {
     final multiplier = mode == GameMode.tenXChallenge ? 10 : 1;
     final earnedCP = (distance ~/ 10) * multiplier;
     if (earnedCP > 0) {
-      player.cubePoints.add(earnedCP);
+      player.cyberPoints.add(earnedCP);
     }
 
     saveAll();

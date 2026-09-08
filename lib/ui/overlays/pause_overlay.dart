@@ -5,7 +5,7 @@ import '../../core/localization/app_localizations.dart';
 import '../../game/sqube_game.dart';
 
 class PauseOverlay extends StatelessWidget {
-  final SqubeGame game;
+  final CyberNinjaRunnerGame game;
 
   const PauseOverlay({super.key, required this.game});
 

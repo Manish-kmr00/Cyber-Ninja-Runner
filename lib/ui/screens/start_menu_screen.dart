@@ -53,7 +53,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     if (nowEpoch - lastClaim > 20 * 60 * 60 * 1000) {
       AudioService().playCollect();
       saveService.player.lastDailyClaimEpoch = nowEpoch;
-      saveService.addCubePoints(150);
+      saveService.addCyberPoints(150);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color(0xFF161B26),
@@ -532,7 +532,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${player.cubePoints.value}',
+                      '${player.cyberPoints.value}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
@@ -790,11 +790,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             objective: context.l10n.tr('flight_obj'),
             icon: Icons.flight_takeoff_rounded,
             accentColor: const Color(0xFFD500F9),
-            bestScore: saveService.stats.bestDistanceSqubeBird,
+            bestScore: saveService.stats.bestDistanceFlight,
             isLocked: !isFlightUnlocked,
             unlockPrice: 100000,
             onTap: isFlightUnlocked
-                ? () => _launchGame(context, GameMode.squbeBird)
+                ? () => _launchGame(context, GameMode.flightRunner)
                 : () => _promptFlightUnlock(context, saveService),
           ),
         ],
@@ -1232,7 +1232,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     required String successMessage,
   }) {
     AudioService().playClick();
-    final currentCP = saveService.player.cubePoints.value;
+    final currentCP = saveService.player.cyberPoints.value;
     final canAfford = currentCP >= unlockCost;
     final formattedCost = unlockCost.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),

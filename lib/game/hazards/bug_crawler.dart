@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 import 'base_hazard.dart';
 
 /// Fast ground crawler triggered by proximity tripwires.
@@ -27,7 +27,7 @@ class BugCrawler extends BaseHazard {
   }
 
   @override
-  bool checkCollision(SqubePlayer player) {
+  bool checkCollision(RunnerPlayer player) {
     final pos = worldPosition;
     // Proximity trigger (awakes bug when player gets within 350px)
     if (!isAwake && (player.position.x - pos.x).abs() < 350) {

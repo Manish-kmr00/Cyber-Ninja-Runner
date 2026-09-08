@@ -8,7 +8,7 @@ import '../../core/storage/save_service.dart';
 import '../../game/sqube_game.dart';
 
 class HudOverlay extends StatefulWidget {
-  final SqubeGame game;
+  final CyberNinjaRunnerGame game;
 
   const HudOverlay({super.key, required this.game});
 
@@ -22,6 +22,8 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   late final Animation<double> _sectorBannerOpacity;
   late final Animation<Offset> _sectorBannerSlide;
   SectorBiome? _announcedSector;
+  Offset? _swipeStartOffset;
+  bool _swipeActionTriggered = false;
 
   int _lastJumpTime = 0;
   void _triggerJump() {
@@ -101,6 +103,8 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final saveService = context.watch<SaveService>();
+    final isSwipeMode =
+        saveService.settings.controlScheme == ControlScheme.swipe;
     final bestScore = saveService.stats.getBestForMode(widget.game.mode);
 
     return SizedBox.expand(
@@ -108,29 +112,65 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // 0. Full-Screen Interactive Touch Surface (Tap anywhere to Jump, Drag down to Slide)
-            // Non-positioned SizedBox.expand guarantees the Stack is fully expanded
-            // and catches taps/clicks anywhere across the entire screen!
-            SizedBox.expand(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTapDown: (_) => _triggerJump(),
-                onTap: () => _triggerJump(),
-                onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta != null &&
-                      details.primaryDelta! > 10) {
-                    _triggerSlide();
-                  } else if (details.primaryDelta != null &&
-                      details.primaryDelta! < -10) {
-                    _triggerJump();
-                  }
-                },
-                onVerticalDragEnd: (_) {
-                  widget.game.player.stopSlide();
-                },
-                child: const SizedBox.expand(),
+            // 0. Full-Screen Swipe & Gesture Controller (Active in SWIPE mode)
+            if (isSwipeMode)
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanStart: (details) {
+                    _swipeStartOffset = details.localPosition;
+                    _swipeActionTriggered = false;
+                  },
+                  onPanUpdate: (details) {
+                    if (_swipeStartOffset == null || _swipeActionTriggered) {
+                      return;
+                    }
+                    final delta = details.localPosition - _swipeStartOffset!;
+                    final sensitivity = saveService.settings.swipeSensitivity
+                        .clamp(0.4, 2.5);
+                    final threshold = 34.0 / sensitivity;
+
+                    if (delta.dy < -threshold) {
+                      // Upward flick -> JUMP
+                      _swipeActionTriggered = true;
+                      _triggerJump();
+                    } else if (delta.dy > threshold) {
+                      // Downward flick -> SLIDE
+                      _swipeActionTriggered = true;
+                      _triggerSlide();
+                    } else if (delta.dx > threshold * 1.3) {
+                      // Forward flick -> SLIDE / DASH
+                      _swipeActionTriggered = true;
+                      _triggerSlide();
+                    }
+                  },
+                  onPanEnd: (_) {
+                    if (_swipeActionTriggered) {
+                      widget.game.player.stopSlide();
+                    }
+                    _swipeStartOffset = null;
+                    _swipeActionTriggered = false;
+                  },
+                  onPanCancel: () {
+                    if (_swipeActionTriggered) {
+                      widget.game.player.stopSlide();
+                    }
+                    _swipeStartOffset = null;
+                    _swipeActionTriggered = false;
+                  },
+                  onTapDown: (details) {
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    if (details.localPosition.dx < screenWidth * 0.5) {
+                      // Left side click / tap -> JUMP
+                      _triggerJump();
+                    } else {
+                      // Right side click / tap -> KATANA SLASH
+                      _triggerSlide();
+                    }
+                  },
+                  child: Container(color: Colors.transparent),
+                ),
               ),
-            ),
 
             // 1. Top Cyber Telemetry Header
             Positioned(
@@ -344,7 +384,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${saveService.player.cubePoints.value}',
+                              '${saveService.player.cyberPoints.value}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,
@@ -398,219 +438,147 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
               ),
             ),
 
-            // 2. Left Booster Dock: Quick Activate
+            // 2. Left Booster Dock: Quick Activate & Jump Pedal
             Positioned(
               left: 20,
               bottom: 24,
-              child: Column(
-                children: [
-                  _buildBoosterPill(
-                    type: BoosterType.safeGround,
-                    icon: Icons.shield_rounded,
-                    color: AppConstants.stealthBlue,
-                    count:
-                        saveService
-                            .player
-                            .boosters[BoosterType.safeGround]
-                            ?.value ??
-                        0,
-                    onTap: () {
-                      if (saveService.useBooster(BoosterType.safeGround)) {
-                        widget.game.boosterManager.activateBooster(
-                          BoosterType.safeGround,
-                        );
-                        AudioService().playBooster();
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildBoosterPill(
-                    type: BoosterType.matrixSlowMo,
-                    icon: Icons.slow_motion_video_rounded,
-                    color: AppConstants.matrixGreen,
-                    count:
-                        saveService
-                            .player
-                            .boosters[BoosterType.matrixSlowMo]
-                            ?.value ??
-                        0,
-                    onTap: () {
-                      if (saveService.useBooster(BoosterType.matrixSlowMo)) {
-                        widget.game.boosterManager.activateBooster(
-                          BoosterType.matrixSlowMo,
-                        );
-                        AudioService().playBooster();
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildBoosterPill(
-                    type: BoosterType.invisibility,
-                    icon: Icons.visibility_off_rounded,
-                    color: const Color(0xFFD500F9),
-                    count:
-                        saveService
-                            .player
-                            .boosters[BoosterType.invisibility]
-                            ?.value ??
-                        0,
-                    onTap: () {
-                      if (saveService.useBooster(BoosterType.invisibility)) {
-                        widget.game.boosterManager.activateBooster(
-                          BoosterType.invisibility,
-                        );
-                        AudioService().playBooster();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // 3. Right Action Touch Controls: Slide & Jump (Exact Dual-Ring Neon Pedals from Screenshot)
-            Positioned(
-              right: 24,
-              bottom: 24,
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // SLIDE Neon Pedal (Hot Pink / Magenta Dual-Ring)
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (_) => _triggerSlide(),
-                    onTap: () => _triggerSlide(),
-                    onTapUp: (_) => widget.game.player.stopSlide(),
-                    onTapCancel: () => widget.game.player.stopSlide(),
-                    child: Container(
-                      width: 82,
-                      height: 82,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F131D).withValues(alpha: 0.90),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFFF007F),
-                          width: 2.4,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFFFF007F,
-                            ).withValues(alpha: 0.45),
-                            blurRadius: 18,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildBoosterPill(
+                        type: BoosterType.safeGround,
+                        icon: Icons.shield_rounded,
+                        color: AppConstants.stealthBlue,
+                        count:
+                            saveService
+                                .player
+                                .boosters[BoosterType.safeGround]
+                                ?.value ??
+                            0,
+                        onTap: () {
+                          if (saveService.useBooster(BoosterType.safeGround)) {
+                            widget.game.boosterManager.activateBooster(
+                              BoosterType.safeGround,
+                            );
+                            AudioService().playBooster();
+                          }
+                        },
                       ),
-                      child: Container(
-                        margin: const EdgeInsets.all(4.5),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(
-                              0xFFFF007F,
-                            ).withValues(alpha: 0.5),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CustomPaint(
-                              size: const Size(32, 22),
-                              painter: _SlideRunnerIconPainter(
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            const Text(
-                              'SLASH',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.5,
-                                color: Colors.white,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ],
-                        ),
+                      const SizedBox(height: 10),
+                      _buildBoosterPill(
+                        type: BoosterType.matrixSlowMo,
+                        icon: Icons.slow_motion_video_rounded,
+                        color: AppConstants.matrixGreen,
+                        count:
+                            saveService
+                                .player
+                                .boosters[BoosterType.matrixSlowMo]
+                                ?.value ??
+                            0,
+                        onTap: () {
+                          if (saveService.useBooster(
+                            BoosterType.matrixSlowMo,
+                          )) {
+                            widget.game.boosterManager.activateBooster(
+                              BoosterType.matrixSlowMo,
+                            );
+                            AudioService().playBooster();
+                          }
+                        },
                       ),
-                    ),
+                      const SizedBox(height: 10),
+                      _buildBoosterPill(
+                        type: BoosterType.invisibility,
+                        icon: Icons.visibility_off_rounded,
+                        color: const Color(0xFFD500F9),
+                        count:
+                            saveService
+                                .player
+                                .boosters[BoosterType.invisibility]
+                                ?.value ??
+                            0,
+                        onTap: () {
+                          if (saveService.useBooster(
+                            BoosterType.invisibility,
+                          )) {
+                            widget.game.boosterManager.activateBooster(
+                              BoosterType.invisibility,
+                            );
+                            AudioService().playBooster();
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 18),
-
-                  // JUMP Neon Pedal (Golden / Orange Glowing Dual-Ring)
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (_) => _triggerJump(),
-                    onTap: () => _triggerJump(),
-                    child: AnimatedBuilder(
-                      animation: _pulseController,
-                      builder: (context, child) {
-                        return Container(
-                          width: 92,
-                          height: 92,
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF0F131D,
-                            ).withValues(alpha: 0.90),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFFFFB300),
-                              width: 2.8,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFFFB300).withValues(
-                                  alpha:
-                                      0.50 +
-                                      0.25 * sin(_pulseController.value * pi),
-                                ),
-                                blurRadius: 22,
-                                spreadRadius: 3,
-                              ),
-                            ],
-                          ),
-                          child: Container(
-                            margin: const EdgeInsets.all(5.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(
-                                  0xFFFFB300,
-                                ).withValues(alpha: 0.5),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CustomPaint(
-                                  size: const Size(28, 26),
-                                  painter: _JumpRunnerIconPainter(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'JUMP',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.8,
-                                    color: Colors.white,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                  // Left Action Pedal (Only visible in BUTTONS mode)
+                  if (!isSwipeMode) ...[
+                    const SizedBox(width: 16),
+                    _buildJumpPedal(
+                      saveService.settings.buttonOpacity.clamp(0.4, 1.0),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
+
+            // 3. Right Action Touch Control: (Only visible in BUTTONS mode)
+            if (!isSwipeMode)
+              Positioned(
+                right: 24,
+                bottom: 24,
+                child: _buildSlashPedal(
+                  saveService.settings.buttonOpacity.clamp(0.4, 1.0),
+                ),
+              ),
+
+            // 3b. Swipe Mode Watermark Indicator (Only visible in SWIPE mode)
+            if (isSwipeMode)
+              Positioned(
+                right: 24,
+                bottom: 24,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F131D).withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFF00E5FF).withValues(alpha: 0.3),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.touch_app_rounded,
+                          color: Color(0xFF00E5FF),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'SWIPE CONTROLS ACTIVE // LEFT: ⇡ JUMP • RIGHT: ⚡ SLASH',
+                          style: TextStyle(
+                            color: const Color(
+                              0xFF00E5FF,
+                            ).withValues(alpha: 0.8),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'monospace',
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
             // 4. Holographic Sector Transition Announcement Banner
             if (_announcedSector != null)
@@ -812,6 +780,136 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJumpPedal(double opacity) {
+    return Opacity(
+      opacity: opacity,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _triggerJump(),
+        onTap: () => _triggerJump(),
+        child: AnimatedBuilder(
+          animation: _pulseController,
+          builder: (context, child) {
+            return Container(
+              width: 92,
+              height: 92,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F131D).withValues(alpha: 0.90),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFFFB300), width: 2.8),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFB300).withValues(
+                      alpha: 0.50 + 0.25 * sin(_pulseController.value * pi),
+                    ),
+                    blurRadius: 22,
+                    spreadRadius: 3,
+                  ),
+                ],
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(5.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFFFB300).withValues(alpha: 0.5),
+                    width: 1.2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomPaint(
+                      size: const Size(28, 26),
+                      painter: _JumpRunnerIconPainter(color: Colors.white),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'JUMP',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.8,
+                        color: Colors.white,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSlashPedal(double opacity) {
+    return Opacity(
+      opacity: opacity,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _triggerSlide(),
+        onTap: () => _triggerSlide(),
+        onTapUp: (_) => widget.game.player.stopSlide(),
+        onTapCancel: () => widget.game.player.stopSlide(),
+        child: AnimatedBuilder(
+          animation: _pulseController,
+          builder: (context, child) {
+            return Container(
+              width: 92,
+              height: 92,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F131D).withValues(alpha: 0.90),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFFF007F), width: 2.8),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF007F).withValues(
+                      alpha: 0.50 + 0.25 * sin(_pulseController.value * pi),
+                    ),
+                    blurRadius: 22,
+                    spreadRadius: 3,
+                  ),
+                ],
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(5.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFFF007F).withValues(alpha: 0.5),
+                    width: 1.2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomPaint(
+                      size: const Size(34, 24),
+                      painter: _SlideRunnerIconPainter(color: Colors.white),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'SLASH',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.8,
+                        color: Colors.white,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

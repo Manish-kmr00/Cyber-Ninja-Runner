@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 import '../sqube_game.dart';
 import 'base_hazard.dart';
 
@@ -191,7 +191,8 @@ class TitanTheme {
 /// - Chest Overcharged Quantum Arc Reactor with pulsing energy shield
 /// - Dynamic steam vents releasing smoke particles from exhaust ports
 /// - Heavy hydraulics with piston shafts & magnetic stabilizer foot pads
-class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
+class CyberTitan extends BaseHazard
+    with HasGameReference<CyberNinjaRunnerGame> {
   final double patrolDistance;
   final double patrolSpeed;
   final double fireInterval;
@@ -277,7 +278,7 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
           ? (game.mode == GameMode.tenXChallenge ? 1000 : 500)
           : (game.mode == GameMode.tenXChallenge ? 250 : 100);
       game.collectedCP += cpBonus;
-      game.saveService.addCubePoints(cpBonus);
+      game.saveService.addCyberPoints(cpBonus);
     } catch (_) {}
 
     // Spawn 36 heavy flying mechanical scrap, armor shards & circuit sparks
@@ -460,7 +461,7 @@ class CyberTitan extends BaseHazard with HasGameReference<SqubeGame> {
   }
 
   @override
-  bool checkCollision(SqubePlayer player) {
+  bool checkCollision(RunnerPlayer player) {
     if (isSliced) return false;
 
     if (player.hideController.isStealthActive) {

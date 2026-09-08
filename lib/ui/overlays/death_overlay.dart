@@ -7,7 +7,7 @@ import '../../core/storage/save_service.dart';
 import '../../game/sqube_game.dart';
 
 class DeathOverlay extends StatelessWidget {
-  final SqubeGame game;
+  final CyberNinjaRunnerGame game;
 
   const DeathOverlay({super.key, required this.game});
 

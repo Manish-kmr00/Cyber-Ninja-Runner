@@ -2,7 +2,10 @@ import '../constants/game_enums.dart';
 import '../security/safe_types.dart';
 
 class PlayerData {
-  final SafeInt cubePoints = SafeInt(500);
+  final SafeInt cyberPoints = SafeInt(500);
+  SafeInt get cubePoints => cyberPoints;
+  SafeInt get cyberNinjaPoints => cyberPoints;
+
   CharacterHero selectedHero = CharacterHero.cyberNinja;
   PlayerSkin equippedSkin = PlayerSkin.classicWhite;
   final Set<PlayerSkin> unlockedSkins = {PlayerSkin.classicWhite};
@@ -22,7 +25,8 @@ class PlayerData {
   int lastDailyClaimEpoch = 0;
 
   Map<String, dynamic> toJson() => {
-    'cubePoints': cubePoints.value,
+    'cyberPoints': cyberPoints.value,
+    'cubePoints': cyberPoints.value,
     'selectedHero': selectedHero.name,
     'equippedSkin': equippedSkin.name,
     'unlockedSkins': unlockedSkins.map((s) => s.name).toList(),
@@ -35,7 +39,7 @@ class PlayerData {
   };
 
   void loadJson(Map<String, dynamic> json) {
-    cubePoints.value = json['cubePoints'] ?? 500;
+    cyberPoints.value = json['cyberPoints'] ?? json['cubePoints'] ?? 500;
     selectedHero = CharacterHero.values.firstWhere(
       (h) => h.name == json['selectedHero'],
       orElse: () => CharacterHero.cyberNinja,
@@ -77,7 +81,12 @@ class PlayerData {
 class StatsData {
   int bestDistanceRun = 0;
   int bestDistance10x = 0;
-  int bestDistanceSqubeBird = 0;
+  int bestDistanceFlight = 0;
+  int get bestDistanceRunner => bestDistanceFlight;
+  set bestDistanceRunner(int val) => bestDistanceFlight = val;
+  int get bestDistanceSqubeBird => bestDistanceFlight;
+  set bestDistanceSqubeBird(int val) => bestDistanceFlight = val;
+
   int totalRuns = 0;
   int totalJumps = 0;
   int totalShadowHides = 0;
@@ -86,7 +95,9 @@ class StatsData {
   Map<String, dynamic> toJson() => {
     'bestDistanceRun': bestDistanceRun,
     'bestDistance10x': bestDistance10x,
-    'bestDistanceSqubeBird': bestDistanceSqubeBird,
+    'bestDistanceFlight': bestDistanceFlight,
+    'bestDistanceRunner': bestDistanceFlight,
+    'bestDistanceSqubeBird': bestDistanceFlight,
     'totalRuns': totalRuns,
     'totalJumps': totalJumps,
     'totalShadowHides': totalShadowHides,
@@ -96,7 +107,11 @@ class StatsData {
   void loadJson(Map<String, dynamic> json) {
     bestDistanceRun = json['bestDistanceRun'] ?? 0;
     bestDistance10x = json['bestDistance10x'] ?? 0;
-    bestDistanceSqubeBird = json['bestDistanceSqubeBird'] ?? 0;
+    bestDistanceFlight =
+        json['bestDistanceFlight'] ??
+        json['bestDistanceRunner'] ??
+        json['bestDistanceSqubeBird'] ??
+        0;
     totalRuns = json['totalRuns'] ?? 0;
     totalJumps = json['totalJumps'] ?? 0;
     totalShadowHides = json['totalShadowHides'] ?? 0;
@@ -109,8 +124,8 @@ class StatsData {
         return bestDistanceRun;
       case GameMode.tenXChallenge:
         return bestDistance10x;
-      case GameMode.squbeBird:
-        return bestDistanceSqubeBird;
+      case GameMode.flightRunner:
+        return bestDistanceFlight;
       case GameMode.multiplayer:
         return bestDistanceRun;
     }
@@ -124,8 +139,8 @@ class StatsData {
       case GameMode.tenXChallenge:
         if (distance > bestDistance10x) bestDistance10x = distance;
         break;
-      case GameMode.squbeBird:
-        if (distance > bestDistanceSqubeBird) bestDistanceSqubeBird = distance;
+      case GameMode.flightRunner:
+        if (distance > bestDistanceFlight) bestDistanceFlight = distance;
         break;
       case GameMode.multiplayer:
         if (distance > bestDistanceRun) bestDistanceRun = distance;
@@ -137,7 +152,12 @@ class StatsData {
 class SettingsData {
   double musicVolume = 0.8;
   double sfxVolume = 1.0;
+  bool isMuted = false;
   bool hapticsEnabled = true;
+  bool godModeEnabled = false;
+  bool invertedControls = false;
+  double buttonOpacity = 1.0;
+  bool highQualityEffects = true;
   ControlScheme controlScheme = ControlScheme.buttons;
   double swipeSensitivity = 1.0;
   String languageCode = 'en';
@@ -145,7 +165,12 @@ class SettingsData {
   Map<String, dynamic> toJson() => {
     'musicVolume': musicVolume,
     'sfxVolume': sfxVolume,
+    'isMuted': isMuted,
     'hapticsEnabled': hapticsEnabled,
+    'godModeEnabled': godModeEnabled,
+    'invertedControls': invertedControls,
+    'buttonOpacity': buttonOpacity,
+    'highQualityEffects': highQualityEffects,
     'controlScheme': controlScheme.name,
     'swipeSensitivity': swipeSensitivity,
     'languageCode': languageCode,
@@ -154,7 +179,12 @@ class SettingsData {
   void loadJson(Map<String, dynamic> json) {
     musicVolume = (json['musicVolume'] as num?)?.toDouble() ?? 0.8;
     sfxVolume = (json['sfxVolume'] as num?)?.toDouble() ?? 1.0;
+    isMuted = json['isMuted'] ?? false;
     hapticsEnabled = json['hapticsEnabled'] ?? true;
+    godModeEnabled = json['godModeEnabled'] ?? false;
+    invertedControls = json['invertedControls'] ?? false;
+    buttonOpacity = (json['buttonOpacity'] as num?)?.toDouble() ?? 1.0;
+    highQualityEffects = json['highQualityEffects'] ?? true;
     controlScheme = ControlScheme.values.firstWhere(
       (c) => c.name == json['controlScheme'],
       orElse: () => ControlScheme.buttons,

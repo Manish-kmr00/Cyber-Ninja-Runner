@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 
 abstract class BaseHazard extends PositionComponent {
   final ObstacleType obstacleType;
@@ -23,5 +23,5 @@ abstract class BaseHazard extends PositionComponent {
   }
 
   /// Checks if player collides or is caught by this hazard. Returns true if lethal.
-  bool checkCollision(SqubePlayer player);
+  bool checkCollision(RunnerPlayer player);
 }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../player/sqube_player.dart';
+import '../player/runner_player.dart';
 import '../sqube_game.dart';
 import 'base_hazard.dart';
 
@@ -38,10 +38,10 @@ class DroidImpactSpark {
   });
 }
 
-/// Cyber Patrol Droid (replaces static cube obstacle):
+/// Cyber Patrol Droid:
 /// An articulated, patrolling mecha sentinel with walking hydraulic legs,
 /// sweeping optical sensor visor, armored chest chassis, and arm blasters that fire lethal plasma rounds!
-class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
+class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
   final double patrolDistance;
   final double patrolSpeed;
   final double fireInterval;
@@ -239,7 +239,7 @@ class DarkBox extends BaseHazard with HasGameReference<SqubeGame> {
   }
 
   @override
-  bool checkCollision(SqubePlayer player) {
+  bool checkCollision(RunnerPlayer player) {
     if (isSliced) return false; // Sliced droid is dead and non-hazardous
 
     // Camouflage / invisibility bypass

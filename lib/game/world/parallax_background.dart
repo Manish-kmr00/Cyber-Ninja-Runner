@@ -42,7 +42,7 @@ class SpeedStreak {
 /// Adds immense visual depth, glowing skyscraper grids, sky bridges,
 /// flying aerocars, and dynamic speed wind streaks.
 class ParallaxBackground extends PositionComponent
-    with HasGameReference<SqubeGame> {
+    with HasGameReference<CyberNinjaRunnerGame> {
   final List<Aerocar> aerocars = [];
   final List<SpeedStreak> speedStreaks = [];
   double beaconTimer = 0.0;

@@ -7,7 +7,6 @@ import '../../core/constants/game_enums.dart';
 import '../sqube_game.dart';
 import 'corner_hide_controller.dart';
 
-
 /// A recorded ghost silhouette for high-speed phantom afterimage trails.
 class GhostFrame {
   final Vector2 position;
@@ -65,7 +64,7 @@ class FootstepDust {
 
 /// Abstract base class for playable runner character (Cyber Ninja / Shadow Shinobi)
 abstract class RunnerPlayer extends PositionComponent
-    with HasGameReference<SqubeGame> {
+    with HasGameReference<CyberNinjaRunnerGame> {
   final PlayerSkin skin;
   final CornerHideController hideController = CornerHideController();
 
@@ -83,7 +82,6 @@ abstract class RunnerPlayer extends PositionComponent
   int jumpCount = 0;
 
   void onSlashAttack() {}
-
 
   // Visual Effects & Particle Queues
 
@@ -386,3 +384,6 @@ abstract class RunnerPlayer extends PositionComponent
     }
   }
 }
+
+typedef CyberNinjaRunnerPlayer = RunnerPlayer;
+typedef SqubePlayer = RunnerPlayer;
