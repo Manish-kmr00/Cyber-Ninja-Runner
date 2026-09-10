@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../hazards/base_hazard.dart';
+import '../sqube_game.dart';
 
 /// 3D Volumetric Shadow Haven: An extruded stealth sanctuary with perspective canopy.
 class ShadowHaven extends PositionComponent {
@@ -300,7 +301,8 @@ class ElevatedPlatform extends PositionComponent {
 
 /// 2.5D Extruded Running Track: Features an extruded 3D top roadway (depth plane),
 /// vertical drop front wall, 3D chasm walls in pits, and industrial overhead girders.
-class WorldChunk extends PositionComponent {
+class WorldChunk extends PositionComponent
+    with HasGameReference<CyberNinjaRunnerGame> {
   final double startX;
   final double length;
   final double groundY;
@@ -385,6 +387,23 @@ class WorldChunk extends PositionComponent {
         groundY,
         trackDepth,
       );
+
+      // Holographic Hard-Light Energy Bridge when Safe Ground Pack is Active!
+      bool isSafeGround = false;
+      try {
+        isSafeGround = game.boosterManager.isSafeGroundActive;
+      } catch (_) {}
+
+      if (isSafeGround) {
+        _renderHardLightBridge(
+          canvas,
+          pitStartX,
+          pitStartX + pitWidth,
+          topRoadwayY,
+          groundY,
+          trackDepth,
+        );
+      }
 
       // Segment 2: Right 3D Track after pit
       final afterPitX = pitStartX + pitWidth;
@@ -945,6 +964,98 @@ class WorldChunk extends PositionComponent {
         abyssLaser,
       );
     }
+  }
+
+  /// Draws a glowing cyan holographic hard-light bridge deck spanning across the chasm pit
+  void _renderHardLightBridge(
+    Canvas canvas,
+    double pitStart,
+    double pitEnd,
+    double topRoadwayY,
+    double frontCurbY,
+    double depth,
+  ) {
+    final bridgeWidth = pitEnd - pitStart;
+    if (bridgeWidth <= 0) return;
+
+    // 1. Holographic Bridge Roadway Surface (Translucent Glowing Cyan)
+    final bridgePath = Path()
+      ..moveTo(pitStart, topRoadwayY)
+      ..lineTo(pitEnd, topRoadwayY)
+      ..lineTo(pitEnd, frontCurbY)
+      ..lineTo(pitStart, frontCurbY)
+      ..close();
+
+    final bridgeGlow = Paint()
+      ..color = const Color(0xFF00E5FF).withValues(alpha: 0.45)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(bridgePath, bridgeGlow);
+
+    // 2. High-Tech Hexagonal Grid / Lattice Trusses across the bridge
+    final latticePaint = Paint()
+      ..color = const Color(0xFFE0F7FA).withValues(alpha: 0.70)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+
+    const step = 26.0;
+    for (double x = pitStart; x <= pitEnd; x += step) {
+      canvas.drawLine(
+        Offset(x, topRoadwayY),
+        Offset(min(pitEnd, x + step * 0.5), frontCurbY),
+        latticePaint,
+      );
+      canvas.drawLine(
+        Offset(x, frontCurbY),
+        Offset(min(pitEnd, x + step * 0.5), topRoadwayY),
+        latticePaint,
+      );
+    }
+
+    // 3. Glowing Barrier Railings (Top and Bottom Front Edges)
+    final railGlow = Paint()
+      ..color = const Color(0xFF00E5FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    final railLine = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    canvas.drawLine(
+      Offset(pitStart, frontCurbY),
+      Offset(pitEnd, frontCurbY),
+      railGlow,
+    );
+    canvas.drawLine(
+      Offset(pitStart, frontCurbY),
+      Offset(pitEnd, frontCurbY),
+      railLine,
+    );
+
+    canvas.drawLine(
+      Offset(pitStart, topRoadwayY),
+      Offset(pitEnd, topRoadwayY),
+      railGlow,
+    );
+    canvas.drawLine(
+      Offset(pitStart, topRoadwayY),
+      Offset(pitEnd, topRoadwayY),
+      railLine,
+    );
+
+    // 4. Subtle vertical laser safety curtain underneath
+    final curtainRect = Rect.fromLTWH(pitStart, frontCurbY, bridgeWidth, 24.0);
+    final curtainPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF00E5FF).withValues(alpha: 0.35),
+          Colors.transparent,
+        ],
+      ).createShader(curtainRect);
+    canvas.drawRect(curtainRect, curtainPaint);
   }
 
   /// Draws Realistic 3D Industrial Overhead Roof Girder with Cross-Trusses & Dangling Chains

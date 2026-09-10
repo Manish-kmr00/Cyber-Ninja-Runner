@@ -96,7 +96,7 @@ class CyberCannon extends BaseHazard
     final dx = pPos.x - myWorld.x;
 
     // Check if player is approaching within targeting range
-    if (dx < 60 && dx > -targetingRange) {
+    if (dx < 60 && dx > -targetingRange && !player.isStealthActive) {
       if (!isLockingOn) {
         // Prime cannon on detection so first shot fires promptly after 0.70s!
         fireTimer = fireInterval - 0.70;
@@ -208,7 +208,7 @@ class CyberCannon extends BaseHazard
   @override
   bool checkCollision(RunnerPlayer player) {
     // Shadow camouflage allows the player to evade targeting
-    if (player.hideController.isStealthActive) {
+    if (player.isStealthActive) {
       return false;
     }
 

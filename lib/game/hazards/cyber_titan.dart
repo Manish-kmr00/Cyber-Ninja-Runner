@@ -464,7 +464,7 @@ class CyberTitan extends BaseHazard
   bool checkCollision(RunnerPlayer player) {
     if (isSliced) return false;
 
-    if (player.hideController.isStealthActive) {
+    if (player.isStealthActive) {
       return false;
     }
 

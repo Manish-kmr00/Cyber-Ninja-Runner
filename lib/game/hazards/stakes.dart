@@ -42,6 +42,7 @@ class Stakes extends BaseHazard {
 
   @override
   bool checkCollision(RunnerPlayer player) {
+    if (player.isInvisibilityActive || player.isSafeGroundActive) return false;
     if (isRetracting && !isExtended) return false;
 
     final pRect = Rect.fromLTWH(

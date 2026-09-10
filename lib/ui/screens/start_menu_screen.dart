@@ -5,7 +5,9 @@ import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/services/daily_crate_service.dart';
 import '../../core/storage/save_service.dart';
+import '../widgets/daily_crate_dialog.dart';
 import 'game_screen.dart';
 import 'leaderboard_screen.dart';
 import 'settings_screen.dart';
@@ -45,57 +47,12 @@ class _StartMenuScreenState extends State<StartMenuScreen>
   }
 
   void _claimDailyGift(BuildContext context) {
-    final saveService = context.read<SaveService>();
-    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
-    final lastClaim = saveService.player.lastDailyClaimEpoch;
-
-    // 20 hours cooldown
-    if (nowEpoch - lastClaim > 20 * 60 * 60 * 1000) {
-      AudioService().playCollect();
-      saveService.player.lastDailyClaimEpoch = nowEpoch;
-      saveService.addCyberPoints(150);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF161B26),
-          content: const Row(
-            children: [
-              Icon(Icons.diamond, color: AppConstants.coinGold),
-              SizedBox(width: 10),
-              Text(
-                'NEURAL CRATE UNLOCKED! +150 CP',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: AppConstants.coinGold,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppConstants.coinGold, width: 1.5),
-          ),
-        ),
-      );
-    } else {
-      final hoursLeft = (20 - (nowEpoch - lastClaim) / (60 * 60 * 1000)).ceil();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF161B26),
-          content: Text(
-            'RECHARGING CRATE: Next supply drop in ${hoursLeft}h',
-            style: const TextStyle(color: Colors.white70),
-          ),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-      );
-    }
+    AudioService().playClick();
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => const DailyCrateDialog(),
+    );
   }
 
   Future<void> _openDeveloperPage() async {
@@ -394,28 +351,53 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           ),
 
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-              child: Column(
-                children: [
-                  // 1. Top Bar: Game Title & Utility Actions
-                  _buildHeader(context, player),
-                  const SizedBox(height: 14),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxHeight < 390;
+                final isUltraCompact = constraints.maxHeight < 340;
 
-                  // 2. Active Operative Status Badge
-                  _buildOperativeBadge(context),
+                return Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCompact ? 16 : 22,
+                    vertical: isUltraCompact ? 4 : (isCompact ? 6 : 14),
+                  ),
+                  child: Column(
+                    children: [
+                      // 1. Top Bar: Game Title & Utility Actions
+                      _buildHeader(context, player, isCompact: isCompact),
+                      SizedBox(
+                        height: isUltraCompact ? 3 : (isCompact ? 5 : 12),
+                      ),
 
-                  const Spacer(),
+                      // 2. Active Operative Status Badge
+                      _buildOperativeBadge(context, isCompact: isCompact),
 
-                  // 3. Center: Holographic Mode Selection Carousel
-                  _buildModeCarousel(context, saveService),
+                      // 3. Center: Holographic Mode Selection Carousel (Adaptive Auto-Scale)
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: isUltraCompact ? 2 : (isCompact ? 4 : 8),
+                          ),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.center,
+                              child: _buildModeCarousel(
+                                context,
+                                saveService,
+                                isCompact: isCompact,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
 
-                  const Spacer(),
-
-                  // 4. Bottom Utility Dock: Daily Crate, Arsenal & Hangar, Leaderboard
-                  _buildBottomDock(context),
-                ],
-              ),
+                      // 4. Bottom Utility Dock: Daily Crate, Arsenal & Hangar, Moon Edge Studio
+                      _buildBottomDock(context, isCompact: isCompact),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -423,7 +405,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     );
   }
 
-  Widget _buildHeader(BuildContext context, dynamic player) {
+  Widget _buildHeader(
+    BuildContext context,
+    dynamic player, {
+    bool isCompact = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -431,8 +417,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         Row(
           children: [
             Container(
-              width: 4,
-              height: 36,
+              width: isCompact ? 3.5 : 4,
+              height: isCompact ? 28 : 36,
               decoration: BoxDecoration(
                 color: AppConstants.stealthBlue,
                 borderRadius: BorderRadius.circular(2),
@@ -444,7 +430,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: isCompact ? 8 : 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -452,35 +438,35 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                   children: [
                     Text(
                       context.l10n.tr('game_title_cyber'),
-                      style: const TextStyle(
-                        fontSize: 22,
+                      style: TextStyle(
+                        fontSize: isCompact ? 18 : 22,
                         fontWeight: FontWeight.w900,
                         color: AppConstants.stealthBlue,
-                        letterSpacing: 2.0,
+                        letterSpacing: isCompact ? 1.5 : 2.0,
                         height: 1.0,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       context.l10n.tr('game_title_runner'),
-                      style: const TextStyle(
-                        fontSize: 22,
+                      style: TextStyle(
+                        fontSize: isCompact ? 18 : 22,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        letterSpacing: 2.0,
+                        letterSpacing: isCompact ? 1.5 : 2.0,
                         height: 1.0,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: isCompact ? 2 : 3),
                 Text(
                   context.l10n.tr('game_protocol'),
-                  style: const TextStyle(
-                    fontSize: 9,
+                  style: TextStyle(
+                    fontSize: isCompact ? 7.5 : 9,
                     fontWeight: FontWeight.bold,
                     color: Colors.white38,
-                    letterSpacing: 2.5,
+                    letterSpacing: isCompact ? 1.8 : 2.5,
                   ),
                 ),
               ],
@@ -492,8 +478,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         Row(
           children: [
             // Also Try Now: Img Resizer
-            _buildImgResizerButton(),
-            const SizedBox(width: 10),
+            _buildImgResizerButton(isCompact: isCompact),
+            SizedBox(width: isCompact ? 6 : 10),
 
             // Currency Pill
             GestureDetector(
@@ -505,9 +491,9 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ).push(MaterialPageRoute(builder: (_) => const ShopScreen()));
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 7,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 10 : 14,
+                  vertical: isCompact ? 5 : 7,
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF131722),
@@ -525,16 +511,16 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.diamond,
                       color: AppConstants.coinGold,
-                      size: 17,
+                      size: isCompact ? 14 : 17,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: isCompact ? 4 : 6),
                     Text(
                       '${player.cyberPoints.value}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: isCompact ? 12 : 14,
                         fontWeight: FontWeight.w900,
                         color: AppConstants.coinGold,
                         letterSpacing: 0.5,
@@ -544,12 +530,13 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: isCompact ? 6 : 10),
 
             // Leaderboard
             _buildRoundIconButton(
               icon: Icons.leaderboard_rounded,
               color: AppConstants.stealthBlue,
+              isCompact: isCompact,
               onTap: () {
                 AudioService().playClick();
                 Navigator.of(context).push(
@@ -557,12 +544,13 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 );
               },
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: isCompact ? 6 : 8),
 
             // Settings
             _buildRoundIconButton(
               icon: Icons.tune_rounded,
               color: Colors.white70,
+              isCompact: isCompact,
               onTap: () {
                 AudioService().playClick();
                 Navigator.of(context).push(
@@ -576,12 +564,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     );
   }
 
-  Widget _buildImgResizerButton() {
+  Widget _buildImgResizerButton({bool isCompact = false}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _openImgResizer,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 8 : 11,
+          vertical: isCompact ? 4.5 : 6.5,
+        ),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF0D2338), Color(0xFF131A28)],
@@ -605,34 +596,34 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(3.5),
+              padding: EdgeInsets.all(isCompact ? 2.5 : 3.5),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [Color(0xFF0072FF), Color(0xFF00C6FF)],
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.auto_fix_high_rounded,
                 color: Colors.white,
-                size: 11,
+                size: isCompact ? 9 : 11,
               ),
             ),
-            const SizedBox(width: 6),
-            const Text(
+            SizedBox(width: isCompact ? 4 : 6),
+            Text(
               'TRY: IMG RESIZER',
               style: TextStyle(
-                fontSize: 10.5,
+                fontSize: isCompact ? 9 : 10.5,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 0.6,
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: isCompact ? 3 : 4),
             Icon(
               Icons.open_in_new_rounded,
               color: const Color(0xFF00C6FF).withValues(alpha: 0.85),
-              size: 11,
+              size: isCompact ? 9 : 11,
             ),
           ],
         ),
@@ -644,24 +635,27 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    bool isCompact = false,
   }) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        width: 38,
-        height: 38,
+        width: isCompact ? 32 : 38,
+        height: isCompact ? 32 : 38,
         decoration: BoxDecoration(
           color: const Color(0xFF131722),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(isCompact ? 10 : 12),
           border: Border.all(color: Colors.white12),
         ),
-        child: Center(child: Icon(icon, color: color, size: 19)),
+        child: Center(
+          child: Icon(icon, color: color, size: isCompact ? 16 : 19),
+        ),
       ),
     );
   }
 
-  Widget _buildOperativeBadge(BuildContext context) {
+  Widget _buildOperativeBadge(BuildContext context, {bool isCompact = false}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -671,10 +665,13 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         ).push(MaterialPageRoute(builder: (_) => const ShopScreen()));
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 12 : 18,
+          vertical: isCompact ? 4.5 : 8,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF0F1522),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
           border: Border.all(
             color: AppConstants.stealthBlue.withValues(alpha: 0.45),
             width: 1.2,
@@ -682,42 +679,45 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           boxShadow: [
             BoxShadow(
               color: AppConstants.stealthBlue.withValues(alpha: 0.15),
-              blurRadius: 10,
+              blurRadius: isCompact ? 6 : 10,
             ),
           ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.sports_martial_arts_rounded,
               color: AppConstants.stealthBlue,
-              size: 18,
+              size: isCompact ? 14 : 18,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: isCompact ? 6 : 8),
             Text(
               context.l10n.tr('active_operative'),
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w900,
-                fontSize: 11,
-                letterSpacing: 1.4,
+                fontSize: isCompact ? 9.5 : 11,
+                letterSpacing: isCompact ? 1.0 : 1.4,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: isCompact ? 6 : 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 5 : 6,
+                vertical: isCompact ? 1.5 : 2,
+              ),
               decoration: BoxDecoration(
                 color: AppConstants.stealthBlue.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(isCompact ? 4 : 6),
               ),
               child: Text(
                 context.l10n.tr('deployed'),
-                style: const TextStyle(
-                  fontSize: 9,
+                style: TextStyle(
+                  fontSize: isCompact ? 8 : 9,
                   fontWeight: FontWeight.w900,
                   color: AppConstants.stealthBlue,
-                  letterSpacing: 1.0,
+                  letterSpacing: 0.8,
                 ),
               ),
             ),
@@ -727,13 +727,18 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     );
   }
 
-  Widget _buildModeCarousel(BuildContext context, SaveService saveService) {
+  Widget _buildModeCarousel(
+    BuildContext context,
+    SaveService saveService, {
+    bool isCompact = false,
+  }) {
     final isTenXUnlocked = saveService.player.isTenXUnlocked;
     final isFlightUnlocked = saveService.player.isFlightUnlocked;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildModernModeCard(
             context,
@@ -749,9 +754,10 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             icon: Icons.play_arrow_rounded,
             accentColor: AppConstants.stealthBlue,
             bestScore: saveService.stats.bestDistanceRun,
+            isCompact: isCompact,
             onTap: () => _launchGame(context, GameMode.run),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: isCompact ? 12 : 16),
           _buildModernModeCard(
             context,
             title: context.l10n.tr('tenx_title'),
@@ -772,11 +778,12 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             bestScore: saveService.stats.bestDistance10x,
             isLocked: !isTenXUnlocked,
             unlockPrice: 50000,
+            isCompact: isCompact,
             onTap: isTenXUnlocked
                 ? () => _launchGame(context, GameMode.tenXChallenge)
                 : () => _promptTenXUnlock(context, saveService),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: isCompact ? 12 : 16),
           _buildModernModeCard(
             context,
             title: context.l10n.tr('flight_title'),
@@ -793,6 +800,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             bestScore: saveService.stats.bestDistanceFlight,
             isLocked: !isFlightUnlocked,
             unlockPrice: 100000,
+            isCompact: isCompact,
             onTap: isFlightUnlocked
                 ? () => _launchGame(context, GameMode.flightRunner)
                 : () => _promptFlightUnlock(context, saveService),
@@ -819,6 +827,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     required VoidCallback onTap,
     bool isLocked = false,
     int unlockPrice = 0,
+    bool isCompact = false,
   }) {
     final formattedPrice = unlockPrice.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -828,8 +837,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        width: 290,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        width: isCompact ? 260 : 290,
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 12 : 16,
+          vertical: isCompact ? 8 : 13,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -838,19 +850,19 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ? const [Color(0xFF15141E), Color(0xFF0D0C14)]
                 : const [Color(0xFF131926), Color(0xFF0C101A)],
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(isCompact ? 16 : 20),
           border: Border.all(
             color: isLocked
                 ? AppConstants.coinGold.withValues(alpha: 0.5)
                 : accentColor.withValues(alpha: 0.45),
-            width: 1.5,
+            width: isCompact ? 1.2 : 1.5,
           ),
           boxShadow: [
             BoxShadow(
               color: isLocked
                   ? AppConstants.coinGold.withValues(alpha: 0.15)
                   : accentColor.withValues(alpha: 0.14),
-              blurRadius: 16,
+              blurRadius: isCompact ? 10 : 16,
               spreadRadius: 1,
             ),
           ],
@@ -866,14 +878,14 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3.5,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isCompact ? 6 : 8,
+                        vertical: isCompact ? 2.5 : 3.5,
                       ),
                       decoration: BoxDecoration(
                         color: (isLocked ? AppConstants.hazardRed : accentColor)
                             .withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(isCompact ? 5 : 6),
                         border: Border.all(
                           color:
                               (isLocked ? AppConstants.hazardRed : accentColor)
@@ -883,7 +895,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                       child: Text(
                         tag,
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: isCompact ? 8 : 9,
                           fontWeight: FontWeight.w900,
                           color: isLocked
                               ? AppConstants.hazardRed
@@ -892,32 +904,34 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: isCompact ? 4 : 6),
                     if (isLocked)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3.5,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isCompact ? 5 : 7,
+                          vertical: isCompact ? 2.5 : 3.5,
                         ),
                         decoration: BoxDecoration(
                           color: AppConstants.coinGold.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(
+                            isCompact ? 5 : 6,
+                          ),
                           border: Border.all(
                             color: AppConstants.coinGold.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.lock_rounded,
                               color: AppConstants.coinGold,
-                              size: 11,
+                              size: isCompact ? 9.5 : 11,
                             ),
                             const SizedBox(width: 3),
                             Text(
                               '$formattedPrice CP',
-                              style: const TextStyle(
-                                fontSize: 9,
+                              style: TextStyle(
+                                fontSize: isCompact ? 8 : 9,
                                 fontWeight: FontWeight.w900,
                                 color: AppConstants.coinGold,
                                 letterSpacing: 0.5,
@@ -928,13 +942,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                       )
                     else
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3.5,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isCompact ? 5 : 7,
+                          vertical: isCompact ? 2.5 : 3.5,
                         ),
                         decoration: BoxDecoration(
                           color: AppConstants.coinGold.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(
+                            isCompact ? 5 : 6,
+                          ),
                           border: Border.all(
                             color: AppConstants.coinGold.withValues(
                               alpha: 0.35,
@@ -943,16 +959,16 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.bolt,
                               color: AppConstants.coinGold,
-                              size: 11,
+                              size: isCompact ? 9.5 : 11,
                             ),
                             const SizedBox(width: 2),
                             Text(
                               rewardMultiplier,
-                              style: const TextStyle(
-                                fontSize: 9,
+                              style: TextStyle(
+                                fontSize: isCompact ? 8 : 9,
                                 fontWeight: FontWeight.w900,
                                 color: AppConstants.coinGold,
                                 letterSpacing: 0.5,
@@ -964,8 +980,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                   ],
                 ),
                 Container(
-                  width: 34,
-                  height: 34,
+                  width: isCompact ? 28 : 34,
+                  height: isCompact ? 28 : 34,
                   decoration: BoxDecoration(
                     color: (isLocked ? AppConstants.coinGold : accentColor)
                         .withValues(alpha: 0.18),
@@ -978,43 +994,48 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                   child: Icon(
                     isLocked ? Icons.lock_rounded : icon,
                     color: isLocked ? AppConstants.coinGold : accentColor,
-                    size: isLocked ? 17 : 19,
+                    size: isLocked
+                        ? (isCompact ? 14 : 17)
+                        : (isCompact ? 16 : 19),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isCompact ? 4 : 8),
 
             // 2. Mode Title & Tactical Objective
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 15,
+              style: TextStyle(
+                fontSize: isCompact ? 13.5 : 15,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 0.8,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: isCompact ? 1.5 : 2),
             Text(
               objective,
-              style: const TextStyle(
-                fontSize: 10,
+              style: TextStyle(
+                fontSize: isCompact ? 8.5 : 10,
                 color: Colors.white54,
-                height: 1.2,
+                height: 1.15,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isCompact ? 4 : 8),
 
             // 3. Map & Sector Telemetry Banner
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 6 : 8,
+                vertical: isCompact ? 3.5 : 5,
+              ),
               decoration: BoxDecoration(
                 color: const Color(0xFF161E2E),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(isCompact ? 6 : 8),
                 border: Border.all(color: Colors.white10),
               ),
               child: Row(
@@ -1022,9 +1043,9 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                   Icon(
                     isLocked ? Icons.lock_outline_rounded : Icons.radar_rounded,
                     color: isLocked ? AppConstants.coinGold : accentColor,
-                    size: 14,
+                    size: isCompact ? 12 : 14,
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: isCompact ? 4 : 6),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1032,7 +1053,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         Text(
                           mapName,
                           style: TextStyle(
-                            fontSize: 9.5,
+                            fontSize: isCompact ? 8.5 : 9.5,
                             fontWeight: FontWeight.w900,
                             color: isLocked
                                 ? AppConstants.coinGold
@@ -1044,8 +1065,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         ),
                         Text(
                           mapSector,
-                          style: const TextStyle(
-                            fontSize: 8.5,
+                          style: TextStyle(
+                            fontSize: isCompact ? 7.5 : 8.5,
                             fontWeight: FontWeight.bold,
                             color: Colors.white54,
                             letterSpacing: 0.4,
@@ -1059,27 +1080,27 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ],
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: isCompact ? 3 : 6),
 
             // 4. Hazard Intel Tags
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.warning_amber_rounded,
                   color: Colors.white38,
-                  size: 11,
+                  size: isCompact ? 9.5 : 11,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   context.l10n.tr('hazards_label'),
-                  style: const TextStyle(
-                    fontSize: 8,
+                  style: TextStyle(
+                    fontSize: isCompact ? 7 : 8,
                     fontWeight: FontWeight.w900,
                     color: Colors.white38,
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(width: 5),
+                SizedBox(width: isCompact ? 4 : 5),
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -1087,19 +1108,19 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                       children: hazardTags.map((hazard) {
                         return Container(
                           margin: const EdgeInsets.only(right: 4),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCompact ? 3.5 : 5,
+                            vertical: isCompact ? 1.5 : 2,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(3),
                             border: Border.all(color: Colors.white12),
                           ),
                           child: Text(
                             hazard,
-                            style: const TextStyle(
-                              fontSize: 7.5,
+                            style: TextStyle(
+                              fontSize: isCompact ? 6.5 : 7.5,
                               fontWeight: FontWeight.bold,
                               color: Colors.white70,
                               letterSpacing: 0.3,
@@ -1112,15 +1133,18 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isCompact ? 4 : 8),
 
             // 5. Threat Level & Best Record Pill OR Unlock Pill
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 7 : 10,
+                vertical: isCompact ? 3.5 : 6,
+              ),
               decoration: BoxDecoration(
                 color: const Color(0xFF161E2E),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(isCompact ? 8 : 10),
                 border: Border.all(color: Colors.white12),
               ),
               child: Row(
@@ -1131,8 +1155,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 6,
-                        height: 6,
+                        width: isCompact ? 5 : 6,
+                        height: isCompact ? 5 : 6,
                         decoration: BoxDecoration(
                           color: threatColor,
                           shape: BoxShape.circle,
@@ -1148,7 +1172,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                       Text(
                         threatLevel,
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: isCompact ? 8 : 9,
                           fontWeight: FontWeight.w900,
                           color: threatColor,
                           letterSpacing: 0.5,
@@ -1160,30 +1184,30 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                   // Best score record OR Unlock CTA
                   if (isLocked)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isCompact ? 6 : 8,
+                        vertical: isCompact ? 2 : 3,
                       ),
                       decoration: BoxDecoration(
                         color: AppConstants.coinGold.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(5),
                         border: Border.all(
                           color: AppConstants.coinGold.withValues(alpha: 0.6),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.key_rounded,
                             color: AppConstants.coinGold,
-                            size: 11,
+                            size: isCompact ? 9 : 11,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             'UNLOCK MAP',
                             style: TextStyle(
-                              fontSize: 9,
+                              fontSize: isCompact ? 7.5 : 9,
                               fontWeight: FontWeight.w900,
                               color: AppConstants.coinGold,
                               letterSpacing: 0.6,
@@ -1196,16 +1220,16 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.emoji_events_outlined,
                           color: AppConstants.coinGold,
-                          size: 13,
+                          size: isCompact ? 11 : 13,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '${bestScore}M',
-                          style: const TextStyle(
-                            fontSize: 10,
+                          style: TextStyle(
+                            fontSize: isCompact ? 8.5 : 10,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                             letterSpacing: 0.5,
@@ -1277,247 +1301,252 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Top Tag
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppConstants.hazardRed.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: AppConstants.hazardRed.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.security_rounded,
-                            size: 12,
-                            color: AppConstants.hazardRed,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            'SECTOR CLEARANCE REQUIRED',
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w900,
-                              color: AppConstants.hazardRed,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(
-                      Icons.lock_outline_rounded,
-                      color: AppConstants.coinGold,
-                      size: 18,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // Title
-                Text(
-                  modeTitle,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 1.0,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  modeSubtitle,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.hazardRed.withValues(alpha: 0.8),
-                    letterSpacing: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-
-                // Telemetry Card
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF131926),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Column(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Top Tag
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'UNLOCK CLEARANCE FEE:',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white60,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppConstants.hazardRed.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppConstants.hazardRed.withValues(
+                              alpha: 0.5,
                             ),
                           ),
-                          Text(
-                            '$formattedCost CP',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w900,
-                              color: AppConstants.coinGold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(color: Colors.white10, height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'YOUR CURRENT BALANCE:',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white60,
-                            ),
-                          ),
-                          Text(
-                            '$currentCP CP',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
-                              color: canAfford
-                                  ? const Color(0xFF00FF88)
-                                  : AppConstants.hazardRed,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (!canAfford) ...[
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'ADDITIONAL CP NEEDED:',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppConstants.hazardRed,
-                              ),
+                            Icon(
+                              Icons.security_rounded,
+                              size: 12,
+                              color: AppConstants.hazardRed,
                             ),
+                            SizedBox(width: 5),
                             Text(
-                              '$neededCP CP',
-                              style: const TextStyle(
-                                fontSize: 11,
+                              'SECTOR CLEARANCE REQUIRED',
+                              style: TextStyle(
+                                fontSize: 9.5,
                                 fontWeight: FontWeight.w900,
                                 color: AppConstants.hazardRed,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ],
                         ),
-                      ],
+                      ),
+                      const Icon(
+                        Icons.lock_outline_rounded,
+                        color: AppConstants.coinGold,
+                        size: 18,
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 18),
+                  const SizedBox(height: 14),
 
-                // Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white60,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(color: Colors.white24),
-                          ),
-                        ),
-                        onPressed: () => Navigator.of(dialogCtx).pop(),
-                        child: const Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
+                  // Title
+                  Text(
+                    modeTitle,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 1.0,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: canAfford
-                              ? AppConstants.coinGold
-                              : const Color(0xFF161E2E),
-                          foregroundColor: canAfford
-                              ? Colors.black
-                              : Colors.white70,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(
-                              color: canAfford
-                                  ? AppConstants.coinGold
-                                  : Colors.white24,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    modeSubtitle,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppConstants.hazardRed.withValues(alpha: 0.8),
+                      letterSpacing: 1.2,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Telemetry Card
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF131926),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'UNLOCK CLEARANCE FEE:',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white60,
+                              ),
+                            ),
+                            Text(
+                              '$formattedCost CP',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                color: AppConstants.coinGold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(color: Colors.white10, height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'YOUR CURRENT BALANCE:',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white60,
+                              ),
+                            ),
+                            Text(
+                              '$currentCP CP',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: canAfford
+                                    ? const Color(0xFF00FF88)
+                                    : AppConstants.hazardRed,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!canAfford) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'ADDITIONAL CP NEEDED:',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppConstants.hazardRed,
+                                ),
+                              ),
+                              Text(
+                                '$neededCP CP',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppConstants.hazardRed,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white60,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(color: Colors.white24),
+                            ),
+                          ),
+                          onPressed: () => Navigator.of(dialogCtx).pop(),
+                          child: const Text(
+                            'CANCEL',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.of(dialogCtx).pop();
-                          if (canAfford) {
-                            final success = onUnlock();
-                            if (success) {
-                              AudioService().playCollect();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: const Color(0xFF0C101A),
-                                  content: Text(
-                                    successMessage,
-                                    style: const TextStyle(
-                                      color: AppConstants.coinGold,
-                                      fontWeight: FontWeight.bold,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: canAfford
+                                ? AppConstants.coinGold
+                                : const Color(0xFF161E2E),
+                            foregroundColor: canAfford
+                                ? Colors.black
+                                : Colors.white70,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(
+                                color: canAfford
+                                    ? AppConstants.coinGold
+                                    : Colors.white24,
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(dialogCtx).pop();
+                            if (canAfford) {
+                              final success = onUnlock();
+                              if (success) {
+                                AudioService().playCollect();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: const Color(0xFF0C101A),
+                                    content: Text(
+                                      successMessage,
+                                      style: const TextStyle(
+                                        color: AppConstants.coinGold,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
+                                );
+                              }
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ShopScreen(),
                                 ),
                               );
                             }
-                          } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const ShopScreen(),
-                              ),
-                            );
-                          }
-                        },
-                        child: Text(
-                          canAfford
-                              ? 'AUTHORIZE & UNLOCK'
-                              : 'ACQUIRE CP (SHOP)',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 11,
+                          },
+                          child: Text(
+                            canAfford
+                                ? 'AUTHORIZE & UNLOCK'
+                                : 'ACQUIRE CP (SHOP)',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -1549,7 +1578,10 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     );
   }
 
-  Widget _buildBottomDock(BuildContext context) {
+  Widget _buildBottomDock(BuildContext context, {bool isCompact = false}) {
+    final saveService = context.watch<SaveService>();
+    final isCrateReady = DailyCrateService().isCrateReady(saveService);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1558,6 +1590,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           title: context.l10n.tr('daily_crate'),
           icon: Icons.card_giftcard_rounded,
           accentColor: AppConstants.coinGold,
+          showBadge: isCrateReady,
+          isCompact: isCompact,
           onTap: () => _claimDailyGift(context),
         ),
 
@@ -1567,6 +1601,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           icon: Icons.shopping_bag_rounded,
           accentColor: AppConstants.stealthBlue,
           isHighlight: true,
+          isCompact: isCompact,
           onTap: () {
             AudioService().playClick();
             Navigator.of(
@@ -1576,12 +1611,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
         ),
 
         // 3. Moon Edge Studio Developer Page
-        _buildStudioDockButton(context),
+        _buildStudioDockButton(context, isCompact: isCompact),
       ],
     );
   }
 
-  Widget _buildStudioDockButton(BuildContext context) {
+  Widget _buildStudioDockButton(
+    BuildContext context, {
+    bool isCompact = false,
+  }) {
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) {
@@ -1593,26 +1631,29 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             _showStudioDialog(context);
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 10 : 14,
+              vertical: isCompact ? 6 : 8,
+            ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF26102E), Color(0xFF131722)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
               border: Border.all(
                 color: Color.lerp(
                   const Color(0xFFFF007F),
                   const Color(0xFFA855F7),
                   _pulseController.value,
                 )!,
-                width: 1.5,
+                width: isCompact ? 1.2 : 1.5,
               ),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFFFF007F).withValues(alpha: glowAlpha),
-                  blurRadius: 10,
+                  blurRadius: isCompact ? 6 : 10,
                   spreadRadius: 1,
                 ),
               ],
@@ -1621,7 +1662,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(5),
+                  padding: EdgeInsets.all(isCompact ? 4 : 5),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFFFF007F), Color(0xFF7928CA)],
@@ -1630,17 +1671,17 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFFFF007F).withValues(alpha: 0.4),
-                        blurRadius: 6,
+                        blurRadius: isCompact ? 4 : 6,
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.nightlight_round,
                     color: Colors.white,
-                    size: 14,
+                    size: isCompact ? 11 : 14,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: isCompact ? 6 : 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -1648,11 +1689,11 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
+                        Text(
                           'MOON EDGE STUDIO',
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
-                            fontSize: 10.5,
+                            fontSize: isCompact ? 9 : 10.5,
                             letterSpacing: 0.8,
                             color: Colors.white,
                           ),
@@ -1661,7 +1702,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         Icon(
                           Icons.open_in_new_rounded,
                           color: const Color(0xFFFF007F).withValues(alpha: 0.9),
-                          size: 11,
+                          size: isCompact ? 9.5 : 11,
                         ),
                       ],
                     ),
@@ -1669,7 +1710,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     Text(
                       'DEV HUB // GOOGLE PLAY',
                       style: TextStyle(
-                        fontSize: 7.5,
+                        fontSize: isCompact ? 6.5 : 7.5,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFFFF77A9).withValues(alpha: 0.85),
                         letterSpacing: 0.8,
@@ -1690,46 +1731,95 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     required IconData icon,
     required Color accentColor,
     bool isHighlight = false,
+    bool showBadge = false,
+    bool isCompact = false,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isHighlight
-              ? accentColor.withValues(alpha: 0.16)
-              : const Color(0xFF131722),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isHighlight ? accentColor : Colors.white12,
-            width: isHighlight ? 1.5 : 1.0,
-          ),
-          boxShadow: isHighlight
-              ? [
-                  BoxShadow(
-                    color: accentColor.withValues(alpha: 0.22),
-                    blurRadius: 10,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 11 : 16,
+              vertical: isCompact ? 7 : 12,
+            ),
+            decoration: BoxDecoration(
+              color: isHighlight
+                  ? accentColor.withValues(alpha: 0.16)
+                  : const Color(0xFF131722),
+              borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
+              border: Border.all(
+                color: isHighlight
+                    ? accentColor
+                    : (showBadge
+                          ? accentColor.withValues(alpha: 0.8)
+                          : Colors.white12),
+                width: isHighlight || showBadge ? (isCompact ? 1.2 : 1.5) : 1.0,
+              ),
+              boxShadow: isHighlight || showBadge
+                  ? [
+                      BoxShadow(
+                        color: accentColor.withValues(alpha: 0.22),
+                        blurRadius: isCompact ? 6 : 10,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: accentColor, size: isCompact ? 14 : 18),
+                SizedBox(width: isCompact ? 6 : 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: isCompact ? 9 : 11,
+                    letterSpacing: isCompact ? 0.6 : 1.0,
+                    color: isHighlight ? Colors.white : Colors.white70,
                   ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: accentColor, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 11,
-                letterSpacing: 1.0,
-                color: isHighlight ? Colors.white : Colors.white70,
+                ),
+              ],
+            ),
+          ),
+          if (showBadge)
+            Positioned(
+              top: isCompact ? -3 : -5,
+              right: isCompact ? -3 : -5,
+              child: Container(
+                width: isCompact ? 12 : 14,
+                height: isCompact ? 12 : 14,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF2E4C),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: isCompact ? 1.0 : 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF2E4C).withValues(alpha: 0.6),
+                      blurRadius: isCompact ? 4 : 6,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    '!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isCompact ? 7 : 8,
+                      fontWeight: FontWeight.w900,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

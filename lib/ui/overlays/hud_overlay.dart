@@ -327,6 +327,13 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                           return Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              if (bm.isSafeGroundActive)
+                                _buildActiveTimerBadge(
+                                  icon: Icons.shield_rounded,
+                                  label:
+                                      '${bm.safeGroundTimeRemaining.toStringAsFixed(1)}s',
+                                  color: const Color(0xFF00E5FF),
+                                ),
                               if (bm.isMatrixActive)
                                 _buildActiveTimerBadge(
                                   icon: Icons.timer_rounded,
@@ -340,6 +347,12 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                                   label:
                                       '${bm.invisibilityTimeRemaining.toStringAsFixed(1)}s',
                                   color: AppConstants.stealthBlue,
+                                ),
+                              if (bm.isEmpShockwaveActive)
+                                _buildActiveTimerBadge(
+                                  icon: Icons.electric_bolt_rounded,
+                                  label: 'EMP BLAST',
+                                  color: const Color(0xFFFF3366),
                                 ),
                             ],
                           );
@@ -467,7 +480,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                           }
                         },
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       _buildBoosterPill(
                         type: BoosterType.matrixSlowMo,
                         icon: Icons.slow_motion_video_rounded,
@@ -489,7 +502,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                           }
                         },
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       _buildBoosterPill(
                         type: BoosterType.invisibility,
                         icon: Icons.visibility_off_rounded,
@@ -508,6 +521,23 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                               BoosterType.invisibility,
                             );
                             AudioService().playBooster();
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      _buildBoosterPill(
+                        type: BoosterType.killEyes,
+                        icon: Icons.electric_bolt_rounded,
+                        color: const Color(0xFFFF3366),
+                        count:
+                            saveService
+                                .player
+                                .boosters[BoosterType.killEyes]
+                                ?.value ??
+                            0,
+                        onTap: () {
+                          if (saveService.useBooster(BoosterType.killEyes)) {
+                            widget.game.triggerEmpShockwave();
                           }
                         },
                       ),

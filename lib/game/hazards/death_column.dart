@@ -39,6 +39,8 @@ class DeathColumn extends BaseHazard {
 
   @override
   bool checkCollision(RunnerPlayer player) {
+    if (player.isInvisibilityActive || player.isSafeGroundActive) return false;
+
     final pRect = Rect.fromLTWH(
       player.position.x - player.size.x / 2,
       player.position.y - player.size.y,

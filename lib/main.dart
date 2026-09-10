@@ -43,9 +43,18 @@ class CyberNinjaRunnerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       locale: Locale(saveService.settings.languageCode),
       builder: (context, child) {
-        return Directionality(
-          textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-          child: child ?? const SizedBox(),
+        final mediaQuery = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: mediaQuery.textScaler.clamp(
+              minScaleFactor: 0.85,
+              maxScaleFactor: 1.0,
+            ),
+          ),
+          child: Directionality(
+            textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+            child: child ?? const SizedBox(),
+          ),
         );
       },
       theme: ThemeData(

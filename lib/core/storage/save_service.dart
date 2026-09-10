@@ -138,10 +138,6 @@ class SaveService extends ChangeNotifier {
     saveAll();
   }
 
-  void setRemoveAds(bool val) {
-    player.removeAdsPurchased = val;
-    saveAll();
-  }
 
   bool unlockTenXMode() {
     const cost = 50000;

@@ -198,7 +198,7 @@ class ShopScreen extends StatelessWidget {
               description: 'Forces checkpoint havens to spawn',
               icon: Icons.shield_rounded,
               color: AppConstants.stealthBlue,
-              price: 120,
+              price: 200,
               count: 3,
               saveService: saveService,
             ),
@@ -207,10 +207,10 @@ class ShopScreen extends StatelessWidget {
               context,
               type: BoosterType.matrixSlowMo,
               name: 'Matrix Slow-Mo x3',
-              description: 'Slows down time velocity by 55%',
+              description: 'World slows for 8s while Ninja runs at full speed',
               icon: Icons.speed_rounded,
               color: AppConstants.matrixGreen,
-              price: 150,
+              price: 400,
               count: 3,
               saveService: saveService,
             ),
@@ -222,7 +222,7 @@ class ShopScreen extends StatelessWidget {
               description: 'Immunity against Dark Eye drone sentries',
               icon: Icons.visibility_off_rounded,
               color: AppConstants.boosterPurple,
-              price: 180,
+              price: 600,
               count: 3,
               saveService: saveService,
             ),
@@ -234,7 +234,7 @@ class ShopScreen extends StatelessWidget {
               description: 'Neutralizes active sentries on screen',
               icon: Icons.electric_bolt_rounded,
               color: const Color(0xFFFF3366),
-              price: 200,
+              price: 800,
               count: 3,
               saveService: saveService,
             ),
@@ -249,84 +249,13 @@ class ShopScreen extends StatelessWidget {
               color: const Color(0xFFB026FF),
               icon: Icons.memory_rounded,
             ),
+
             const SizedBox(height: 14),
-            _buildProtocolItem(
-              context,
-              title: 'Neural Ad-Bypass Protocol',
-              description:
-                  'Permanent ad-free uplink & +20% bonus CP on every run',
-              icon: Icons.verified_user_rounded,
-              color: const Color(0xFF00E5FF),
-              trailing: saveService.player.removeAdsPurchased
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00FF88).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFF00FF88).withValues(alpha: 0.6),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle_rounded,
-                            color: Color(0xFF00FF88),
-                            size: 14,
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            'VIP ACTIVE',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF00FF88),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1A2638),
-                        foregroundColor: const Color(0xFF00E5FF),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(
-                            color: const Color(
-                              0xFF00E5FF,
-                            ).withValues(alpha: 0.5),
-                          ),
-                        ),
-                      ),
-                      onPressed: () {
-                        saveService.setRemoveAds(true);
-                        saveService.addCyberPoints(500);
-                        AudioService().playCollect();
-                        _showPurchasedToast(
-                          context,
-                          'VIP Protocol Activated! +500 CP',
-                        );
-                      },
-                      child: const Text(
-                        '\$1.99 ACTIVATE',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 10),
             _buildProtocolItem(
               context,
               title: 'Daily Quantum Supply Hub',
               description:
-                  'Consecutive daily link: ${saveService.player.dailyStreak} Day Streak // +150 CP reward',
+                  'Consecutive daily link: ${saveService.player.dailyStreak} Day Streak // Neural Supply Drop Active',
               icon: Icons.calendar_month_rounded,
               color: AppConstants.coinGold,
               trailing: Container(

@@ -75,6 +75,25 @@ abstract class RunnerPlayer extends PositionComponent
   bool isDead = false;
   bool canDoubleJump = false;
 
+  bool get isInvisibilityActive {
+    try {
+      return game.boosterManager.isInvisibilityActive;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool get isSafeGroundActive {
+    try {
+      return game.boosterManager.isSafeGroundActive;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool get isStealthActive =>
+      hideController.isStealthActive || isInvisibilityActive;
+
   double squashFactorX = 1.0;
   double squashFactorY = 1.0;
   double slideTimer = 0.0;

@@ -27,7 +27,14 @@ class CyberNinjaPlayer extends RunnerPlayer {
   }) : super(size: Vector2(AppConstants.ninjaWidth, AppConstants.ninjaHeight));
 
   @override
-  Color getGhostNeonColor() => getNeonAccentColor();
+  Color getGhostNeonColor() {
+    if (isInvisibilityActive) return const Color(0xFF9D4EDD);
+    if (isSafeGroundActive) return const Color(0xFF00E5FF);
+    try {
+      if (game.boosterManager.isMatrixActive) return AppConstants.matrixGreen;
+    } catch (_) {}
+    return getNeonAccentColor();
+  }
 
   @override
   void jump() {
@@ -46,19 +53,28 @@ class CyberNinjaPlayer extends RunnerPlayer {
 
   @override
   void update(double dt) {
-    super.update(dt);
+    // If Matrix Slow-Mo is active, compensate dt so ninja maintains full 1.0x unhurried speed!
+    double playerDt = dt;
+    try {
+      if (game.boosterManager.isMatrixActive &&
+          game.boosterManager.timeDilationFactor > 0) {
+        playerDt = dt / game.boosterManager.timeDilationFactor;
+      }
+    } catch (_) {}
+
+    super.update(playerDt);
     if (isDead) return;
 
     // Running gait & wave physics
     final strideFreq = isSliding ? 7.0 : (isGrounded ? 13.0 : 5.0);
-    runCycle += dt * strideFreq;
-    scarfTimer += dt * (isGrounded ? 11.0 : 7.0);
-    corePulseTimer += dt * 4.0;
-    visorScanTimer += dt * 3.0;
+    runCycle += playerDt * strideFreq;
+    scarfTimer += playerDt * (isGrounded ? 11.0 : 7.0);
+    corePulseTimer += playerDt * 4.0;
+    visorScanTimer += playerDt * 3.0;
 
     // Aerial ninja flip logic
     if (!isGrounded) {
-      flipRotation += dt * 8.5;
+      flipRotation += playerDt * 8.5;
       if (flipRotation > 2 * pi) flipRotation = 2 * pi;
     } else {
       flipRotation = 0.0;
@@ -130,18 +146,28 @@ class CyberNinjaPlayer extends RunnerPlayer {
 
     super.render(canvas);
 
-    final isStealth = hideController.isStealthActive;
-    final primaryArmor = isStealth
-        ? const Color(0xFF0A0C10)
-        : getPrimaryArmorColor();
-    final secondaryPlate = isStealth
-        ? const Color(0xFF121620)
-        : getSecondaryPlateColor();
-    final neonAccent = isStealth
-        ? getNeonAccentColor().withValues(alpha: 0.3)
-        : getNeonAccentColor();
+    final isStealth = isStealthActive;
+    final isInv = isInvisibilityActive;
+    final primaryArmor = isInv
+        ? const Color(0xFF040608) // Ultra-Dark Shadow Stealth
+        : (isStealth ? const Color(0xFF0A0C10) : getPrimaryArmorColor());
+    final secondaryPlate = isInv
+        ? const Color(0xFF0A0E16) // Deep Carbon Stealth
+        : (isStealth ? const Color(0xFF121620) : getSecondaryPlateColor());
+    final neonAccent = isInv
+        ? const Color(0xFF9D4EDD).withValues(
+            alpha: 0.40,
+          ) // Phantom Stealth Purple
+        : (isStealth
+              ? getNeonAccentColor().withValues(alpha: 0.3)
+              : getNeonAccentColor());
 
     canvas.save();
+
+    if (isInv) {
+      // 55% Opacity stealth phantom layer - turns ninja dark & semi-transparent
+      canvas.saveLayer(null, Paint()..color = const Color(0x95FFFFFF));
+    }
 
     // 2. Dynamic Squash & Stretch Transform
     final pivotX = size.x / 2;
@@ -260,6 +286,69 @@ class CyberNinjaPlayer extends RunnerPlayer {
     // 12. Layer 7: Dual Katana Blazing Cross-Slash Shockwaves
     if (isSlashing) {
       _renderCrossSlashShockwave(canvas, neonAccent);
+    }
+
+    if (isInv) {
+      // Draw pulsing ethereal shadow cloak aura around the ninja
+      final auraPulse = (sin(runCycle * 4.0) * 0.5 + 0.5);
+      final auraPaint = Paint()
+        ..color = const Color(
+          0xFF9D4EDD,
+        ).withValues(alpha: 0.35 + auraPulse * 0.25)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset(size.x / 2, size.y * 0.52),
+            width: size.x * 0.88,
+            height: size.y * 0.90,
+          ),
+          const Radius.circular(16),
+        ),
+        auraPaint,
+      );
+      canvas.restore(); // Restore stealth saveLayer
+    }
+
+    if (isSafeGroundActive) {
+      final shieldPulse = (sin(runCycle * 6.0) * 0.5 + 0.5);
+      final shieldCenter = Offset(size.x / 2, size.y * 0.52);
+      final shieldRadius = size.y * 0.58;
+
+      // Outer cyan kinetic glow
+      final shieldGlowPaint = Paint()
+        ..color = const Color(
+          0xFF00E5FF,
+        ).withValues(alpha: 0.30 + shieldPulse * 0.20)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.5
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+      canvas.drawCircle(shieldCenter, shieldRadius, shieldGlowPaint);
+
+      // Inner crisp cyan energy barrier
+      final shieldLinePaint = Paint()
+        ..color = const Color(
+          0xFFE0F7FA,
+        ).withValues(alpha: 0.80 + shieldPulse * 0.20)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8;
+      canvas.drawCircle(shieldCenter, shieldRadius, shieldLinePaint);
+
+      // Kinetic shield orbital ellipse ring
+      final ringPaint = Paint()
+        ..color = const Color(0xFF00E5FF).withValues(alpha: 0.45)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4;
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: shieldCenter,
+          width: shieldRadius * 2.1,
+          height: shieldRadius * 0.85,
+        ),
+        ringPaint,
+      );
     }
 
     canvas.restore();

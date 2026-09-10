@@ -144,7 +144,7 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
           pPos.x - myWorld.x; // negative when player is to the left of robot
 
       // Player approaching from the front (left side) within detection range
-      if (dx < -30 && dx > -detectionRange) {
+      if (dx < -30 && dx > -detectionRange && !player.isStealthActive) {
         movingRight = false; // Turn to face incoming runner!
 
         final timeUntilFire = fireInterval - fireTimer;
@@ -243,7 +243,7 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
     if (isSliced) return false; // Sliced droid is dead and non-hazardous
 
     // Camouflage / invisibility bypass
-    if (player.hideController.isStealthActive) {
+    if (player.isStealthActive) {
       return false;
     }
 

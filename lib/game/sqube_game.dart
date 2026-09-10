@@ -118,7 +118,7 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
     // Apply time dilation from death slow-mo and Matrix Slow-Mo booster
     final effectiveDt = dt * deathTimeScale * boosterManager.timeDilationFactor;
-    boosterManager.update(effectiveDt);
+    boosterManager.update(dt * deathTimeScale);
 
     super.update(effectiveDt);
 
@@ -156,7 +156,9 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     worldGen.updateChunks(
       playerX: player.position.x,
       parentComponent: world,
-      forceSafeGround: boosterManager.forceSafeGroundSpawn,
+      forceSafeGround:
+          boosterManager.forceSafeGroundSpawn ||
+          boosterManager.isSafeGroundActive,
     );
     if (boosterManager.forceSafeGroundSpawn) {
       boosterManager.forceSafeGroundSpawn = false;
@@ -202,8 +204,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
             player.position.x >= chunk.startX + chunk.pitStartX &&
             player.position.x <=
                 chunk.startX + chunk.pitStartX + chunk.pitWidth) {
-          if (godMode) {
-            // Developer Test Mode: Safe invisible bridge over pit so player never falls or gets trapped
+          if (godMode || boosterManager.isSafeGroundActive) {
+            // Safe Ground Pack / GodMode: Hard-light safe bridge over pit so player never falls
             if (player.position.y >= groundLevelY) {
               player.onLand(groundLevelY);
             }
@@ -271,9 +273,12 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
           player.position.x <= chunk.startX + chunk.length + 100) {
         final hazardsToDestroy = <BaseHazard>[];
         for (final hazard in chunk.hazards) {
-          if ((hazard.obstacleType == ObstacleType.darkEye ||
-                  hazard.obstacleType == ObstacleType.cyberCannon) &&
-              boosterManager.isInvisibilityActive) {
+          if (boosterManager.isInvisibilityActive &&
+              (hazard.obstacleType == ObstacleType.darkEye ||
+                  hazard.obstacleType == ObstacleType.cyberCannon ||
+                  hazard.obstacleType == ObstacleType.darkBox ||
+                  hazard.obstacleType == ObstacleType.cyberTitan ||
+                  hazard.obstacleType == ObstacleType.bugCrawler)) {
             continue;
           }
           if (hazard is DarkBox &&
@@ -373,7 +378,9 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
               }
               continue;
             }
-            if (!godMode) {
+            if (!godMode &&
+                !boosterManager.isInvisibilityActive &&
+                !boosterManager.isSafeGroundActive) {
               triggerGameOver(hazard.deathType);
               return;
             }
@@ -386,9 +393,13 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       }
     }
 
-    // Safety ground check during test mode
-    if (godMode && player.position.y > groundLevelY) {
+    // Safety ground check during test mode or active Safe Ground booster
+    if ((godMode || boosterManager.isSafeGroundActive) &&
+        player.position.y > groundLevelY) {
       player.onLand(groundLevelY);
+      player.position.y = groundLevelY;
+      player.velocity.y = 0;
+      player.isGrounded = true;
     }
 
     player.hideController.isNearShadowZone = inShadow;
@@ -397,6 +408,14 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   void triggerGameOver(DeathType cause) {
     if (godMode) {
       return; // IMMORTAL: Player cannot die while game testing is active!
+    }
+    // Safe Ground Protection: Kinetic shield prevents any fatal damage or falling death!
+    if (boosterManager.isSafeGroundActive) {
+      return;
+    }
+    // Invisibility Protection: Ninja ONLY dies by falling into a pit!
+    if (boosterManager.isInvisibilityActive && cause != DeathType.fallInPit) {
+      return;
     }
     if (isGameOver) return;
     isGameOver = true;
@@ -441,6 +460,83 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   void resumeGame() {
     isGamePaused = false;
     overlays.remove('PauseOverlay');
+  }
+
+  /// Triggers full-screen EMP Shockwave that destroys all active sentries, obstacles & enemies
+  void triggerEmpShockwave() {
+    boosterManager.activateBooster(BoosterType.killEyes);
+    AudioService().playSfx('laser');
+    AudioService().playBooster();
+
+    // Heavy screen shake impact
+    shakeCamera(2.2);
+
+    // Multi-layered visual EMP blast shockwaves centered at player position
+    final centerPos = player.position.clone() - Vector2(0, player.size.y / 2);
+    player.shockwaves.add(
+      ShockwaveRing(
+        position: centerPos,
+        radius: 14.0,
+        maxRadius: 850.0,
+        alpha: 1.0,
+        color: const Color(0xFFFF3366), // Crimson EMP Wave
+      ),
+    );
+    player.shockwaves.add(
+      ShockwaveRing(
+        position: centerPos,
+        radius: 10.0,
+        maxRadius: 720.0,
+        alpha: 0.9,
+        color: const Color(0xFF00E5FF), // Electric Blue Ion Ring
+      ),
+    );
+    player.shockwaves.add(
+      ShockwaveRing(
+        position: centerPos,
+        radius: 6.0,
+        maxRadius: 600.0,
+        alpha: 0.8,
+        color: Colors.white, // Core plasma flash
+      ),
+    );
+
+    // Destroy all active on-screen hazards & enemies
+    int neutralizedCount = 0;
+    for (final chunk in worldGen.activeChunks) {
+      final hazardsToDestroy = <BaseHazard>[];
+      for (final hazard in chunk.hazards) {
+        final hPos = hazard.worldPosition;
+        if (hPos.x >= player.position.x - 180.0 &&
+            hPos.x <= player.position.x + 950.0) {
+          if (hazard is DarkBox) {
+            if (!hazard.isSliced) {
+              hazard.sliceAndDestroy();
+              neutralizedCount++;
+            }
+          } else if (hazard is CyberTitan) {
+            if (!hazard.isSliced) {
+              hazard.takeDamage(amount: 3);
+              neutralizedCount += 2;
+            }
+          } else {
+            hazardsToDestroy.add(hazard);
+            neutralizedCount++;
+          }
+        }
+      }
+      for (final h in hazardsToDestroy) {
+        h.removeFromParent();
+        chunk.hazards.remove(h);
+      }
+    }
+
+    if (neutralizedCount > 0) {
+      final cpBonus =
+          neutralizedCount * (mode == GameMode.tenXChallenge ? 60 : 30);
+      collectedCP += cpBonus;
+      saveService.addCyberPoints(cpBonus);
+    }
   }
 
   // Touch and Gesture Controls - Jump only triggers via on-screen Jump Button
@@ -493,6 +589,12 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
         if (saveService.useBooster(BoosterType.invisibility)) {
           boosterManager.activateBooster(BoosterType.invisibility);
           AudioService().playBooster();
+        }
+        return KeyEventResult.handled;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.digit4) {
+        if (saveService.useBooster(BoosterType.killEyes)) {
+          triggerEmpShockwave();
         }
         return KeyEventResult.handled;
       }

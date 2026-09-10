@@ -28,6 +28,8 @@ class BugCrawler extends BaseHazard {
 
   @override
   bool checkCollision(RunnerPlayer player) {
+    if (player.isStealthActive) return false;
+
     final pos = worldPosition;
     // Proximity trigger (awakes bug when player gets within 350px)
     if (!isAwake && (player.position.x - pos.x).abs() < 350) {
