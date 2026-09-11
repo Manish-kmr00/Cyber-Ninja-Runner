@@ -7,6 +7,8 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
+import '../dialogs/feedback_dialog.dart';
+import 'shop_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -575,47 +577,83 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                       const SizedBox(width: 12),
 
-                      // CP Vault Balance
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF121724),
+                      // CP Vault Balance (Tap to open Arsenal & Hangar Store)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppConstants.coinGold.withValues(alpha: 0.6),
-                            width: 1.2,
+                          splashColor: AppConstants.coinGold.withValues(
+                            alpha: 0.3,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppConstants.coinGold.withValues(
-                                alpha: 0.15,
+                          onTap: () {
+                            AudioService().playClick();
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const ShopScreen(
+                                  initialScrollToVault: true,
+                                ),
                               ),
-                              blurRadius: 10,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.diamond_rounded,
-                              color: AppConstants.coinGold,
-                              size: 15,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${saveService.player.cyberPoints.value} CP',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                                fontFamily: 'monospace',
-                                letterSpacing: 1.0,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF121724),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: AppConstants.coinGold.withValues(
+                                  alpha: 0.7,
+                                ),
+                                width: 1.2,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppConstants.coinGold.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  blurRadius: 10,
+                                ),
+                              ],
                             ),
-                          ],
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.diamond_rounded,
+                                  color: AppConstants.coinGold,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${saveService.player.cyberPoints.value} CP',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: AppConstants.coinGold.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_rounded,
+                                    color: AppConstants.coinGold,
+                                    size: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -626,608 +664,718 @@ class _SettingsScreenState extends State<SettingsScreen>
 
             // 2. Landscape Dual-Column Scrollable Body
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 14,
-                  bottom: 30,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ===== LEFT COLUMN: AUDIO & CONTROLS MATRIX =====
-                    Expanded(
-                      child: Column(
-                        children: [
-                          // Card 1: Audio & Haptics Matrix
-                          _buildCyberCard(
-                            title: 'AUDIO & SENSORY MATRIX',
-                            subtitle: '// ACOUSTIC ENGINE & HAPTIC FEEDBACK',
-                            accentColor: const Color(0xFF00E5FF),
-                            icon: Icons.headphones_rounded,
-                            child: Column(
-                              children: [
-                                // Master Mute Toggle
-                                _buildCyberSwitchTile(
-                                  title: 'Master Audio Output',
-                                  subtitle: saveService.settings.isMuted
-                                      ? 'ALL AUDIO SILENCED'
-                                      : 'AUDIO OUTPUT ACTIVE',
-                                  icon: saveService.settings.isMuted
-                                      ? Icons.volume_off_rounded
-                                      : Icons.volume_up_rounded,
-                                  accentColor: const Color(0xFF00E5FF),
-                                  value: !saveService.settings.isMuted,
-                                  onChanged: (active) {
-                                    saveService.settings.isMuted = !active;
-                                    AudioService().updateVolumes(
-                                      music: saveService.settings.musicVolume,
-                                      sfx: saveService.settings.sfxVolume,
-                                      muted: !active,
-                                    );
-                                    saveService.saveAll();
-                                    AudioService().playClick();
-                                  },
-                                ),
-                                const Divider(
-                                  color: Colors.white10,
-                                  height: 16,
-                                ),
-
-                                // BGM Volume Slider
-                                _buildCyberSliderTile(
-                                  title: 'BGM / Cyber Synthwave Volume',
-                                  percent:
-                                      (saveService.settings.musicVolume * 100)
-                                          .toInt(),
-                                  icon: Icons.music_note_rounded,
-                                  accentColor: const Color(0xFF00E5FF),
-                                  value: saveService.settings.musicVolume,
-                                  enabled: !saveService.settings.isMuted,
-                                  onChanged: (val) {
-                                    saveService.settings.musicVolume = val;
-                                    AudioService().updateVolumes(
-                                      music: val,
-                                      sfx: saveService.settings.sfxVolume,
-                                    );
-                                    saveService.saveAll();
-                                  },
-                                ),
-                                const SizedBox(height: 8),
-
-                                // SFX Volume Slider
-                                _buildCyberSliderTile(
-                                  title: 'SFX & Weapon Blade Volume',
-                                  percent:
-                                      (saveService.settings.sfxVolume * 100)
-                                          .toInt(),
-                                  icon: Icons.graphic_eq_rounded,
-                                  accentColor: const Color(0xFF00E5FF),
-                                  value: saveService.settings.sfxVolume,
-                                  enabled: !saveService.settings.isMuted,
-                                  onChanged: (val) {
-                                    saveService.settings.sfxVolume = val;
-                                    AudioService().updateVolumes(
-                                      music: saveService.settings.musicVolume,
-                                      sfx: val,
-                                    );
-                                    saveService.saveAll();
-                                  },
-                                  onChangeEnd: (_) {
-                                    AudioService().playClick();
-                                  },
-                                ),
-                                const Divider(
-                                  color: Colors.white10,
-                                  height: 16,
-                                ),
-
-                                // Haptics Toggle
-                                _buildCyberSwitchTile(
-                                  title: 'Cyber Haptic Vibration',
-                                  subtitle:
-                                      'Tactile pulses on Jump, Katana Slash & Impact',
-                                  icon: Icons.vibration_rounded,
-                                  accentColor: const Color(0xFF00E5FF),
-                                  value: saveService.settings.hapticsEnabled,
-                                  onChanged: (active) {
-                                    saveService.settings.hapticsEnabled =
-                                        active;
-                                    AudioService().hapticsEnabled = active;
-                                    saveService.saveAll();
-                                    if (active) {
-                                      HapticFeedback.heavyImpact();
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          // Card 2: Controls & HUD Customization
-                          _buildCyberCard(
-                            title: 'CONTROLS & HUD DOCK',
-                            subtitle:
-                                saveService.settings.controlScheme ==
-                                    ControlScheme.swipe
-                                ? '// GESTURE SWIPE & SENSITIVITY CONFIG'
-                                : '// ACTION PEDALS GLOW & OPACITY DOCK',
-                            accentColor: const Color(0xFFFFB300),
-                            icon: Icons.sports_esports_rounded,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Dual Mode Selector: SWIPE vs BUTTONS (Ref: Sqube Darkness style)
-                                Row(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 14,
+                      bottom: 30,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ===== LEFT COLUMN: AUDIO & CONTROLS MATRIX =====
+                        Expanded(
+                          child: Column(
+                            children: [
+                              // Card 1: Audio & Haptics Matrix
+                              _buildCyberCard(
+                                title: 'AUDIO & SENSORY MATRIX',
+                                subtitle:
+                                    '// ACOUSTIC ENGINE & HAPTIC FEEDBACK',
+                                accentColor: const Color(0xFF00E5FF),
+                                icon: Icons.headphones_rounded,
+                                child: Column(
                                   children: [
-                                    _buildControlModeCard(
-                                      title: 'SWIPE',
-                                      subtitle: 'Left: Jump • Right: Slash',
+                                    // Master Mute Toggle
+                                    _buildCyberSwitchTile(
+                                      title: 'Master Audio Output',
+                                      subtitle: saveService.settings.isMuted
+                                          ? 'ALL AUDIO SILENCED'
+                                          : 'AUDIO OUTPUT ACTIVE',
+                                      icon: saveService.settings.isMuted
+                                          ? Icons.volume_off_rounded
+                                          : Icons.volume_up_rounded,
                                       accentColor: const Color(0xFF00E5FF),
-                                      isSelected:
-                                          saveService.settings.controlScheme ==
-                                          ControlScheme.swipe,
-                                      onTap: () {
-                                        AudioService().playClick();
-                                        saveService.settings.controlScheme =
-                                            ControlScheme.swipe;
+                                      value: !saveService.settings.isMuted,
+                                      onChanged: (active) {
+                                        saveService.settings.isMuted = !active;
+                                        AudioService().updateVolumes(
+                                          music:
+                                              saveService.settings.musicVolume,
+                                          sfx: saveService.settings.sfxVolume,
+                                          muted: !active,
+                                        );
                                         saveService.saveAll();
+                                        AudioService().playClick();
                                       },
-                                      previewWidget: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                const Icon(
-                                                  Icons.arrow_upward_rounded,
-                                                  size: 18,
-                                                  color: Color(0xFF00E5FF),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  'LEFT: JUMP',
-                                                  style: TextStyle(
-                                                    color: const Color(
-                                                      0xFF00E5FF,
-                                                    ).withValues(alpha: 0.9),
-                                                    fontSize: 8.0,
-                                                    fontWeight: FontWeight.w800,
-                                                    fontFamily: 'monospace',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 1,
-                                            height: 28,
-                                            color: Colors.white12,
-                                          ),
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                const Icon(
-                                                  Icons.flash_on_rounded,
-                                                  size: 18,
-                                                  color: Color(0xFFFF007F),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  'RIGHT: SLASH',
-                                                  style: TextStyle(
-                                                    color: const Color(
-                                                      0xFFFF007F,
-                                                    ).withValues(alpha: 0.9),
-                                                    fontSize: 8.0,
-                                                    fontWeight: FontWeight.w800,
-                                                    fontFamily: 'monospace',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                                     ),
-                                    const SizedBox(width: 10),
-                                    _buildControlModeCard(
-                                      title: 'BUTTONS',
-                                      subtitle: 'Pedals: Jump • Slash',
-                                      accentColor: const Color(0xFFFFB300),
-                                      isSelected:
-                                          saveService.settings.controlScheme ==
-                                          ControlScheme.buttons,
-                                      onTap: () {
-                                        AudioService().playClick();
-                                        saveService.settings.controlScheme =
-                                            ControlScheme.buttons;
+                                    const Divider(
+                                      color: Colors.white10,
+                                      height: 16,
+                                    ),
+
+                                    // BGM Volume Slider
+                                    _buildCyberSliderTile(
+                                      title: 'BGM / Cyber Synthwave Volume',
+                                      percent:
+                                          (saveService.settings.musicVolume *
+                                                  100)
+                                              .toInt(),
+                                      icon: Icons.music_note_rounded,
+                                      accentColor: const Color(0xFF00E5FF),
+                                      value: saveService.settings.musicVolume,
+                                      enabled: !saveService.settings.isMuted,
+                                      onChanged: (val) {
+                                        saveService.settings.musicVolume = val;
+                                        AudioService().updateVolumes(
+                                          music: val,
+                                          sfx: saveService.settings.sfxVolume,
+                                        );
                                         saveService.saveAll();
                                       },
-                                      previewWidget: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  width: 24,
-                                                  height: 24,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: const Color(
-                                                      0xFF00E5FF,
-                                                    ).withValues(alpha: 0.18),
-                                                    border: Border.all(
-                                                      color: const Color(
-                                                        0xFF00E5FF,
-                                                      ).withValues(alpha: 0.6),
-                                                      width: 1.0,
-                                                    ),
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.arrow_upward_rounded,
-                                                    size: 14,
-                                                    color: Color(0xFF00E5FF),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  'JUMP',
-                                                  style: TextStyle(
-                                                    color: const Color(
-                                                      0xFF00E5FF,
-                                                    ).withValues(alpha: 0.9),
-                                                    fontSize: 8.5,
-                                                    fontWeight: FontWeight.w800,
-                                                    fontFamily: 'monospace',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 1,
-                                            height: 28,
-                                            color: Colors.white12,
-                                          ),
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  width: 24,
-                                                  height: 24,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: const Color(
-                                                      0xFFFF007F,
-                                                    ).withValues(alpha: 0.18),
-                                                    border: Border.all(
-                                                      color: const Color(
-                                                        0xFFFF007F,
-                                                      ).withValues(alpha: 0.6),
-                                                      width: 1.0,
-                                                    ),
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.flash_on_rounded,
-                                                    size: 14,
-                                                    color: Color(0xFFFF007F),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  'SLASH',
-                                                  style: TextStyle(
-                                                    color: const Color(
-                                                      0xFFFF007F,
-                                                    ).withValues(alpha: 0.9),
-                                                    fontSize: 8.5,
-                                                    fontWeight: FontWeight.w800,
-                                                    fontFamily: 'monospace',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // SFX Volume Slider
+                                    _buildCyberSliderTile(
+                                      title: 'SFX & Weapon Blade Volume',
+                                      percent:
+                                          (saveService.settings.sfxVolume * 100)
+                                              .toInt(),
+                                      icon: Icons.graphic_eq_rounded,
+                                      accentColor: const Color(0xFF00E5FF),
+                                      value: saveService.settings.sfxVolume,
+                                      enabled: !saveService.settings.isMuted,
+                                      onChanged: (val) {
+                                        saveService.settings.sfxVolume = val;
+                                        AudioService().updateVolumes(
+                                          music:
+                                              saveService.settings.musicVolume,
+                                          sfx: val,
+                                        );
+                                        saveService.saveAll();
+                                      },
+                                      onChangeEnd: (_) {
+                                        AudioService().playClick();
+                                      },
+                                    ),
+                                    const Divider(
+                                      color: Colors.white10,
+                                      height: 16,
+                                    ),
+
+                                    // Haptics Toggle
+                                    _buildCyberSwitchTile(
+                                      title: 'Cyber Haptic Vibration',
+                                      subtitle:
+                                          'Tactile pulses on Jump, Katana Slash & Impact',
+                                      icon: Icons.vibration_rounded,
+                                      accentColor: const Color(0xFF00E5FF),
+                                      value:
+                                          saveService.settings.hapticsEnabled,
+                                      onChanged: (active) {
+                                        saveService.settings.hapticsEnabled =
+                                            active;
+                                        AudioService().hapticsEnabled = active;
+                                        saveService.saveAll();
+                                        if (active) {
+                                          HapticFeedback.heavyImpact();
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),
-                                const Divider(
-                                  color: Colors.white10,
-                                  height: 18,
-                                ),
+                              ),
+                              const SizedBox(height: 14),
 
-                                // Contextual Controls based on Mode
-                                if (saveService.settings.controlScheme ==
-                                    ControlScheme.swipe) ...[
-                                  // Sensitivity Slider
-                                  _buildSensitivitySliderTile(
-                                    saveService: saveService,
-                                    accentColor: const Color(0xFF00E5FF),
-                                  ),
-                                ] else ...[
-                                  // Button Opacity Slider
-                                  _buildCyberSliderTile(
-                                    title: 'HUD Pedal Opacity / Glow',
-                                    percent:
-                                        (saveService.settings.buttonOpacity *
-                                                100)
-                                            .toInt(),
-                                    icon: Icons.opacity_rounded,
-                                    accentColor: const Color(0xFFFFB300),
-                                    value: saveService.settings.buttonOpacity,
-                                    min: 0.4,
-                                    max: 1.0,
-                                    onChanged: (val) {
-                                      saveService.settings.buttonOpacity = val;
-                                      saveService.saveAll();
-                                    },
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-
-                    // ===== RIGHT COLUMN: PROTOCOLS, LOCALIZATION & DATA =====
-                    Expanded(
-                      child: Column(
-                        children: [
-                          // Card 3: Game Protocols & Localization
-                          _buildCyberCard(
-                            title: 'PROTOCOLS & INTERFACE',
-                            subtitle:
-                                '// SYSTEM OVERRIDES & LOCALIZATION MATRIX',
-                            accentColor: const Color(0xFFD500F9),
-                            icon: Icons.developer_mode_rounded,
-                            child: Column(
-                              children: [
-                                // God Mode / Immortal Protocol Toggle
-                                _buildCyberSwitchTile(
-                                  title: 'Immortal Protocol (Test Mode)',
-                                  subtitle: saveService.settings.godModeEnabled
-                                      ? 'ENABLED: Ninja deflects all hazard lethal damage'
-                                      : 'OFF: Real survival mode (death triggers Game Over)',
-                                  icon: Icons.shield_rounded,
-                                  accentColor: const Color(0xFFD500F9),
-                                  value: saveService.settings.godModeEnabled,
-                                  onChanged: (active) {
-                                    AudioService().playClick();
-                                    saveService.settings.godModeEnabled =
-                                        active;
-                                    saveService.saveAll();
-                                  },
-                                ),
-                                const Divider(
-                                  color: Colors.white10,
-                                  height: 16,
-                                ),
-
-                                // Screen Glow / Visual FX Toggle
-                                _buildCyberSwitchTile(
-                                  title: 'Ultra Neon Bloom & FX',
-                                  subtitle:
-                                      saveService.settings.highQualityEffects
-                                      ? 'ENABLED: Full particle trails & neon bloom'
-                                      : 'BATTERY SAVER: Minimal shader footprint',
-                                  icon: Icons.auto_awesome_rounded,
-                                  accentColor: const Color(0xFFD500F9),
-                                  value:
-                                      saveService.settings.highQualityEffects,
-                                  onChanged: (active) {
-                                    AudioService().playClick();
-                                    saveService.settings.highQualityEffects =
-                                        active;
-                                    saveService.saveAll();
-                                  },
-                                ),
-                                const Divider(
-                                  color: Colors.white10,
-                                  height: 16,
-                                ),
-
-                                // Interface Language Selector Tile
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                              // Card 2: Controls & HUD Customization
+                              _buildCyberCard(
+                                title: 'CONTROLS & HUD DOCK',
+                                subtitle:
+                                    saveService.settings.controlScheme ==
+                                        ControlScheme.swipe
+                                    ? '// GESTURE SWIPE & SENSITIVITY CONFIG'
+                                    : '// ACTION PEDALS GLOW & OPACITY DOCK',
+                                accentColor: const Color(0xFFFFB300),
+                                icon: Icons.sports_esports_rounded,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: const Color(
-                                                0xFFD500F9,
-                                              ).withValues(alpha: 0.15),
-                                            ),
-                                            child: const Icon(
-                                              Icons.translate_rounded,
-                                              color: Color(0xFFD500F9),
-                                              size: 18,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Text(
-                                                  'Interface Language',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w900,
-                                                    fontSize: 13,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '${currentLang.flag} ${currentLang.nativeName} (${currentLang.englishName})',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    color: const Color(
-                                                      0xFFD500F9,
-                                                    ).withValues(alpha: 0.8),
-                                                    fontSize: 10.5,
-                                                    fontFamily: 'monospace',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(8),
-                                        onTap: () => _showLanguageDialog(
-                                          context,
-                                          saveService,
-                                        ),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 7,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF191226),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: const Color(
-                                                0xFFD500F9,
-                                              ).withValues(alpha: 0.6),
-                                              width: 1.2,
-                                            ),
-                                          ),
-                                          child: const Row(
+                                    // Dual Mode Selector: SWIPE vs BUTTONS (Ref: Sqube Darkness style)
+                                    Row(
+                                      children: [
+                                        _buildControlModeCard(
+                                          title: 'SWIPE',
+                                          subtitle: 'Left: Jump • Right: Slash',
+                                          accentColor: const Color(0xFF00E5FF),
+                                          isSelected:
+                                              saveService
+                                                  .settings
+                                                  .controlScheme ==
+                                              ControlScheme.swipe,
+                                          onTap: () {
+                                            AudioService().playClick();
+                                            saveService.settings.controlScheme =
+                                                ControlScheme.swipe;
+                                            saveService.saveAll();
+                                          },
+                                          previewWidget: Row(
                                             children: [
-                                              Text(
-                                                'CHANGE',
-                                                style: TextStyle(
-                                                  color: Color(0xFFD500F9),
-                                                  fontWeight: FontWeight.w900,
-                                                  fontSize: 11,
-                                                  fontFamily: 'monospace',
-                                                  letterSpacing: 1.0,
+                                              Expanded(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons
+                                                          .arrow_upward_rounded,
+                                                      size: 18,
+                                                      color: Color(0xFF00E5FF),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'LEFT: JUMP',
+                                                      style: TextStyle(
+                                                        color:
+                                                            const Color(
+                                                              0xFF00E5FF,
+                                                            ).withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 8.0,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        fontFamily: 'monospace',
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                              SizedBox(width: 4),
-                                              Icon(
-                                                Icons.arrow_forward_ios_rounded,
-                                                color: Color(0xFFD500F9),
-                                                size: 11,
+                                              Container(
+                                                width: 1,
+                                                height: 28,
+                                                color: Colors.white12,
+                                              ),
+                                              Expanded(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.flash_on_rounded,
+                                                      size: 18,
+                                                      color: Color(0xFFFF007F),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'RIGHT: SLASH',
+                                                      style: TextStyle(
+                                                        color:
+                                                            const Color(
+                                                              0xFFFF007F,
+                                                            ).withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 8.0,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        fontFamily: 'monospace',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ],
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          // Card 4: Data Vault & Studio Hub
-                          _buildCyberCard(
-                            title: 'DATA VAULT & STUDIO ACCESS',
-                            subtitle:
-                                '// MISSION ARCHIVE & MOON EDGE STUDIO HUB',
-                            accentColor: AppConstants.hazardRed,
-                            icon: Icons.shield_moon_rounded,
-                            child: Column(
-                              children: [
-                                // Data management buttons row
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildCyberButton(
-                                        label: 'RESET TELEMETRY',
-                                        icon: Icons.replay_rounded,
-                                        color: const Color(0xFF00E5FF),
-                                        onTap: () => _showResetStatsDialog(
-                                          context,
-                                          saveService,
+                                        const SizedBox(width: 10),
+                                        _buildControlModeCard(
+                                          title: 'BUTTONS',
+                                          subtitle: 'Pedals: Jump • Slash',
+                                          accentColor: const Color(0xFFFFB300),
+                                          isSelected:
+                                              saveService
+                                                  .settings
+                                                  .controlScheme ==
+                                              ControlScheme.buttons,
+                                          onTap: () {
+                                            AudioService().playClick();
+                                            saveService.settings.controlScheme =
+                                                ControlScheme.buttons;
+                                            saveService.saveAll();
+                                          },
+                                          previewWidget: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      width: 24,
+                                                      height: 24,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color:
+                                                            const Color(
+                                                              0xFF00E5FF,
+                                                            ).withValues(
+                                                              alpha: 0.18,
+                                                            ),
+                                                        border: Border.all(
+                                                          color:
+                                                              const Color(
+                                                                0xFF00E5FF,
+                                                              ).withValues(
+                                                                alpha: 0.6,
+                                                              ),
+                                                          width: 1.0,
+                                                        ),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons
+                                                            .arrow_upward_rounded,
+                                                        size: 14,
+                                                        color: Color(
+                                                          0xFF00E5FF,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'JUMP',
+                                                      style: TextStyle(
+                                                        color:
+                                                            const Color(
+                                                              0xFF00E5FF,
+                                                            ).withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 8.5,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        fontFamily: 'monospace',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                width: 1,
+                                                height: 28,
+                                                color: Colors.white12,
+                                              ),
+                                              Expanded(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      width: 24,
+                                                      height: 24,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color:
+                                                            const Color(
+                                                              0xFFFF007F,
+                                                            ).withValues(
+                                                              alpha: 0.18,
+                                                            ),
+                                                        border: Border.all(
+                                                          color:
+                                                              const Color(
+                                                                0xFFFF007F,
+                                                              ).withValues(
+                                                                alpha: 0.6,
+                                                              ),
+                                                          width: 1.0,
+                                                        ),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.flash_on_rounded,
+                                                        size: 14,
+                                                        color: Color(
+                                                          0xFFFF007F,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'SLASH',
+                                                      style: TextStyle(
+                                                        color:
+                                                            const Color(
+                                                              0xFFFF007F,
+                                                            ).withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 8.5,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        fontFamily: 'monospace',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _buildCyberButton(
-                                        label: 'FACTORY RESET',
-                                        icon: Icons.delete_forever_rounded,
-                                        color: AppConstants.hazardRed,
-                                        onTap: () => _showFactoryResetDialog(
-                                          context,
-                                          saveService,
-                                        ),
-                                      ),
+                                    const Divider(
+                                      color: Colors.white10,
+                                      height: 18,
                                     ),
-                                  ],
-                                ),
-                                const Divider(
-                                  color: Colors.white10,
-                                  height: 16,
-                                ),
 
-                                // Developer Links Row
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildCyberLinkCard(
-                                        title: 'MOON EDGE STUDIO',
-                                        subtitle:
-                                            'Developer Catalog on Google Play',
-                                        icon: Icons.shop_rounded,
-                                        accentColor: const Color(0xFF00E676),
-                                        onTap: () => _openUrl(_moonEdgeUrl),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _buildCyberLinkCard(
-                                        title: 'IMAGE RESIZER',
-                                        subtitle:
-                                            'Featured Utility Tool on Play Store',
-                                        icon: Icons
-                                            .photo_size_select_large_rounded,
+                                    // Contextual Controls based on Mode
+                                    if (saveService.settings.controlScheme ==
+                                        ControlScheme.swipe) ...[
+                                      // Sensitivity Slider
+                                      _buildSensitivitySliderTile(
+                                        saveService: saveService,
                                         accentColor: const Color(0xFF00E5FF),
-                                        onTap: () => _openUrl(_imgResizerUrl),
+                                      ),
+                                    ] else ...[
+                                      // Button Opacity Slider
+                                      _buildCyberSliderTile(
+                                        title: 'HUD Pedal Opacity / Glow',
+                                        percent:
+                                            (saveService
+                                                        .settings
+                                                        .buttonOpacity *
+                                                    100)
+                                                .toInt(),
+                                        icon: Icons.opacity_rounded,
+                                        accentColor: const Color(0xFFFFB300),
+                                        value:
+                                            saveService.settings.buttonOpacity,
+                                        min: 0.4,
+                                        max: 1.0,
+                                        onChanged: (val) {
+                                          saveService.settings.buttonOpacity =
+                                              val;
+                                          saveService.saveAll();
+                                        },
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+
+                        // ===== RIGHT COLUMN: PROTOCOLS, LOCALIZATION & DATA =====
+                        Expanded(
+                          child: Column(
+                            children: [
+                              // Card 3: Game Protocols & Localization
+                              _buildCyberCard(
+                                title: 'PROTOCOLS & INTERFACE',
+                                subtitle:
+                                    '// SYSTEM OVERRIDES & LOCALIZATION MATRIX',
+                                accentColor: const Color(0xFFD500F9),
+                                icon: Icons.developer_mode_rounded,
+                                child: Column(
+                                  children: [
+                                    // God Mode / Immortal Protocol Toggle
+                                    _buildCyberSwitchTile(
+                                      title: 'Immortal Protocol (Test Mode)',
+                                      subtitle:
+                                          saveService.settings.godModeEnabled
+                                          ? 'ENABLED: Ninja deflects all hazard lethal damage'
+                                          : 'OFF: Real survival mode (death triggers Game Over)',
+                                      icon: Icons.shield_rounded,
+                                      accentColor: const Color(0xFFD500F9),
+                                      value:
+                                          saveService.settings.godModeEnabled,
+                                      onChanged: (active) {
+                                        AudioService().playClick();
+                                        saveService.settings.godModeEnabled =
+                                            active;
+                                        saveService.saveAll();
+                                      },
+                                    ),
+                                    const Divider(
+                                      color: Colors.white10,
+                                      height: 16,
+                                    ),
+
+                                    // Screen Glow / Visual FX Toggle
+                                    _buildCyberSwitchTile(
+                                      title: 'Ultra Neon Bloom & FX',
+                                      subtitle:
+                                          saveService
+                                              .settings
+                                              .highQualityEffects
+                                          ? 'ENABLED: Full particle trails & neon bloom'
+                                          : 'BATTERY SAVER: Minimal shader footprint',
+                                      icon: Icons.auto_awesome_rounded,
+                                      accentColor: const Color(0xFFD500F9),
+                                      value: saveService
+                                          .settings
+                                          .highQualityEffects,
+                                      onChanged: (active) {
+                                        AudioService().playClick();
+                                        saveService
+                                                .settings
+                                                .highQualityEffects =
+                                            active;
+                                        saveService.saveAll();
+                                      },
+                                    ),
+                                    const Divider(
+                                      color: Colors.white10,
+                                      height: 16,
+                                    ),
+
+                                    // Interface Language Selector Tile
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  8,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: const Color(
+                                                    0xFFD500F9,
+                                                  ).withValues(alpha: 0.15),
+                                                ),
+                                                child: const Icon(
+                                                  Icons.translate_rounded,
+                                                  color: Color(0xFFD500F9),
+                                                  size: 18,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      'Interface Language',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${currentLang.flag} ${currentLang.nativeName} (${currentLang.englishName})',
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        color:
+                                                            const Color(
+                                                              0xFFD500F9,
+                                                            ).withValues(
+                                                              alpha: 0.8,
+                                                            ),
+                                                        fontSize: 10.5,
+                                                        fontFamily: 'monospace',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            onTap: () => _showLanguageDialog(
+                                              context,
+                                              saveService,
+                                            ),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 7,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF191226),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: const Color(
+                                                    0xFFD500F9,
+                                                  ).withValues(alpha: 0.6),
+                                                  width: 1.2,
+                                                ),
+                                              ),
+                                              child: const Row(
+                                                children: [
+                                                  Text(
+                                                    'CHANGE',
+                                                    style: TextStyle(
+                                                      color: Color(0xFFD500F9),
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      fontSize: 11,
+                                                      fontFamily: 'monospace',
+                                                      letterSpacing: 1.0,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 4),
+                                                  Icon(
+                                                    Icons
+                                                        .arrow_forward_ios_rounded,
+                                                    color: Color(0xFFD500F9),
+                                                    size: 11,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+
+                              // Card 4: Data Vault & Studio Hub
+                              _buildCyberCard(
+                                title: 'DATA VAULT & STUDIO ACCESS',
+                                subtitle:
+                                    '// MISSION ARCHIVE & MOON EDGE STUDIO HUB',
+                                accentColor: AppConstants.hazardRed,
+                                icon: Icons.shield_moon_rounded,
+                                child: Column(
+                                  children: [
+                                    // Data management buttons row
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildCyberButton(
+                                            label: 'RESET TELEMETRY',
+                                            icon: Icons.replay_rounded,
+                                            color: const Color(0xFF00E5FF),
+                                            onTap: () => _showResetStatsDialog(
+                                              context,
+                                              saveService,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _buildCyberButton(
+                                            label: 'FACTORY RESET',
+                                            icon: Icons.delete_forever_rounded,
+                                            color: AppConstants.hazardRed,
+                                            onTap: () =>
+                                                _showFactoryResetDialog(
+                                                  context,
+                                                  saveService,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Divider(
+                                      color: Colors.white10,
+                                      height: 16,
+                                    ),
+
+                                    // Developer Links Row
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildCyberLinkCard(
+                                            title: 'MOON EDGE STUDIO',
+                                            subtitle:
+                                                'Developer Catalog on Google Play',
+                                            icon: Icons.shop_rounded,
+                                            accentColor: const Color(
+                                              0xFF00E676,
+                                            ),
+                                            onTap: () => _openUrl(_moonEdgeUrl),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _buildCyberLinkCard(
+                                            title: 'IMAGE RESIZER',
+                                            subtitle:
+                                                'Featured Utility Tool on Play Store',
+                                            icon: Icons
+                                                .photo_size_select_large_rounded,
+                                            accentColor: const Color(
+                                              0xFF00E5FF,
+                                            ),
+                                            onTap: () =>
+                                                _openUrl(_imgResizerUrl),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+
+                              // Card 5: Feedback & Problem Report (Google Apps Script / Gmail)
+                              _buildCyberCard(
+                                title: 'OPERATIVE FEEDBACK & REPORT PROBLEM',
+                                subtitle:
+                                    '// DIRECT DISPATCH TO DEVELOPER GMAIL VIA GOOGLE SCRIPT',
+                                accentColor: const Color(0xFF00E5FF),
+                                icon: Icons.mark_email_unread_rounded,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Facing a glitch, obstacle bug, or have ideas to improve Cyber Ninja Runner? Transmit direct logs and problem descriptions to the developer via Google Gmail script link.',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 11.5,
+                                        height: 1.4,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildCyberButton(
+                                      label:
+                                          'TRANSMIT FEEDBACK / REPORT PROBLEM',
+                                      icon: Icons.send_rounded,
+                                      color: const Color(0xFF00E5FF),
+                                      onTap: () => FeedbackDialog.show(
+                                        context,
+                                        saveService,
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

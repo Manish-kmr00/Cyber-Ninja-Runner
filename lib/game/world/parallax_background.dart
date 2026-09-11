@@ -3,7 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../sqube_game.dart';
+import '../cyber_ninja_game.dart';
 import 'procedural_generator.dart';
 
 /// Flying aerocar in the cyberpunk skyline.
@@ -125,7 +125,10 @@ class ParallaxBackground extends PositionComponent
     final rightX = camX + viewWidth / 2 + 200;
 
     final distanceMeters = game.currentDistance;
-    final biome = ProceduralGenerator.getBiomeForDistance(distanceMeters);
+    final biome = ProceduralGenerator.getBiomeForDistance(
+      distanceMeters,
+      mode: game.mode,
+    );
 
     // 1. Deep Atmospheric Gradient Sky (Dynamically tinted per Sector Biome)
     final skyPaint = Paint()
@@ -139,7 +142,7 @@ class ParallaxBackground extends PositionComponent
       skyPaint,
     );
 
-    // 2. Far Layer: Dynamic Biome Landmarks (Skyscrapers, Foundries, Tunnel Ribs, Orbital Skyway, Quantum Monoliths)
+    // 2. Far Layer: Dynamic Biome Landmarks (Skyscrapers, Foundries, Tunnel Ribs, Orbital Skyway, Quantum Monoliths, Shinto Temples, Magma Furnaces)
     _renderFarArchitecture(canvas, camX, leftX, rightX, biome);
 
     // 3. Mid Layer: Sky Bridges & Billboards (Parallax 0.22x)
@@ -177,6 +180,12 @@ class ParallaxBackground extends PositionComponent
         break;
       case SectorBiome.quantumNexus:
         _renderQuantumNexus(canvas, offsetX, leftX, rightX);
+        break;
+      case SectorBiome.cyberShinto:
+        _renderCyberShintoSkyline(canvas, offsetX, leftX, rightX);
+        break;
+      case SectorBiome.neoNebula:
+        _renderNeoNebulaSkyline(canvas, offsetX, leftX, rightX);
         break;
     }
   }
@@ -559,6 +568,421 @@ class ParallaxBackground extends PositionComponent
         Offset(s.x + s.length, s.y),
         streakPaint,
       );
+    }
+  }
+
+  void _renderCyberShintoSkyline(
+    Canvas canvas,
+    double offsetX,
+    double leftX,
+    double rightX,
+  ) {
+    const templeInterval = 280.0;
+    final startIdx = ((leftX - offsetX) / templeInterval).floor() - 1;
+    final endIdx = ((rightX - offsetX) / templeInterval).ceil() + 1;
+
+    // 1. Giant Glitched Crimson Blood Moon in the background
+    final moonCenter = Offset(offsetX * 0.3 + 450, 140);
+    final moonPaint = Paint()
+      ..color = const Color(0xFFFF003C).withValues(alpha: 0.25)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
+    canvas.drawCircle(moonCenter, 72, moonPaint);
+    canvas.drawCircle(moonCenter, 60, Paint()..color = const Color(0xFF4A0413));
+    // Moon glitch horizontal scanlines
+    final scanPaint = Paint()
+      ..color = const Color(0xFF0F0106)
+      ..strokeWidth = 2.0;
+    for (double sy = moonCenter.dy - 50; sy <= moonCenter.dy + 50; sy += 8) {
+      canvas.drawLine(
+        Offset(moonCenter.dx - 55, sy),
+        Offset(moonCenter.dx + 55, sy),
+        scanPaint,
+      );
+    }
+
+    // 2. Towering Cyber-Shinto Torii Gates & Multi-Tier Pagodas
+    final templePaint = Paint()..color = const Color(0xFF0A0206);
+    final toriiGlowPaint = Paint()
+      ..color = const Color(0xFFFF003C).withValues(alpha: 0.65)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+
+    for (int i = startIdx; i <= endIdx; i++) {
+      final tX = i * templeInterval + offsetX;
+      final isPagoda = i % 2 == 0;
+
+      if (isPagoda) {
+        // Multi-tier Cyber Pagoda
+        final pagodaH = 340.0;
+        final pY =
+            AppConstants.virtualHeight - AppConstants.groundHeight - pagodaH;
+        // Base tower body
+        canvas.drawRect(
+          Rect.fromLTWH(tX + 40, pY + 80, 70, pagodaH - 80),
+          templePaint,
+        );
+        // 3 Overhanging Pagoda Eaves
+        for (int tier = 0; tier < 3; tier++) {
+          final tierY = pY + 80 + tier * 75;
+          final tierW = 120.0 - tier * 16.0;
+          final eavePath = Path()
+            ..moveTo(tX + 75 - tierW / 2, tierY)
+            ..lineTo(tX + 75 + tierW / 2, tierY)
+            ..lineTo(tX + 75 + tierW / 2 - 12, tierY - 16)
+            ..lineTo(tX + 75 - tierW / 2 + 12, tierY - 16)
+            ..close();
+          canvas.drawPath(eavePath, templePaint);
+          canvas.drawPath(eavePath, toriiGlowPaint);
+
+          // Hanging glowing amber lanterns at eave tips
+          canvas.drawCircle(
+            Offset(tX + 75 - tierW / 2 + 4, tierY + 6),
+            3.5,
+            Paint()
+              ..color = const Color(0xFFFFD700)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+          );
+          canvas.drawCircle(
+            Offset(tX + 75 + tierW / 2 - 4, tierY + 6),
+            3.5,
+            Paint()
+              ..color = const Color(0xFFFFD700)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+          );
+        }
+        // Pagoda Spire / Sorin
+        canvas.drawLine(
+          Offset(tX + 75, pY + 64),
+          Offset(tX + 75, pY),
+          Paint()
+            ..color = const Color(0xFFFFD700)
+            ..strokeWidth = 2.0,
+        );
+      } else {
+        // Colossal Neon Torii Gate in Background
+        final toriiH = 260.0;
+        final tY =
+            AppConstants.virtualHeight - AppConstants.groundHeight - toriiH;
+        // Two massive Pillars
+        canvas.drawRect(
+          Rect.fromLTWH(tX + 25, tY + 30, 20, toriiH - 30),
+          templePaint,
+        );
+        canvas.drawRect(
+          Rect.fromLTWH(tX + 115, tY + 30, 20, toriiH - 30),
+          templePaint,
+        );
+        // Upper Kasagi Crossbar (Curved laser lintel)
+        final lintelPath = Path()
+          ..moveTo(tX + 10, tY + 20)
+          ..quadraticBezierTo(tX + 80, tY + 12, tX + 150, tY + 20)
+          ..lineTo(tX + 146, tY + 32)
+          ..quadraticBezierTo(tX + 80, tY + 24, tX + 14, tY + 32)
+          ..close();
+        canvas.drawPath(lintelPath, templePaint);
+        canvas.drawPath(lintelPath, toriiGlowPaint);
+        // Middle Nuki Crossbar
+        canvas.drawRect(Rect.fromLTWH(tX + 25, tY + 55, 110, 14), templePaint);
+        canvas.drawLine(
+          Offset(tX + 25, tY + 62),
+          Offset(tX + 135, tY + 62),
+          toriiGlowPaint,
+        );
+      }
+    }
+  }
+
+  void _renderNeoNebulaSkyline(
+    Canvas canvas,
+    double offsetX,
+    double leftX,
+    double rightX,
+  ) {
+    // 1. Giant Quantum Core / Vector Sun on Horizon
+    final sunCenter = Offset(offsetX * 0.15 + 480, 150);
+    final sunGlowPaint = Paint()
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.18)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
+    canvas.drawCircle(sunCenter, 85, sunGlowPaint);
+
+    // Sun Concentric Wireframe Rings
+    final ringPaintCyan = Paint()
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    final ringPaintPink = Paint()
+      ..color = const Color(0xFFFF007F).withValues(alpha: 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+
+    canvas.drawCircle(sunCenter, 72, ringPaintCyan);
+    canvas.drawCircle(sunCenter, 56, ringPaintPink);
+    canvas.drawCircle(sunCenter, 38, ringPaintCyan);
+    canvas.drawCircle(sunCenter, 20, ringPaintPink);
+
+    // Quantum Sun Horizontal Slice Scanlines (Synthwave / TRON style)
+    final slicePaint = Paint()
+      ..color = const Color(0xFF000206)
+      ..strokeWidth = 2.5;
+    for (double sy = sunCenter.dy - 60; sy <= sunCenter.dy + 60; sy += 9) {
+      canvas.drawLine(
+        Offset(sunCenter.dx - 80, sy),
+        Offset(sunCenter.dx + 80, sy),
+        slicePaint,
+      );
+    }
+
+    // 2. Cascading Digital Rain Streams (Hex / Binary matrix)
+    final rainPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    for (int col = 0; col < 12; col++) {
+      final rx =
+          (leftX + col * 90 + (offsetX * 0.25)) % (rightX - leftX) + leftX;
+      final seed = (col * 47) % 300;
+      final ry =
+          (seed + (beaconTimer * 80)) % (AppConstants.virtualHeight - 120);
+      rainPaint.color = col % 2 == 0
+          ? const Color(0xFF00F5FF).withValues(alpha: 0.45)
+          : const Color(0xFFFF007F).withValues(alpha: 0.4);
+      canvas.drawLine(Offset(rx, ry), Offset(rx, ry + 28), rainPaint);
+      canvas.drawCircle(
+        Offset(rx, ry + 28),
+        1.8,
+        Paint()..color = Colors.white,
+      );
+    }
+
+    // 3. Floating 3D Polyhedral Quantum Data Nodes (Tesseracts / Octahedrons)
+    const nodeInterval = 260.0;
+    final nodeStart = ((leftX - offsetX * 0.4) / nodeInterval).floor() - 1;
+    final nodeEnd = ((rightX - offsetX * 0.4) / nodeInterval).ceil() + 1;
+    for (int n = nodeStart; n <= nodeEnd; n++) {
+      final nX = n * nodeInterval + offsetX * 0.4;
+      final bobY = 110.0 + sin(beaconTimer * 2.0 + n) * 16.0;
+      final isCyan = n % 2 == 0;
+      final nodeColor = isCyan
+          ? const Color(0xFF00F5FF)
+          : const Color(0xFFFF007F);
+
+      // Draw Wireframe Diamond / Octahedron
+      final octaPath = Path()
+        ..moveTo(nX, bobY - 22)
+        ..lineTo(nX + 16, bobY)
+        ..lineTo(nX, bobY + 22)
+        ..lineTo(nX - 16, bobY)
+        ..close();
+      canvas.drawPath(
+        octaPath,
+        Paint()
+          ..color = nodeColor.withValues(alpha: 0.12)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawPath(
+        octaPath,
+        Paint()
+          ..color = nodeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+      // Internal Cross Axis
+      canvas.drawLine(
+        Offset(nX, bobY - 22),
+        Offset(nX, bobY + 22),
+        Paint()
+          ..color = Colors.white
+          ..strokeWidth = 1.0,
+      );
+      canvas.drawLine(
+        Offset(nX - 16, bobY),
+        Offset(nX + 16, bobY),
+        Paint()
+          ..color = nodeColor
+          ..strokeWidth = 1.0,
+      );
+
+      // Node Halo
+      canvas.drawCircle(
+        Offset(nX, bobY),
+        4.0,
+        Paint()
+          ..color = Colors.white
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+    }
+
+    // 4. Infinite 3D Isometric Wireframe Hyper-Towers
+    const buildingWidth = 135.0;
+    final startIdx = ((leftX - offsetX) / buildingWidth).floor() - 1;
+    final endIdx = ((rightX - offsetX) / buildingWidth).ceil() + 1;
+
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    for (int i = startIdx; i <= endIdx; i++) {
+      final bX = i * buildingWidth + offsetX;
+      final h = 320.0 + ((i * 137) % 280);
+      final bY = AppConstants.virtualHeight - AppConstants.groundHeight - h;
+      final w = buildingWidth - 14;
+      final isPinkScheme = i % 3 == 1;
+      final wireColor = isPinkScheme
+          ? const Color(0xFFFF007F)
+          : const Color(0xFF00F5FF);
+      final accentColor = isPinkScheme
+          ? const Color(0xFFFFD700)
+          : const Color(0xFF00F5FF);
+
+      // Dark Translucent Vector Body
+      final bRect = Rect.fromLTWH(bX, bY, w, h);
+      canvas.drawRect(bRect, Paint()..color = const Color(0xEE030712));
+      canvas.drawRect(
+        bRect,
+        Paint()
+          ..color = wireColor.withValues(alpha: 0.85)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.8,
+      );
+
+      // Rooftop Spire with Pulsing Vector Beacon
+      final spireX = bX + w / 2;
+      canvas.drawLine(
+        Offset(spireX, bY),
+        Offset(spireX, bY - 42),
+        Paint()
+          ..color = wireColor
+          ..strokeWidth = 1.8,
+      );
+      final beaconPulsar = (sin(beaconTimer * 4.0 + i) + 1.0) / 2.0;
+      canvas.drawCircle(
+        Offset(spireX, bY - 42),
+        3.5 + beaconPulsar * 2.5,
+        Paint()
+          ..color = accentColor
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+
+      // 3D Isometric Wireframe Grid Cells & Cross-Braces (TRON Style)
+      final gridStroke = Paint()
+        ..color = wireColor.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+
+      final cellHeight = 36.0;
+      final rows = (h / cellHeight).floor();
+      for (int r = 0; r < rows; r++) {
+        final cy = bY + r * cellHeight;
+        // Horizontal Grid Bar
+        canvas.drawLine(Offset(bX, cy), Offset(bX + w, cy), gridStroke);
+
+        // Diagonal X-Braces on alternate blocks
+        if ((r + i) % 2 == 0) {
+          canvas.drawLine(
+            Offset(bX, cy),
+            Offset(bX + w, cy + cellHeight),
+            gridStroke,
+          );
+          canvas.drawLine(
+            Offset(bX + w, cy),
+            Offset(bX, cy + cellHeight),
+            gridStroke,
+          );
+        }
+
+        // Glowing Vertex Nodes at Edges
+        canvas.drawCircle(Offset(bX, cy), 1.6, Paint()..color = Colors.white);
+        canvas.drawCircle(
+          Offset(bX + w, cy),
+          1.6,
+          Paint()..color = Colors.white,
+        );
+      }
+
+      // Vertical Center Laser Data Bus
+      canvas.drawLine(
+        Offset(spireX, bY),
+        Offset(spireX, bY + h),
+        Paint()
+          ..color = wireColor.withValues(alpha: 0.6)
+          ..strokeWidth = 1.5,
+      );
+
+      // Floating Holographic Vector Billboards (Every 2nd Tower)
+      if (i % 2 == 0) {
+        final bbY = bY + 85.0;
+        final bbRect = Rect.fromLTWH(bX + 8, bbY, w - 16, 48.0);
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(bbRect, const Radius.circular(3.0)),
+          Paint()..color = const Color(0xF0010308),
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(bbRect, const Radius.circular(3.0)),
+          Paint()
+            ..color = wireColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.6
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
+        );
+
+        // Vector Corner Reticles
+        final reticlePaint = Paint()
+          ..color = Colors.white
+          ..strokeWidth = 1.8;
+        canvas.drawLine(
+          Offset(bbRect.left, bbRect.top),
+          Offset(bbRect.left + 8, bbRect.top),
+          reticlePaint,
+        );
+        canvas.drawLine(
+          Offset(bbRect.left, bbRect.top),
+          Offset(bbRect.left, bbRect.top + 8),
+          reticlePaint,
+        );
+        canvas.drawLine(
+          Offset(bbRect.right, bbRect.top),
+          Offset(bbRect.right - 8, bbRect.top),
+          reticlePaint,
+        );
+        canvas.drawLine(
+          Offset(bbRect.right, bbRect.top),
+          Offset(bbRect.right, bbRect.top + 8),
+          reticlePaint,
+        );
+
+        // Holographic Glitch Text
+        final label = i % 4 == 0 ? 'QUANTUM\n0xCORE' : 'TRON //\nOVERDRIVE';
+        textPainter.text = TextSpan(
+          text: label,
+          style: TextStyle(
+            color: wireColor,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.0,
+            fontFamily: 'monospace',
+          ),
+        );
+        textPainter.layout();
+        textPainter.paint(canvas, Offset(bX + 16, bbY + 8));
+      }
+
+      // Connecting High-Altitude Laser Transit Beams
+      if (i % 3 == 0) {
+        final beamY = bY + 160.0;
+        canvas.drawLine(
+          Offset(bX + w, beamY),
+          Offset(bX + w + 35, beamY),
+          Paint()
+            ..color = const Color(0xFF00F5FF)
+            ..strokeWidth = 2.2
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        );
+        canvas.drawLine(
+          Offset(bX + w, beamY),
+          Offset(bX + w + 35, beamY),
+          Paint()
+            ..color = Colors.white
+            ..strokeWidth = 1.0,
+        );
+      }
     }
   }
 }

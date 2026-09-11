@@ -1,1 +1,1 @@
-export 'sqube_game.dart';
+export 'cyber_ninja_game.dart';

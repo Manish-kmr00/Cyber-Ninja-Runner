@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'core/audio/audio_service.dart';
 import 'core/constants/app_constants.dart';
+import 'core/services/iap_service.dart';
 import 'core/storage/save_service.dart';
 import 'ui/screens/splash_screen.dart';
 
@@ -24,7 +25,10 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => SaveService())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => SaveService()),
+        ChangeNotifierProvider.value(value: IAPService()),
+      ],
       child: const CyberNinjaRunnerApp(),
     ),
   );

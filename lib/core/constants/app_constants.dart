@@ -46,4 +46,10 @@ class AppConstants {
   // Developer / Testing Configuration
   // When true: Player is immortal (cannot die from any hazard, cannon bullet, or pit).
   static const bool testGodMode = true;
+
+  // Feedback & Transmission Configuration (Google Apps Script Web App)
+  // Direct Web App webhook configured for moonedgestudio@gmail.com
+  static const String feedbackScriptUrl =
+      'https://script.google.com/macros/s/AKfycbz9lNHxO_TNB0H7TCjYqlZZcMbC6n1pPr1TtCPzZ2xXdoaRHQ7LXts87L8pWLEEuvGILw/exec';
+  static const String supportEmail = 'moonedgestudio@gmail.com';
 }

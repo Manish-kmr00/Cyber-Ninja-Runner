@@ -12,10 +12,11 @@ import 'chunk_models.dart';
 
 class ProceduralGenerator {
   final Random random;
+  final GameMode gameMode;
   final List<WorldChunk> activeChunks = [];
   double currentEndCoordinateX = 0.0;
 
-  ProceduralGenerator([int? seed])
+  ProceduralGenerator({this.gameMode = GameMode.run, int? seed})
     : random = Random(seed ?? DateTime.now().millisecondsSinceEpoch);
 
   void reset() {
@@ -23,14 +24,18 @@ class ProceduralGenerator {
     currentEndCoordinateX = 0.0;
   }
 
-  /// Calculates which dynamic sector biome should be rendered at the given distance (changes every 1000m).
-  static SectorBiome getBiomeForDistance(int distanceMeters) {
-    // 0 - 999m: Sector 1 (Neon Metropolis)
-    // 1000 - 1999m: Sector 2 (Toxic Foundry)
-    // 2000 - 2999m: Sector 3 (Maglev Tunnel)
-    // 3000 - 3999m: Sector 4 (Orbital Skyway)
-    // 4000 - 4999m: Sector 5 (Quantum Nexus)
-    // 5000m+: Cycles every 1000m through the sectors
+  /// Calculates which dynamic sector biome should be rendered at the given distance.
+  /// If in Map 2 (TenX Challenge), always renders SectorBiome.cyberShinto.
+  /// If in Map 3 (Flight Runner), always renders SectorBiome.neoNebula.
+  /// For Endless Run (Map 1), cycles through the 5 sectors every 1000m.
+  static SectorBiome getBiomeForDistance(int distanceMeters, {GameMode? mode}) {
+    if (mode == GameMode.tenXChallenge) {
+      return SectorBiome.cyberShinto;
+    }
+    if (mode == GameMode.flightRunner) {
+      return SectorBiome.neoNebula;
+    }
+
     final cycle = (distanceMeters ~/ 1000) % 5;
     switch (cycle) {
       case 0:
@@ -141,8 +146,15 @@ class ProceduralGenerator {
 
     final chunkStartM = (startX / 10).round();
 
-    // Check if a 200m Cyber Titan Milestone (200, 400, 600, 800m...) begins this chunk
-    final isTitanArena = (chunkStartM % 200 == 0) && chunkStartM > 0;
+    // Check if a Cyber Titan Milestone begins this chunk:
+    // In Map 3 (Flight Runner) and Map 2 (TenX Challenge), Titans patrol every 100m!
+    // In Map 1 (Endless Run), Titans appear every 200m!
+    final isTitanArena =
+        ((chunkStartM % 200 == 0) ||
+            ((gameMode == GameMode.flightRunner ||
+                    gameMode == GameMode.tenXChallenge) &&
+                chunkStartM % 100 == 0)) &&
+        chunkStartM > 0;
     final isBossArena = (chunkStartM % 800 == 0) && chunkStartM > 0;
 
     final hasPit =
@@ -156,7 +168,7 @@ class ProceduralGenerator {
         : 0.0;
 
     final distanceMeters = (startX / 10).round();
-    final biome = getBiomeForDistance(distanceMeters);
+    final biome = getBiomeForDistance(distanceMeters, mode: gameMode);
 
     final chunk = WorldChunk(
       startX: startX,
@@ -196,7 +208,10 @@ class ProceduralGenerator {
           ),
         );
         chunk.collectibles.add(
-          CollectibleCP(position: Vector2(plat2X + plat2W / 2, groundY - 180)),
+          CollectibleCP(
+            position: Vector2(plat2X + plat2W / 2, groundY - 180),
+            biome: biome,
+          ),
         );
       } else if (layoutType == 1) {
         // Archetype B: Long High Skyway Bridge (Allows player to sprint above ground hazards)
@@ -214,6 +229,7 @@ class ProceduralGenerator {
           chunk.collectibles.add(
             CollectibleCP(
               position: Vector2(bridgeX + 80.0 + c * 120.0, groundY - 145.0),
+              biome: biome,
             ),
           );
         }
@@ -232,6 +248,7 @@ class ProceduralGenerator {
           chunk.collectibles.add(
             CollectibleCP(
               position: Vector2(pitStartX + pitWidth / 2, groundY - 130),
+              biome: biome,
             ),
           );
         }
@@ -247,7 +264,10 @@ class ProceduralGenerator {
           ),
         );
         chunk.collectibles.add(
-          CollectibleCP(position: Vector2(platX + platW / 2, groundY - 155)),
+          CollectibleCP(
+            position: Vector2(platX + platW / 2, groundY - 155),
+            biome: biome,
+          ),
         );
       }
     }
@@ -256,7 +276,11 @@ class ProceduralGenerator {
     if (isSafeHaven || random.nextDouble() < 0.55) {
       final havenX = isSafeHaven ? 450.0 : 250.0 + random.nextDouble() * 350.0;
       chunk.shadowHavens.add(
-        ShadowHaven(position: Vector2(havenX, groundY), size: Vector2(160, 80)),
+        ShadowHaven(
+          position: Vector2(havenX, groundY),
+          size: Vector2(160, 80),
+          biome: biome,
+        ),
       );
     }
 
@@ -267,6 +291,7 @@ class ProceduralGenerator {
         chunk.collectibles.add(
           CollectibleCP(
             position: Vector2(cpX, groundY - 45 - (i % 2 == 0 ? 0 : 40)),
+            biome: biome,
           ),
         );
       }
@@ -321,6 +346,7 @@ class ProceduralGenerator {
             position: Vector2(platMid, plat.position.y),
             patrolDistance: (platMax - platMin) / 2,
             patrolSpeed: speed,
+            biome: chunk.biome,
             minX: platMin,
             maxX: platMax,
           );
@@ -362,6 +388,7 @@ class ProceduralGenerator {
       position: Vector2(targetX, trackDeckY),
       patrolDistance: effectiveDist,
       patrolSpeed: speed,
+      biome: chunk.biome,
       minX: max(safeMinX, targetX - effectiveDist),
       maxX: min(safeMaxX, targetX + effectiveDist),
     );
@@ -410,6 +437,7 @@ class ProceduralGenerator {
       position: Vector2(targetX, trackDeckY),
       patrolDistance: effectiveDist,
       patrolSpeed: speed,
+      biome: chunk.biome,
       spawnDistanceMeters: worldDistMeters,
       isBoss: isBoss,
       maxHp: maxHp,
@@ -461,6 +489,7 @@ class ProceduralGenerator {
     return Stakes(
       position: Vector2(targetX, trackDeckY),
       spikeCount: spikeCount,
+      biome: chunk.biome,
       isRetracting: false,
     );
   }
@@ -471,10 +500,13 @@ class ProceduralGenerator {
     double groundY,
     double roofY,
   ) {
+    final b = chunk.biome;
     if (tier == 0) {
-      // Tier 0 (Game Start: 0-300m): Red Spikes + Cyber Cannon + Patrol Droid
+      // Tier 0 (Game Start: 0-300m): Spikes + Cannon + Patrol Droid
       chunk.hazards.add(_createTrackStakes(chunk, 220, groundY, spikeCount: 3));
-      chunk.hazards.add(CyberCannon(position: Vector2(460, roofY + 45)));
+      chunk.hazards.add(
+        CyberCannon(position: Vector2(460, roofY + 45), biome: b),
+      );
       chunk.hazards.add(
         _createTrackDroid(chunk, 720, groundY, patrolDist: 140.0, speed: 85.0),
       );
@@ -482,24 +514,28 @@ class ProceduralGenerator {
     }
 
     if (tier == 1) {
-      // Tier 1 (Early Run: 300-1000m): Red Spikes + Cyber Cannon + Patrol Droid + Red Spikes + Bug Crawler
+      // Tier 1 (Early Run: 300-1000m): Spikes + Cannon + Patrol Droid + Spikes + Bug Crawler
       chunk.hazards.add(_createTrackStakes(chunk, 200, groundY, spikeCount: 3));
-      chunk.hazards.add(CyberCannon(position: Vector2(400, roofY + 45)));
+      chunk.hazards.add(
+        CyberCannon(position: Vector2(400, roofY + 45), biome: b),
+      );
       chunk.hazards.add(
         _createTrackDroid(chunk, 620, groundY, patrolDist: 140.0, speed: 95.0),
       );
       chunk.hazards.add(_createTrackStakes(chunk, 800, groundY, spikeCount: 3));
-      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY)));
+      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY), biome: b));
       return;
     }
 
     if (tier == 2) {
-      // Tier 2 (1000-2000m): Red Spikes + Dual Droids + Cyber Cannon + Red Spikes
+      // Tier 2 (1000-2000m): Spikes + Dual Droids + Cannon + Spikes
       chunk.hazards.add(_createTrackStakes(chunk, 180, groundY, spikeCount: 4));
       chunk.hazards.add(
         _createTrackDroid(chunk, 450, groundY, patrolDist: 130.0, speed: 100.0),
       );
-      chunk.hazards.add(CyberCannon(position: Vector2(340, roofY + 45)));
+      chunk.hazards.add(
+        CyberCannon(position: Vector2(340, roofY + 45), biome: b),
+      );
       chunk.hazards.add(
         _createTrackDroid(chunk, 720, groundY, patrolDist: 130.0, speed: 105.0),
       );
@@ -508,39 +544,43 @@ class ProceduralGenerator {
     }
 
     if (tier == 3) {
-      // Tier 3 (2000-3000m): Death Column + Red Spikes + Patrol Droid + Bug Crawler
+      // Tier 3 (2000-3000m): Death Column + Spikes + Patrol Droid + Bug Crawler
       chunk.hazards.add(
-        DeathColumn(position: Vector2(260, roofY), maxHeight: 220),
+        DeathColumn(position: Vector2(260, roofY), maxHeight: 220, biome: b),
       );
       chunk.hazards.add(_createTrackStakes(chunk, 460, groundY, spikeCount: 4));
       chunk.hazards.add(
         _createTrackDroid(chunk, 660, groundY, patrolDist: 150.0, speed: 110.0),
       );
-      chunk.hazards.add(BugCrawler(position: Vector2(850, groundY)));
+      chunk.hazards.add(BugCrawler(position: Vector2(850, groundY), biome: b));
       return;
     }
 
     if (tier == 4) {
-      // Tier 4 (3000-4000m): Red Spikes + Cyber Cannon + Fast Patrol Droid + Red Spikes + Bug Crawler
+      // Tier 4 (3000-4000m): Spikes + Cannon + Fast Patrol Droid + Spikes + Bug Crawler
       chunk.hazards.add(_createTrackStakes(chunk, 180, groundY, spikeCount: 4));
-      chunk.hazards.add(CyberCannon(position: Vector2(320, roofY + 45)));
+      chunk.hazards.add(
+        CyberCannon(position: Vector2(320, roofY + 45), biome: b),
+      );
       chunk.hazards.add(
         _createTrackDroid(chunk, 580, groundY, patrolDist: 160.0, speed: 120.0),
       );
       chunk.hazards.add(_createTrackStakes(chunk, 780, groundY, spikeCount: 4));
-      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY)));
+      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY), biome: b));
       return;
     }
 
-    // Tier 5: Extreme Gauntlet (Death Column + Red Spikes + Patrol Droid + Cyber Cannon + Red Spikes)
+    // Tier 5: Extreme Gauntlet (Death Column + Spikes + Patrol Droid + Cannon + Spikes)
     chunk.hazards.add(
-      DeathColumn(position: Vector2(240, roofY), maxHeight: 230),
+      DeathColumn(position: Vector2(240, roofY), maxHeight: 230, biome: b),
     );
     chunk.hazards.add(_createTrackStakes(chunk, 420, groundY, spikeCount: 4));
     chunk.hazards.add(
       _createTrackDroid(chunk, 620, groundY, patrolDist: 160.0, speed: 125.0),
     );
-    chunk.hazards.add(CyberCannon(position: Vector2(760, roofY + 45)));
+    chunk.hazards.add(
+      CyberCannon(position: Vector2(760, roofY + 45), biome: b),
+    );
     chunk.hazards.add(_createTrackStakes(chunk, 900, groundY, spikeCount: 5));
   }
 }

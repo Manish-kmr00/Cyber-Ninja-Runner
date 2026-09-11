@@ -486,9 +486,12 @@ class _StartMenuScreenState extends State<StartMenuScreen>
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 AudioService().playClick();
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const ShopScreen()));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const ShopScreen(initialScrollToVault: true),
+                  ),
+                );
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -767,9 +770,9 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             threatLevel: context.l10n.tr('threat_lvl_5'),
             threatColor: AppConstants.hazardRed,
             hazardTags: const [
-              'OVERCHARGED TITAN',
-              'RAPID CANNONS',
-              'WARP TRAPS',
+              'SPECTRAL SHINOBI',
+              'GLITCH ONI TITAN',
+              'CURSED KATANAS',
             ],
             rewardMultiplier: '10.0X CP',
             objective: context.l10n.tr('tenx_obj'),
@@ -787,16 +790,20 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           _buildModernModeCard(
             context,
             title: context.l10n.tr('flight_title'),
-            tag: context.l10n.tr('aerial_zero_g'),
+            tag: 'DIGITAL VOID',
             mapName: context.l10n.tr('flight_map'),
             mapSector: context.l10n.tr('flight_sector'),
-            threatLevel: context.l10n.tr('threat_lvl_4'),
-            threatColor: const Color(0xFFD500F9),
-            hazardTags: const ['LASER WEBS', 'AERIAL MINES', 'ION CEILINGS'],
+            threatLevel: 'MAX THREAT',
+            threatColor: const Color(0xFF00F5FF),
+            hazardTags: const [
+              'DIGITAL SENTINELS',
+              'QUANTUM TITAN',
+              'LASER GATES',
+            ],
             rewardMultiplier: '2.5X CP',
             objective: context.l10n.tr('flight_obj'),
-            icon: Icons.flight_takeoff_rounded,
-            accentColor: const Color(0xFFD500F9),
+            icon: Icons.blur_on_rounded,
+            accentColor: const Color(0xFF00F5FF),
             bestScore: saveService.stats.bestDistanceFlight,
             isLocked: !isFlightUnlocked,
             unlockPrice: 100000,

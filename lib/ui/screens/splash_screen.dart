@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/services/iap_service.dart';
 import '../../core/storage/save_service.dart';
 import 'start_menu_screen.dart';
 
@@ -32,9 +33,11 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animController.forward();
 
-    // Initialize SaveService and navigate to StartMenu
+    // Initialize SaveService and IAPService and navigate to StartMenu
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await context.read<SaveService>().init();
+      final saveService = context.read<SaveService>();
+      await saveService.init();
+      await IAPService().init(saveService);
       await Future.delayed(const Duration(milliseconds: 1600));
       if (mounted) {
         Navigator.of(context).pushReplacement(

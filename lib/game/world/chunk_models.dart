@@ -4,14 +4,18 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../hazards/base_hazard.dart';
-import '../sqube_game.dart';
+import '../cyber_ninja_game.dart';
 
 /// 3D Volumetric Shadow Haven: An extruded stealth sanctuary with perspective canopy.
 class ShadowHaven extends PositionComponent {
+  final SectorBiome biome;
   double pulseTimer = 0.0;
 
-  ShadowHaven({required super.position, required super.size})
-    : super(anchor: Anchor.bottomLeft);
+  ShadowHaven({
+    required super.position,
+    required super.size,
+    this.biome = SectorBiome.neonMetropolis,
+  }) : super(anchor: Anchor.bottomLeft);
 
   @override
   void update(double dt) {
@@ -24,6 +28,11 @@ class ShadowHaven extends PositionComponent {
     super.render(canvas);
 
     const depthY = 16.0;
+    final havenAccent = biome == SectorBiome.cyberShinto
+        ? const Color(0xFFFF003C)
+        : (biome == SectorBiome.neoNebula
+              ? const Color(0xFF00F5FF)
+              : AppConstants.stealthBlue);
 
     // 1. 3D Slanted Roof Canopy (Perspective Top Face)
     final roofPath = Path()
@@ -33,21 +42,31 @@ class ShadowHaven extends PositionComponent {
       ..lineTo(size.x, -size.y)
       ..close();
 
+    final roofColor = biome == SectorBiome.cyberShinto
+        ? const Color(0xE62A0814)
+        : (biome == SectorBiome.neoNebula
+              ? const Color(0xE60A1424)
+              : const Color(0xE610192A));
     final roofPaint = Paint()
-      ..color = const Color(0xE610192A)
+      ..color = roofColor
       ..style = PaintingStyle.fill;
     canvas.drawPath(roofPath, roofPaint);
 
     final roofEdgePaint = Paint()
-      ..color = AppConstants.stealthBlue.withValues(alpha: 0.65)
+      ..color = havenAccent.withValues(alpha: 0.65)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawPath(roofPath, roofEdgePaint);
 
     // 2. 3D Front Holographic Stealth Shield Wall
     final wallRect = Rect.fromLTWH(0, -size.y, size.x, size.y);
+    final wallColor = biome == SectorBiome.cyberShinto
+        ? const Color(0xCC18040B)
+        : (biome == SectorBiome.neoNebula
+              ? const Color(0xCC060E1A)
+              : const Color(0xCC09101C));
     final wallPaint = Paint()
-      ..color = const Color(0xCC09101C)
+      ..color = wallColor
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
       RRect.fromRectAndRadius(wallRect, const Radius.circular(6.0)),
@@ -57,9 +76,7 @@ class ShadowHaven extends PositionComponent {
     // Pulsing Neon Stealth Perimeter
     final pulseAlpha = 0.4 + 0.3 * (0.5 + 0.5 * (pulseTimer % 3.14));
     final edgePaint = Paint()
-      ..color = AppConstants.stealthBlue.withValues(
-        alpha: pulseAlpha.clamp(0.2, 0.9),
-      )
+      ..color = havenAccent.withValues(alpha: pulseAlpha.clamp(0.2, 0.9))
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawRRect(
@@ -67,9 +84,9 @@ class ShadowHaven extends PositionComponent {
       edgePaint,
     );
 
-    // Top Glowing Neon Lintel
+    // Top Glowing Neon Lintel / Shinto Torii Beam / Smelter Vent
     final lintelPaint = Paint()
-      ..color = AppConstants.stealthBlue
+      ..color = havenAccent
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -78,16 +95,27 @@ class ShadowHaven extends PositionComponent {
       ),
       lintelPaint,
     );
+
+    // Extra Shinto Talisman Accents on Pavilion
+    if (biome == SectorBiome.cyberShinto) {
+      final talismanPaint = Paint()..color = const Color(0xFFFFD700);
+      for (double tx = 20; tx < size.x - 10; tx += 35) {
+        canvas.drawRect(Rect.fromLTWH(tx, -size.y + 6, 8, 14), talismanPaint);
+      }
+    }
   }
 }
 
-/// 3D Collectible Cyber Point (CP): Floating rotating 3D octahedron crystal.
+/// 3D Collectible Cyber Point (CP): Floating rotating 3D octahedron crystal / Magatama / Magma Core.
 class CollectibleCP extends PositionComponent {
+  final SectorBiome biome;
   double bobTimer = 0.0;
   bool isCollected = false;
 
-  CollectibleCP({required super.position})
-    : super(size: Vector2(24, 24), anchor: Anchor.center);
+  CollectibleCP({
+    required super.position,
+    this.biome = SectorBiome.neonMetropolis,
+  }) : super(size: Vector2(24, 24), anchor: Anchor.center);
 
   @override
   void update(double dt) {
@@ -102,9 +130,15 @@ class CollectibleCP extends PositionComponent {
 
     final center = Offset(size.x / 2, size.y / 2);
 
+    final auraColor = biome == SectorBiome.cyberShinto
+        ? const Color(0xFFFF003C)
+        : (biome == SectorBiome.neoNebula
+              ? const Color(0xFF00F5FF)
+              : AppConstants.coinGold);
+
     // Outer Ambient Glow
     final glowPaint = Paint()
-      ..color = AppConstants.coinGold.withValues(alpha: 0.35)
+      ..color = auraColor.withValues(alpha: 0.38)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
     canvas.drawCircle(center, 14, glowPaint);
 
@@ -117,16 +151,43 @@ class CollectibleCP extends PositionComponent {
     final h = 14.0;
     final depthOffset = sin(rot) * 5.0;
 
+    final Color f1Color;
+    final Color f2Color;
+    final Color f3Color;
+    final Color f4Color;
+
+    if (biome == SectorBiome.cyberShinto) {
+      // Sacred Crimson Magatama Jewels
+      f1Color = const Color(0xFFFF3366);
+      f2Color = const Color(0xFFFF003C);
+      f3Color = const Color(0xFFD00030);
+      f4Color = const Color(0xFFFFD700);
+    } else if (biome == SectorBiome.neoNebula) {
+      // Cyber Matrix Data Octahedron Crystals
+      f1Color = const Color(0xFF80F9FF); // Brilliant Cyan
+      f2Color = const Color(0xFF00F5FF); // Electric Cyan
+      f3Color = const Color(0xFF00B0FF); // Laser Blue
+      f4Color = const Color(0xFFFF007F); // Magenta Matrix Core
+    } else {
+      // Classic Gold Cyberpunk CP
+      f1Color = const Color(0xFFFFE066);
+      f2Color = const Color(0xFFFFB300);
+      f3Color = const Color(0xFFFF8F00);
+      f4Color = const Color(0xFFFF6F00);
+    }
+
     // Face 1: Left Facet (Lit)
     final face1 = Path()
       ..moveTo(0, -h)
       ..lineTo(-w, 0)
       ..lineTo(depthOffset, 4)
       ..close();
-    final face1Paint = Paint()
-      ..color = const Color(0xFFFFE066)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(face1, face1Paint);
+    canvas.drawPath(
+      face1,
+      Paint()
+        ..color = f1Color
+        ..style = PaintingStyle.fill,
+    );
 
     // Face 2: Right Facet (Shaded)
     final face2 = Path()
@@ -134,10 +195,12 @@ class CollectibleCP extends PositionComponent {
       ..lineTo(w, 0)
       ..lineTo(depthOffset, 4)
       ..close();
-    final face2Paint = Paint()
-      ..color = const Color(0xFFFFB300)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(face2, face2Paint);
+    canvas.drawPath(
+      face2,
+      Paint()
+        ..color = f2Color
+        ..style = PaintingStyle.fill,
+    );
 
     // Face 3: Bottom Left Facet
     final face3 = Path()
@@ -145,10 +208,12 @@ class CollectibleCP extends PositionComponent {
       ..lineTo(0, h)
       ..lineTo(depthOffset, 4)
       ..close();
-    final face3Paint = Paint()
-      ..color = const Color(0xFFFF8F00)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(face3, face3Paint);
+    canvas.drawPath(
+      face3,
+      Paint()
+        ..color = f3Color
+        ..style = PaintingStyle.fill,
+    );
 
     // Face 4: Bottom Right Facet
     final face4 = Path()
@@ -156,10 +221,12 @@ class CollectibleCP extends PositionComponent {
       ..lineTo(0, h)
       ..lineTo(depthOffset, 4)
       ..close();
-    final face4Paint = Paint()
-      ..color = const Color(0xFFFF6F00)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(face4, face4Paint);
+    canvas.drawPath(
+      face4,
+      Paint()
+        ..color = f4Color
+        ..style = PaintingStyle.fill,
+    );
 
     // Crystal Neon Edges
     final edgePaint = Paint()
@@ -192,7 +259,231 @@ class ElevatedPlatform extends PositionComponent {
 
     const depthY = 16.0;
 
-    // 1. Steel Safety Railings along the back of the platform (Exact Industrial Look)
+    if (biome == SectorBiome.cyberShinto) {
+      // --- MAP 2: LACQUERED SHINTO TORII BRIDGE PLATFORM ---
+      // 1. Vermilion Curved Lacquer Railing with Golden Finial Posts
+      final railPostPaint = Paint()
+        ..color = const Color(0xFFFFD700)
+        ..strokeWidth = 2.5;
+      final railBarPaint = Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 2.5;
+      canvas.drawLine(const Offset(0, -16), Offset(size.x, -16), railBarPaint);
+      canvas.drawLine(const Offset(0, -7), Offset(size.x, -7), railBarPaint);
+      for (double rx = 10; rx < size.x; rx += 35) {
+        canvas.drawLine(Offset(rx, 0), Offset(rx, -16), railPostPaint);
+        canvas.drawCircle(
+          Offset(rx, -17),
+          2.5,
+          Paint()..color = const Color(0xFFFFD700),
+        );
+      }
+
+      // 2. Walkway Deck (Obsidian Lacquer Wood with Gold Trim)
+      final deckPath = Path()
+        ..moveTo(0, 0)
+        ..lineTo(size.x, 0)
+        ..lineTo(size.x, depthY)
+        ..lineTo(0, depthY)
+        ..close();
+      canvas.drawPath(deckPath, Paint()..color = const Color(0xFF160610));
+
+      // Golden diamond paving
+      final goldDiamond = Paint()
+        ..color = const Color(0xFFFFD700).withValues(alpha: 0.5)
+        ..strokeWidth = 1.2;
+      for (double tx = 15; tx < size.x; tx += 30) {
+        canvas.drawLine(Offset(tx, 2), Offset(tx + 6, depthY - 2), goldDiamond);
+        canvas.drawLine(Offset(tx + 6, 2), Offset(tx, depthY - 2), goldDiamond);
+      }
+
+      // Glowing Crimson Curb Edge
+      canvas.drawLine(
+        const Offset(0, depthY),
+        Offset(size.x, depthY),
+        Paint()
+          ..color = const Color(0xFFFF003C)
+          ..strokeWidth = 3.5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+      );
+
+      // 3. Platform Underside with Sacred Hanging Amber Lanterns
+      final underRect = Rect.fromLTWH(0, depthY, size.x, size.y - depthY);
+      canvas.drawRect(underRect, Paint()..color = const Color(0xFF22040E));
+
+      final lanternPaint = Paint()
+        ..color = const Color(0xFFFFD700).withValues(alpha: 0.85)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      for (double lx = 25; lx < size.x; lx += 60) {
+        canvas.drawLine(
+          Offset(lx, size.y),
+          Offset(lx, size.y + 12),
+          Paint()
+            ..color = const Color(0xFFFF003C)
+            ..strokeWidth = 1.5,
+        );
+        canvas.drawCircle(Offset(lx, size.y + 16), 4.0, lanternPaint);
+      }
+
+      // 4. Torii Support Posts
+      for (double px = 25; px < size.x; px += 120) {
+        canvas.drawRect(
+          Rect.fromLTWH(px - 6, size.y, 12, 180),
+          Paint()..color = const Color(0xFF140208),
+        );
+        canvas.drawLine(
+          Offset(px, size.y),
+          Offset(px, size.y + 180),
+          Paint()
+            ..color = const Color(0xFFFF003C)
+            ..strokeWidth = 3.0,
+        );
+      }
+      return;
+    }
+
+    if (biome == SectorBiome.neoNebula) {
+      // --- MAP 3: HIGH-ALTITUDE MAGLEV SKY-PLATFORM ---
+      // 1. Hexagonal Forcefield Safety Guardrail
+      final forcefieldBeam = Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.8)
+        ..strokeWidth = 2.0
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+      canvas.drawLine(
+        const Offset(0, -20),
+        Offset(size.x, -20),
+        forcefieldBeam,
+      );
+      canvas.drawLine(
+        const Offset(0, -10),
+        Offset(size.x, -10),
+        forcefieldBeam,
+      );
+
+      // Hexagonal Forcefield Lattice Pattern
+      final hexPaint = Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.3)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      for (double rx = 10; rx < size.x; rx += 24) {
+        final hexPath = Path()
+          ..moveTo(rx, -20)
+          ..lineTo(rx + 6, -15)
+          ..lineTo(rx + 6, -10)
+          ..lineTo(rx, -5)
+          ..lineTo(rx - 6, -10)
+          ..lineTo(rx - 6, -15)
+          ..close();
+        canvas.drawPath(hexPath, hexPaint);
+      }
+
+      // 2. Walkway Deck (Carbon-Nanotube & Titanium Frame)
+      final deckPath = Path()
+        ..moveTo(0, 0)
+        ..lineTo(size.x, 0)
+        ..lineTo(size.x, depthY)
+        ..lineTo(0, depthY)
+        ..close();
+      canvas.drawPath(deckPath, Paint()..color = const Color(0xFF0A101C));
+      canvas.drawPath(
+        deckPath,
+        Paint()
+          ..color = const Color(0xFF16243A)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+
+      // Central Pulsing Maglev Induction Rail
+      final maglevRail = Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.75)
+        ..strokeWidth = 3.0
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+      canvas.drawLine(
+        Offset(0, depthY * 0.5),
+        Offset(size.x, depthY * 0.5),
+        maglevRail,
+      );
+      canvas.drawLine(
+        Offset(0, depthY * 0.5),
+        Offset(size.x, depthY * 0.5),
+        Paint()
+          ..color = Colors.white
+          ..strokeWidth = 1.0,
+      );
+
+      // Glowing Holographic Speed Chevrons (>>>)
+      final chevronPaint = Paint()
+        ..color = const Color(0xFFFF007F).withValues(alpha: 0.7)
+        ..strokeWidth = 1.8
+        ..strokeCap = StrokeCap.round;
+      for (double cx = 20; cx < size.x; cx += 45) {
+        canvas.drawLine(
+          Offset(cx - 5, 2),
+          Offset(cx, depthY * 0.5),
+          chevronPaint,
+        );
+        canvas.drawLine(
+          Offset(cx, depthY * 0.5),
+          Offset(cx - 5, depthY - 2),
+          chevronPaint,
+        );
+      }
+
+      // Glowing Cyan Curb Edge
+      canvas.drawLine(
+        const Offset(0, depthY),
+        Offset(size.x, depthY),
+        Paint()
+          ..color = const Color(0xFF00F5FF)
+          ..strokeWidth = 3.5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+      );
+
+      // 3. Platform Underside with High-Speed Optical Data Conduits
+      final underRect = Rect.fromLTWH(0, depthY, size.x, size.y - depthY);
+      canvas.drawRect(underRect, Paint()..color = const Color(0xFF060B14));
+
+      // Dual Fiber-Optic Telemetry Lines
+      canvas.drawLine(
+        Offset(0, (depthY + size.y) / 2 - 2),
+        Offset(size.x, (depthY + size.y) / 2 - 2),
+        Paint()
+          ..color = const Color(0xFF00F5FF)
+          ..strokeWidth = 2.0
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1),
+      );
+      canvas.drawLine(
+        Offset(0, (depthY + size.y) / 2 + 2),
+        Offset(size.x, (depthY + size.y) / 2 + 2),
+        Paint()
+          ..color = const Color(0xFFFF007F)
+          ..strokeWidth = 1.5,
+      );
+
+      // 4. Sleek Aerodynamic Support Pylons with Hydraulic Dampers
+      for (double px = 30; px < size.x; px += 130) {
+        final pRect = Rect.fromLTWH(px - 8, size.y, 16, 180);
+        canvas.drawRect(pRect, Paint()..color = const Color(0xFF080F1C));
+        canvas.drawLine(
+          Offset(px, size.y),
+          Offset(px, size.y + 180),
+          Paint()
+            ..color = const Color(0xFF00F5FF)
+            ..strokeWidth = 1.8,
+        );
+        // Blinking Sensor Node
+        canvas.drawCircle(
+          Offset(px, size.y + 20),
+          3.0,
+          Paint()
+            ..color = const Color(0xFF00F5FF)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+        );
+      }
+      return;
+    }
+
+    // 1. Steel Safety Railings along the back of the platform (Default Campaign)
     final railPostPaint = Paint()
       ..color = const Color(0xFF384354)
       ..strokeWidth = 2.5;
@@ -431,6 +722,30 @@ class WorldChunk extends PositionComponent
     double depth,
   ) {
     if (trackLength <= 0) return;
+
+    // Completely distinct custom 3D tracks for Map 2 and Map 3:
+    if (biome == SectorBiome.cyberShinto) {
+      _renderCyberShinto3DTrack(
+        canvas,
+        startX,
+        trackLength,
+        topRoadwayY,
+        frontCurbY,
+        depth,
+      );
+      return;
+    }
+    if (biome == SectorBiome.neoNebula) {
+      _renderNeoNebula3DTrack(
+        canvas,
+        startX,
+        trackLength,
+        topRoadwayY,
+        frontCurbY,
+        depth,
+      );
+      return;
+    }
 
     // A. 3D Top Roadway (Walkable Depth Plane)
     final topRoadwayPath = Path()
@@ -682,6 +997,601 @@ class WorldChunk extends PositionComponent
           canvas.drawRect(mRect, goldEdge);
         }
         break;
+
+      case SectorBiome.cyberShinto:
+        // Map 2: Vermilion Lacquered Torii Foundation Pillars & Cursed Rune Seals
+        final toriiPillarPaint = Paint()..color = const Color(0xFF160209);
+        final vermilionTrim = Paint()
+          ..color = const Color(0xFFFF003C).withValues(alpha: 0.8)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0;
+        final goldSeal = Paint()..color = const Color(0xFFFFD700);
+        for (double x = startX + 60; x < startX + trackLength; x += 160) {
+          final pRect = Rect.fromLTWH(
+            x,
+            frontCurbY + girderFasciaH + 4,
+            38,
+            AppConstants.virtualHeight,
+          );
+          canvas.drawRect(pRect, toriiPillarPaint);
+          canvas.drawRect(pRect, vermilionTrim);
+          canvas.drawCircle(
+            Offset(x + 19, frontCurbY + girderFasciaH + 24),
+            4.5,
+            goldSeal,
+          );
+        }
+        break;
+
+      case SectorBiome.neoNebula:
+        // Map 3: Monolithic Cyber Pylon Towers & Server Blade Arrays
+        final pylonPaint = Paint()..color = const Color(0xFF080D18);
+        final pylonEdge = Paint()
+          ..color = const Color(0xFF162540)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6;
+        final dataLedCyan = Paint()
+          ..color = const Color(0xFF00F5FF)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+        final dataLedAmber = Paint()..color = const Color(0xFFFFD700);
+
+        for (double x = startX + 80; x < startX + trackLength; x += 190) {
+          final bRect = Rect.fromLTWH(
+            x,
+            frontCurbY + girderFasciaH + 4,
+            50,
+            AppConstants.virtualHeight,
+          );
+          canvas.drawRect(bRect, pylonPaint);
+          canvas.drawRect(bRect, pylonEdge);
+
+          // Central Hydraulic Piston Conduit
+          canvas.drawLine(
+            Offset(x + 25, frontCurbY + girderFasciaH + 4),
+            Offset(x + 25, AppConstants.virtualHeight),
+            Paint()
+              ..color = const Color(0xFF00F5FF).withValues(alpha: 0.7)
+              ..strokeWidth = 2.0,
+          );
+
+          // Embedded Server Blade Array LEDs
+          for (
+            double sy = frontCurbY + girderFasciaH + 15;
+            sy < frontCurbY + girderFasciaH + 120;
+            sy += 16
+          ) {
+            canvas.drawCircle(Offset(x + 12, sy), 2.0, dataLedCyan);
+            canvas.drawCircle(Offset(x + 38, sy), 1.6, dataLedAmber);
+          }
+        }
+        break;
+    }
+  }
+
+  void _renderCyberShinto3DTrack(
+    Canvas canvas,
+    double startX,
+    double trackLength,
+    double topRoadwayY,
+    double frontCurbY,
+    double depth,
+  ) {
+    final trackH = frontCurbY - topRoadwayY;
+
+    // 1. Walkway Deck: 3D Beveled Vermilion & Obsidian Timber Bridge
+    const plankW = 28.0;
+    for (double x = startX; x < startX + trackLength; x += plankW) {
+      final curW = min(plankW, startX + trackLength - x);
+      final plankRect = Rect.fromLTWH(x, topRoadwayY, curW, trackH);
+
+      // Base wood tone: deep rich vermilion
+      canvas.drawRect(plankRect, Paint()..color = const Color(0xFF280710));
+
+      // Top bevel highlight
+      canvas.drawLine(
+        Offset(x, topRoadwayY + 1),
+        Offset(x + curW, topRoadwayY + 1),
+        Paint()
+          ..color = const Color(0xFF6B1A2C)
+          ..strokeWidth = 1.8,
+      );
+
+      // Bottom bevel shadow
+      canvas.drawLine(
+        Offset(x, frontCurbY - 1),
+        Offset(x + curW, frontCurbY - 1),
+        Paint()
+          ..color = const Color(0xFF120207)
+          ..strokeWidth = 2.0,
+      );
+
+      // Plank dividing seam with gold reflection
+      canvas.drawLine(
+        Offset(x, topRoadwayY),
+        Offset(x, frontCurbY),
+        Paint()
+          ..color = const Color(0xFF0F0105)
+          ..strokeWidth = 1.8,
+      );
+      canvas.drawLine(
+        Offset(x + 1.2, topRoadwayY),
+        Offset(x + 1.2, frontCurbY),
+        Paint()
+          ..color = const Color(0xFFFFD700).withValues(alpha: 0.28)
+          ..strokeWidth = 1.0,
+      );
+
+      // Golden brass rivets/caps on plank tips
+      canvas.drawCircle(
+        Offset(x + curW * 0.5, topRoadwayY + 4),
+        1.8,
+        Paint()..color = const Color(0xFFFFD700),
+      );
+      canvas.drawCircle(
+        Offset(x + curW * 0.5, frontCurbY - 4),
+        1.8,
+        Paint()..color = const Color(0xFFFFD700),
+      );
+    }
+
+    // Sacred Central Dragon Runway Conduit with Glowing Crimson Aura & Gold Inlays
+    final midY = (topRoadwayY + frontCurbY) / 2;
+    final dragonConduit = Paint()
+      ..color = const Color(0xFFFF003C).withValues(alpha: 0.85)
+      ..strokeWidth = 3.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawLine(
+      Offset(startX, midY),
+      Offset(startX + trackLength, midY),
+      dragonConduit,
+    );
+    canvas.drawLine(
+      Offset(startX, midY),
+      Offset(startX + trackLength, midY),
+      Paint()
+        ..color = const Color(0xFFFFD700)
+        ..strokeWidth = 1.2,
+    );
+
+    // Glowing Magatama / Diamond Gold Jewels along center
+    final goldJewelPaint = Paint()..color = const Color(0xFFFFD700);
+    final redJewelCore = Paint()..color = const Color(0xFFFF003C);
+    for (double x = startX + 35; x < startX + trackLength; x += 70) {
+      final rPath = Path()
+        ..moveTo(x, midY - 6)
+        ..lineTo(x + 6, midY)
+        ..lineTo(x, midY + 6)
+        ..lineTo(x - 6, midY)
+        ..close();
+      canvas.drawPath(rPath, goldJewelPaint);
+      canvas.drawCircle(Offset(x, midY), 2.2, redJewelCore);
+    }
+
+    // 2. 3D Raised Curbs: Back Curb and Front Curb with Golden Balustrade Posts
+    canvas.drawLine(
+      Offset(startX, topRoadwayY),
+      Offset(startX + trackLength, topRoadwayY),
+      Paint()
+        ..color = const Color(0xFFFF003C).withValues(alpha: 0.6)
+        ..strokeWidth = 3.5,
+    );
+    canvas.drawLine(
+      Offset(startX, frontCurbY - 2),
+      Offset(startX + trackLength, frontCurbY - 2),
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 4.0
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+    canvas.drawLine(
+      Offset(startX, frontCurbY),
+      Offset(startX + trackLength, frontCurbY),
+      Paint()
+        ..color = const Color(0xFFFFE082)
+        ..strokeWidth = 2.5,
+    );
+
+    // Golden Lotus Balustrade Finial Posts along the front curb
+    for (double x = startX + 20; x < startX + trackLength; x += 65) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(center: Offset(x, frontCurbY), width: 7, height: 6),
+          const Radius.circular(2),
+        ),
+        Paint()..color = const Color(0xFFFFD700),
+      );
+      final budPath = Path()
+        ..moveTo(x - 3, frontCurbY - 2)
+        ..quadraticBezierTo(x, frontCurbY - 8, x + 3, frontCurbY - 2)
+        ..close();
+      canvas.drawPath(budPath, Paint()..color = const Color(0xFFFF003C));
+      canvas.drawCircle(
+        Offset(x, frontCurbY - 7),
+        1.5,
+        Paint()..color = const Color(0xFFFFD700),
+      );
+    }
+
+    // 3. 3D Front Wall: Traditional Japanese Dougong (斗拱) Multi-tier Bracket Architecture
+    final wallHeight = AppConstants.virtualHeight - frontCurbY;
+    final wallRect = Rect.fromLTWH(startX, frontCurbY, trackLength, wallHeight);
+    canvas.drawRect(wallRect, Paint()..color = const Color(0xFF0F0105));
+
+    // Continuous Upper Vermilion Fascia Eave Beam
+    const eaveH = 28.0;
+    canvas.drawRect(
+      Rect.fromLTWH(startX, frontCurbY, trackLength, eaveH),
+      Paint()..color = const Color(0xFF1E040C),
+    );
+    canvas.drawLine(
+      Offset(startX, frontCurbY + eaveH),
+      Offset(startX + trackLength, frontCurbY + eaveH),
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 3.0,
+    );
+
+    // Multi-tier Dougong Wood Brackets (Tokyō 斗拱) clusters every 60px
+    final bracketPaint = Paint()..color = const Color(0xFF330615);
+    final bracketGold = Paint()..color = const Color(0xFFFFD700);
+    for (double bx = startX + 30; bx < startX + trackLength; bx += 60) {
+      canvas.drawRect(
+        Rect.fromLTWH(bx - 12, frontCurbY + 3, 24, 7),
+        bracketPaint,
+      );
+      canvas.drawRect(Rect.fromLTWH(bx - 3, frontCurbY + 3, 6, 7), bracketGold);
+
+      canvas.drawRect(
+        Rect.fromLTWH(bx - 18, frontCurbY + 12, 36, 6),
+        bracketPaint,
+      );
+      canvas.drawCircle(Offset(bx - 16, frontCurbY + 15), 2.0, bracketGold);
+      canvas.drawCircle(Offset(bx + 16, frontCurbY + 15), 2.0, bracketGold);
+
+      final bellY = frontCurbY + eaveH + 4;
+      canvas.drawLine(
+        Offset(bx, frontCurbY + eaveH),
+        Offset(bx, bellY),
+        Paint()
+          ..color = const Color(0xFFFFD700)
+          ..strokeWidth = 1.2,
+      );
+      final bPath = Path()
+        ..moveTo(bx - 4, bellY + 5)
+        ..lineTo(bx + 4, bellY + 5)
+        ..lineTo(bx + 3, bellY)
+        ..lineTo(bx - 3, bellY)
+        ..close();
+      canvas.drawPath(bPath, bracketGold);
+
+      final shidePath = Path()
+        ..moveTo(bx, bellY + 5)
+        ..lineTo(bx - 3, bellY + 9)
+        ..lineTo(bx + 3, bellY + 13)
+        ..lineTo(bx, bellY + 17);
+      canvas.drawPath(
+        shidePath,
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.9)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6,
+      );
+    }
+
+    // 4. Massive Torii Gate Columns (Extruded Cylinders with 3D Lighting & Inscriptions)
+    for (double x = startX + 50; x < startX + trackLength; x += 170) {
+      const colW = 42.0;
+      final colTop = frontCurbY + eaveH + 6;
+      final colH = AppConstants.virtualHeight - colTop;
+
+      final pRect = Rect.fromLTWH(x, colTop, colW, colH);
+      canvas.drawRect(pRect, Paint()..color = const Color(0xFF1C030D));
+      canvas.drawLine(
+        Offset(x + 7, colTop),
+        Offset(x + 7, AppConstants.virtualHeight),
+        Paint()
+          ..color = const Color(0xFF5A0E23)
+          ..strokeWidth = 4.0,
+      );
+      canvas.drawLine(
+        Offset(x, colTop),
+        Offset(x, AppConstants.virtualHeight),
+        Paint()
+          ..color = const Color(0xFFFF003C)
+          ..strokeWidth = 2.0,
+      );
+      canvas.drawLine(
+        Offset(x + colW, colTop),
+        Offset(x + colW, AppConstants.virtualHeight),
+        Paint()
+          ..color = const Color(0xFFFF003C)
+          ..strokeWidth = 2.0,
+      );
+
+      final ringY = colTop + 24;
+      canvas.drawRect(
+        Rect.fromLTWH(x - 3, ringY, colW + 6, 12),
+        Paint()..color = const Color(0xFFFFD700),
+      );
+      canvas.drawCircle(
+        Offset(x + colW * 0.5, ringY + 6),
+        3.5,
+        Paint()..color = const Color(0xFFFF003C),
+      );
+
+      final kanjiPaint = Paint()
+        ..color = const Color(0xFFFFD700).withValues(alpha: 0.85)
+        ..strokeWidth = 2.0;
+      for (double ky = ringY + 22; ky < ringY + 70; ky += 16) {
+        canvas.drawLine(
+          Offset(x + 12, ky),
+          Offset(x + colW - 12, ky),
+          kanjiPaint,
+        );
+        canvas.drawLine(
+          Offset(x + colW * 0.5, ky - 5),
+          Offset(x + colW * 0.5, ky + 5),
+          kanjiPaint,
+        );
+      }
+    }
+  }
+
+  void _renderNeoNebula3DTrack(
+    Canvas canvas,
+    double startX,
+    double trackLength,
+    double topRoadwayY,
+    double frontCurbY,
+    double depth,
+  ) {
+    final trackH = frontCurbY - topRoadwayY;
+    final midY = (topRoadwayY + frontCurbY) / 2;
+
+    // 1. UNDER-TRACK: Pure Void Pitch-Black with Deep Digital Wireframe Grid
+    final voidRect = Rect.fromLTWH(startX, topRoadwayY, trackLength, trackH);
+    canvas.drawRect(voidRect, Paint()..color = const Color(0xFF000206));
+
+    // Digital Grid Lines beneath the glass track
+    final gridPaint = Paint()
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.18)
+      ..strokeWidth = 1.0;
+    for (double gy = topRoadwayY + 3; gy < frontCurbY; gy += 5) {
+      canvas.drawLine(
+        Offset(startX, gy),
+        Offset(startX + trackLength, gy),
+        gridPaint,
+      );
+    }
+    for (double gx = startX; gx < startX + trackLength; gx += 28) {
+      canvas.drawLine(
+        Offset(gx, topRoadwayY),
+        Offset(gx, frontCurbY),
+        gridPaint,
+      );
+    }
+
+    // 2. Translucent Crystalline Glass Panels (Tron / Ghostrunner Aesthetic)
+    const panelWidth = 56.0;
+    for (double px = startX; px < startX + trackLength; px += panelWidth) {
+      final curW = min(panelWidth, startX + trackLength - px);
+      final pRect = Rect.fromLTWH(px, topRoadwayY, curW, trackH);
+
+      // Glass surface: deep translucent cyber cyan
+      canvas.drawRect(pRect, Paint()..color = const Color(0x3300F5FF));
+      // Panel Bevel Edges (White & Cyan reflections)
+      canvas.drawRect(
+        pRect,
+        Paint()
+          ..color = const Color(0xFF00F5FF).withValues(alpha: 0.55)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+
+      // Top Glass Highlight Beam
+      canvas.drawLine(
+        Offset(px + 2, topRoadwayY + 1.5),
+        Offset(px + curW - 2, topRoadwayY + 1.5),
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.7)
+          ..strokeWidth = 1.0,
+      );
+
+      // Internal Diagonal Light Refraction
+      canvas.drawLine(
+        Offset(px + 4, frontCurbY - 3),
+        Offset(px + curW - 4, topRoadwayY + 3),
+        Paint()
+          ..color = const Color(0xFF00F5FF).withValues(alpha: 0.2)
+          ..strokeWidth = 1.0,
+      );
+
+      // Glowing Hexagonal Data Node at Panel Seams
+      canvas.drawCircle(
+        Offset(px, midY),
+        2.2,
+        Paint()..color = const Color(0xFF00F5FF),
+      );
+      canvas.drawCircle(Offset(px, midY), 1.0, Paint()..color = Colors.white);
+    }
+
+    // 3. High-Voltage Running Edge Light-Ribbons
+    final ribbonGlowCyan = Paint()
+      ..color = const Color(0xFF00F5FF)
+      ..strokeWidth = 4.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5);
+    final ribbonCoreWhite = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 1.5;
+
+    // Top Boundary Light Ribbon
+    canvas.drawLine(
+      Offset(startX, topRoadwayY),
+      Offset(startX + trackLength, topRoadwayY),
+      ribbonGlowCyan,
+    );
+    canvas.drawLine(
+      Offset(startX, topRoadwayY),
+      Offset(startX + trackLength, topRoadwayY),
+      ribbonCoreWhite,
+    );
+
+    // Bottom Boundary Light Ribbon
+    canvas.drawLine(
+      Offset(startX, frontCurbY),
+      Offset(startX + trackLength, frontCurbY),
+      ribbonGlowCyan,
+    );
+    canvas.drawLine(
+      Offset(startX, frontCurbY),
+      Offset(startX + trackLength, frontCurbY),
+      ribbonCoreWhite,
+    );
+
+    // 4. Central High-Speed Quantum Light Stream & Speed Chevrons (>>>)
+    final centralStream = Paint()
+      ..color = const Color(0xFFFF007F).withValues(alpha: 0.8)
+      ..strokeWidth = 3.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    canvas.drawLine(
+      Offset(startX, midY),
+      Offset(startX + trackLength, midY),
+      centralStream,
+    );
+    canvas.drawLine(
+      Offset(startX, midY),
+      Offset(startX + trackLength, midY),
+      Paint()
+        ..color = Colors.white
+        ..strokeWidth = 1.0,
+    );
+
+    // Glowing Neon Magenta Chevrons & Spark Nodes along Center
+    final chevronPaint = Paint()
+      ..color = const Color(0xFFFF007F)
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round;
+    for (double cx = startX + 30; cx < startX + trackLength; cx += 50) {
+      canvas.drawLine(Offset(cx - 7, midY - 6), Offset(cx, midY), chevronPaint);
+      canvas.drawLine(Offset(cx, midY), Offset(cx - 7, midY + 6), chevronPaint);
+      // Kinetic Particle Spark
+      canvas.drawCircle(
+        Offset(cx + 12, midY),
+        1.5,
+        Paint()..color = Colors.white,
+      );
+    }
+
+    // 5. Holographic Overhead Speed Arches (TRON Speed Gates every 220px)
+    final archPaintCyan = Paint()
+      ..color = const Color(0xFF00F5FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    final archPaintWhite = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    for (double ax = startX + 90; ax < startX + trackLength; ax += 220) {
+      // Upright Pillar Left
+      canvas.drawLine(
+        Offset(ax - 12, frontCurbY),
+        Offset(ax - 12, topRoadwayY - 45),
+        archPaintCyan,
+      );
+      canvas.drawLine(
+        Offset(ax - 12, frontCurbY),
+        Offset(ax - 12, topRoadwayY - 45),
+        archPaintWhite,
+      );
+      // Angled Top Header Bar
+      canvas.drawLine(
+        Offset(ax - 12, topRoadwayY - 45),
+        Offset(ax + 24, topRoadwayY - 45),
+        archPaintCyan,
+      );
+      canvas.drawLine(
+        Offset(ax - 12, topRoadwayY - 45),
+        Offset(ax + 24, topRoadwayY - 45),
+        archPaintWhite,
+      );
+      // Glowing Speed Tag
+      canvas.drawCircle(
+        Offset(ax - 12, topRoadwayY - 45),
+        3.0,
+        Paint()..color = const Color(0xFFFF007F),
+      );
+      canvas.drawCircle(
+        Offset(ax + 24, topRoadwayY - 45),
+        3.0,
+        Paint()..color = const Color(0xFF00F5FF),
+      );
+    }
+
+    // 6. 3D Front Drop Face: Digital Void Abyss with Laser Grid & Floating Vector Blocks
+    final wallHeight = AppConstants.virtualHeight - frontCurbY;
+    final wallRect = Rect.fromLTWH(startX, frontCurbY, trackLength, wallHeight);
+    canvas.drawRect(wallRect, Paint()..color = const Color(0xFF000206));
+
+    // Vertical Cyan Laser Grid Dropping into the Void
+    final laserDropPaint = Paint()
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.35)
+      ..strokeWidth = 1.2;
+    for (double lx = startX; lx < startX + trackLength; lx += 32) {
+      canvas.drawLine(
+        Offset(lx, frontCurbY),
+        Offset(lx, AppConstants.virtualHeight),
+        laserDropPaint,
+      );
+    }
+    // Horizontal Scanlines
+    final dropScanPaint = Paint()
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.15)
+      ..strokeWidth = 1.0;
+    for (
+      double ly = frontCurbY + 12;
+      ly < AppConstants.virtualHeight;
+      ly += 16
+    ) {
+      canvas.drawLine(
+        Offset(startX, ly),
+        Offset(startX + trackLength, ly),
+        dropScanPaint,
+      );
+    }
+
+    // Floating 3D Wireframe Data Cubes in the abyss (every 140px)
+    for (double bx = startX + 45; bx < startX + trackLength; bx += 140) {
+      final cubeY = frontCurbY + 35.0;
+      final cubeRect = Rect.fromCenter(
+        center: Offset(bx, cubeY),
+        width: 22,
+        height: 22,
+      );
+      canvas.drawRect(
+        cubeRect,
+        Paint()
+          ..color = const Color(0xFFFF007F).withValues(alpha: 0.12)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawRect(
+        cubeRect,
+        Paint()
+          ..color = const Color(0xFFFF007F).withValues(alpha: 0.75)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4,
+      );
+      canvas.drawLine(
+        cubeRect.topLeft,
+        cubeRect.bottomRight,
+        Paint()..color = const Color(0xFFFF007F).withValues(alpha: 0.5),
+      );
+      canvas.drawLine(
+        cubeRect.topRight,
+        cubeRect.bottomLeft,
+        Paint()..color = const Color(0xFFFF007F).withValues(alpha: 0.5),
+      );
     }
   }
 
@@ -875,6 +1785,74 @@ class WorldChunk extends PositionComponent
           cosmicEnergy,
         );
         break;
+
+      case SectorBiome.cyberShinto:
+        // Map 2: Sacred Lacquered Bridge Floor, Inscribed Talismans & Crimson Blood Seals
+        final plankPaint = Paint()
+          ..color = const Color(0xFF2A030E)
+          ..strokeWidth = 1.4;
+        for (double x = startX + 16; x < startX + trackLength; x += 32) {
+          canvas.drawLine(
+            Offset(x, topRoadwayY),
+            Offset(x, frontCurbY),
+            plankPaint,
+          );
+        }
+        // Glowing Blood Red Central Conduit & Sacred Gold Magatama Seals
+        final bloodConduit = Paint()
+          ..color = const Color(0xFFFF003C).withValues(alpha: 0.8)
+          ..strokeWidth = 2.0
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+        final midYShinto = (topRoadwayY + frontCurbY) / 2;
+        canvas.drawLine(
+          Offset(startX, midYShinto),
+          Offset(startX + trackLength, midYShinto),
+          bloodConduit,
+        );
+        final goldSealPaint = Paint()..color = const Color(0xFFFFD700);
+        for (double x = startX + 48; x < startX + trackLength; x += 96) {
+          canvas.drawCircle(Offset(x, midYShinto), 3.2, goldSealPaint);
+        }
+        break;
+
+      case SectorBiome.neoNebula:
+        // Map 3: Maglev Linear Induction Guidance Strip & Speed Boost Chevrons
+        final maglevStrip = Paint()
+          ..color = const Color(0xFF00F5FF).withValues(alpha: 0.8)
+          ..strokeWidth = 2.5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+        final midYNeo = (topRoadwayY + frontCurbY) / 2;
+        canvas.drawLine(
+          Offset(startX, midYNeo),
+          Offset(startX + trackLength, midYNeo),
+          maglevStrip,
+        );
+        canvas.drawLine(
+          Offset(startX, midYNeo),
+          Offset(startX + trackLength, midYNeo),
+          Paint()
+            ..color = Colors.white
+            ..strokeWidth = 1.0,
+        );
+
+        // Glowing Velocity Chevrons (>>>)
+        final chevronP = Paint()
+          ..color = const Color(0xFFFF007F).withValues(alpha: 0.75)
+          ..strokeWidth = 2.0
+          ..strokeCap = StrokeCap.round;
+        for (double x = startX + 30; x < startX + trackLength; x += 55) {
+          canvas.drawLine(
+            Offset(x - 6, midYNeo - 5),
+            Offset(x, midYNeo),
+            chevronP,
+          );
+          canvas.drawLine(
+            Offset(x, midYNeo),
+            Offset(x - 6, midYNeo + 5),
+            chevronP,
+          );
+        }
+        break;
     }
   }
 
@@ -895,18 +1873,31 @@ class WorldChunk extends PositionComponent
       ..lineTo(pitStart + 22, AppConstants.virtualHeight)
       ..lineTo(pitStart + 22, topRoadwayY)
       ..close();
+    final Color chasmWallColor;
+    final Color chasmEdgeColor;
+    if (biome == SectorBiome.cyberShinto) {
+      chasmWallColor = const Color(0xFF160209);
+      chasmEdgeColor = const Color(0xFFFF003C);
+    } else if (biome == SectorBiome.neoNebula) {
+      chasmWallColor = const Color(0xFF040710);
+      chasmEdgeColor = const Color(0xFF00F5FF);
+    } else {
+      chasmWallColor = const Color(0xFF04060A);
+      chasmEdgeColor = const Color(0xFF1E2838);
+    }
+
     final chasmPaint = Paint()
-      ..color = const Color(0xFF04060A)
+      ..color = chasmWallColor
       ..style = PaintingStyle.fill;
     canvas.drawPath(leftWall, chasmPaint);
 
-    // Chasm edge lighting
+    // Left chasm edge lighting
     canvas.drawLine(
       Offset(pitStart, topRoadwayY),
       Offset(pitStart, AppConstants.virtualHeight),
       Paint()
-        ..color = const Color(0xFF1E2838)
-        ..strokeWidth = 2.0,
+        ..color = chasmEdgeColor.withValues(alpha: 0.8)
+        ..strokeWidth = 2.5,
     );
 
     // Right 3D Chasm Wall
@@ -922,12 +1913,140 @@ class WorldChunk extends PositionComponent
       Offset(pitEnd, topRoadwayY),
       Offset(pitEnd, AppConstants.virtualHeight),
       Paint()
-        ..color = const Color(0xFF1E2838)
-        ..strokeWidth = 2.0,
+        ..color = chasmEdgeColor.withValues(alpha: 0.8)
+        ..strokeWidth = 2.5,
     );
 
-    // Bottom Molten Lava River in Chasm (Exact Screenshot Style)
-    if (biome == SectorBiome.toxicFoundry) {
+    // Chasm internal details
+    if (biome == SectorBiome.cyberShinto) {
+      // Broken lacquered timber bridge ends and severed sacred ropes
+      final timberBreak = Paint()..color = const Color(0xFFFFD700);
+      canvas.drawCircle(Offset(pitStart + 4, frontCurbY + 4), 2.5, timberBreak);
+      canvas.drawCircle(Offset(pitEnd - 4, frontCurbY + 4), 2.5, timberBreak);
+      // Severed sacred braided ropes hanging down into abyss
+      final ropeP = Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 2.0;
+      canvas.drawLine(
+        Offset(pitStart + 3, frontCurbY + 5),
+        Offset(pitStart + 7, frontCurbY + 28),
+        ropeP,
+      );
+      canvas.drawLine(
+        Offset(pitEnd - 3, frontCurbY + 5),
+        Offset(pitEnd - 7, frontCurbY + 28),
+        ropeP,
+      );
+    } else if (biome == SectorBiome.neoNebula) {
+      // High-voltage laser drop guides on vertical abyss walls
+      final laserDrop = Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.8)
+        ..strokeWidth = 2.0
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+      canvas.drawLine(
+        Offset(pitStart + 6, topRoadwayY + 10),
+        Offset(pitStart + 6, AppConstants.virtualHeight),
+        laserDrop,
+      );
+      canvas.drawLine(
+        Offset(pitEnd - 6, topRoadwayY + 10),
+        Offset(pitEnd - 6, AppConstants.virtualHeight),
+        laserDrop,
+      );
+      // High-speed optical data cable across the chasm span
+      final cablePaint = Paint()
+        ..color = const Color(0xFFFF007F).withValues(alpha: 0.7)
+        ..strokeWidth = 2.0;
+      final cableSagY = frontCurbY + 30.0;
+      final cablePath = Path()
+        ..moveTo(pitStart, frontCurbY + 8)
+        ..quadraticBezierTo(
+          (pitStart + pitEnd) / 2,
+          cableSagY,
+          pitEnd,
+          frontCurbY + 8,
+        );
+      canvas.drawPath(cablePath, cablePaint);
+    }
+
+    // Bottom Chasm Hazards
+    if (biome == SectorBiome.neoNebula) {
+      // --- MAP 3: HIGH-VOLTAGE LASER GRID ABYSS ---
+      final gridRect = Rect.fromLTWH(
+        pitStart,
+        AppConstants.virtualHeight - 32,
+        pitEnd - pitStart,
+        32,
+      );
+      final gridGlow = Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.75)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+      canvas.drawRect(gridRect, gridGlow);
+
+      final gridCore = Paint()
+        ..color = const Color(0xFF07152B)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(gridRect, gridCore);
+
+      final laserBeam = Paint()
+        ..color = const Color(0xFF00F5FF)
+        ..strokeWidth = 3.0;
+      canvas.drawLine(
+        Offset(pitStart, AppConstants.virtualHeight - 16),
+        Offset(pitEnd, AppConstants.virtualHeight - 16),
+        laserBeam,
+      );
+      canvas.drawLine(
+        Offset(pitStart, AppConstants.virtualHeight - 16),
+        Offset(pitEnd, AppConstants.virtualHeight - 16),
+        Paint()
+          ..color = Colors.white
+          ..strokeWidth = 1.0,
+      );
+
+      // Warning nodes
+      final warnPaint = Paint()..color = const Color(0xFFFF007F);
+      for (double bx = pitStart + 18; bx < pitEnd - 10; bx += 32) {
+        canvas.drawCircle(
+          Offset(bx, AppConstants.virtualHeight - 22),
+          2.5,
+          warnPaint,
+        );
+      }
+    } else if (biome == SectorBiome.cyberShinto) {
+      // --- MAP 2: GLITCHED BLOOD VOID ABYSS ---
+      final abyssRect = Rect.fromLTWH(
+        pitStart,
+        AppConstants.virtualHeight - 35,
+        pitEnd - pitStart,
+        35,
+      );
+      canvas.drawRect(abyssRect, Paint()..color = const Color(0xFF100206));
+
+      // Crimson data laser grid lines in abyss
+      final gridPaint = Paint()
+        ..color = const Color(0xFFFF003C).withValues(alpha: 0.8)
+        ..strokeWidth = 2.0;
+      canvas.drawLine(
+        Offset(pitStart, AppConstants.virtualHeight - 16),
+        Offset(pitEnd, AppConstants.virtualHeight - 16),
+        gridPaint,
+      );
+      canvas.drawLine(
+        Offset(pitStart, AppConstants.virtualHeight - 8),
+        Offset(pitEnd, AppConstants.virtualHeight - 8),
+        gridPaint,
+      );
+      // Floating golden spirit runes
+      final runePaint = Paint()..color = const Color(0xFFFFD700);
+      for (double rx = pitStart + 20; rx < pitEnd - 10; rx += 45) {
+        canvas.drawCircle(
+          Offset(rx, AppConstants.virtualHeight - 22),
+          2.2,
+          runePaint,
+        );
+      }
+    } else if (biome == SectorBiome.toxicFoundry) {
       final lavaRect = Rect.fromLTWH(
         pitStart,
         AppConstants.virtualHeight - 26,

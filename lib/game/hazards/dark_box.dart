@@ -5,7 +5,7 @@ import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../player/runner_player.dart';
-import '../sqube_game.dart';
+import '../cyber_ninja_game.dart';
 import 'base_hazard.dart';
 
 /// Plasma projectile fired by the ground Cyber Patrol Robot.
@@ -88,6 +88,7 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
 
   DarkBox({
     required super.position,
+    super.biome = SectorBiome.neonMetropolis,
     this.patrolDistance = 140.0,
     this.patrolSpeed = 85.0,
     this.fireInterval = 1.8,
@@ -226,13 +227,25 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
     for (int i = 0; i < 6; i++) {
       final angle = -pi * 0.2 - (_rng.nextDouble() * pi * 0.6);
       final spd = 60.0 + _rng.nextDouble() * 80.0;
+      final Color sparkColor;
+      if (biome == SectorBiome.cyberShinto) {
+        sparkColor = _rng.nextBool()
+            ? const Color(0xFFFF003C)
+            : const Color(0xFFFFD700);
+      } else if (biome == SectorBiome.neoNebula) {
+        sparkColor = _rng.nextBool()
+            ? const Color(0xFF00F5FF)
+            : const Color(0xFFFF007F);
+      } else {
+        sparkColor = _rng.nextBool()
+            ? AppConstants.hazardRed
+            : const Color(0xFFFF9100);
+      }
       impactSparks.add(
         DroidImpactSpark(
           position: localPos.clone(),
           vel: Vector2(cos(angle) * spd, sin(angle) * spd),
-          color: _rng.nextBool()
-              ? AppConstants.hazardRed
-              : const Color(0xFFFF9100),
+          color: sparkColor,
         ),
       );
     }
@@ -419,6 +432,27 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
       canvas.scale(-1, 1);
     }
 
+    if (biome == SectorBiome.cyberShinto) {
+      _renderCyberShintoShinobi(canvas);
+    } else if (biome == SectorBiome.neoNebula) {
+      _renderTacticalCombatAndroid(canvas);
+    } else {
+      _renderDefaultDroid(canvas);
+    }
+
+    canvas.restore();
+
+    // 8. Render Projectile Bullets & Impact Sparks in Local Hazard Space
+    canvas.save();
+    canvas.translate(size.x / 2, size.y);
+    for (final bullet in activeBullets) {
+      _renderBullet(canvas, bullet);
+    }
+    _renderImpactSparks(canvas);
+    canvas.restore();
+  }
+
+  void _renderDefaultDroid(Canvas canvas) {
     // 1. Soft Runway Shadow on Track
     final shadowPaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.55)
@@ -565,20 +599,692 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(eyeSweep, -49.5), 1.4, eyeCenter);
+  }
 
-    canvas.restore();
+  void _renderCyberShintoShinobi(Canvas canvas) {
+    // 1. Cursed Blood Shadow on Floor
+    final shadowPaint = Paint()
+      ..color = const Color(0xFFFF003C).withValues(alpha: 0.35)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(0, -1), width: 48, height: 12),
+      shadowPaint,
+    );
 
-    // 8. Render Projectile Bullets & Impact Sparks in Local Hazard Space
-    canvas.save();
-    canvas.translate(size.x / 2, size.y);
-    for (final bullet in activeBullets) {
-      _renderBullet(canvas, bullet);
+    final legSwing = sin(walkTimer * 1.5) * 6.0;
+    final robeFlap = sin(walkTimer * 2.0) * 4.0;
+    final breathe = sin(walkTimer * 0.8) * 1.5;
+
+    // 2. 3D Floating Shadow Hakama Pants (Pleated & Beveled)
+    // Back leg
+    final legL = Path()
+      ..moveTo(-10, -28)
+      ..lineTo(-6, -28)
+      ..lineTo(-8 - legSwing, -3)
+      ..lineTo(-14 - legSwing, -3)
+      ..close();
+    canvas.drawPath(legL, Paint()..color = const Color(0xFF0C0106));
+
+    // Front leg
+    final legR = Path()
+      ..moveTo(4, -28)
+      ..lineTo(10, -28)
+      ..lineTo(12 + legSwing, -4)
+      ..lineTo(6 + legSwing, -4)
+      ..close();
+    canvas.drawPath(legR, Paint()..color = const Color(0xFF1F030E));
+    canvas.drawPath(
+      legR,
+      Paint()
+        ..color = const Color(0xFFFF003C).withValues(alpha: 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+
+    // Flowing pleated Hakama skirt over legs
+    final hakama = Path()
+      ..moveTo(-15, -32)
+      ..lineTo(15, -32)
+      ..lineTo(18 + legSwing * 0.6, -10)
+      ..lineTo(0 + robeFlap, -8)
+      ..lineTo(-18 - legSwing * 0.6, -10)
+      ..close();
+    canvas.drawPath(hakama, Paint()..color = const Color(0xFF17020A));
+    canvas.drawLine(
+      const Offset(-6, -32),
+      Offset(-8 + robeFlap * 0.4, -9),
+      Paint()
+        ..color = const Color(0xFF330617)
+        ..strokeWidth = 2.0,
+    );
+    canvas.drawLine(
+      const Offset(6, -32),
+      Offset(8 + robeFlap * 0.4, -9),
+      Paint()
+        ..color = const Color(0xFF330617)
+        ..strokeWidth = 2.0,
+    );
+    // Gold embroidery hem
+    canvas.drawLine(
+      Offset(-18 - legSwing * 0.6, -10),
+      Offset(0 + robeFlap, -8),
+      Paint()
+        ..color = const Color(0xFFFFD700)
+        ..strokeWidth = 1.6,
+    );
+    canvas.drawLine(
+      Offset(0 + robeFlap, -8),
+      Offset(18 + legSwing * 0.6, -10),
+      Paint()
+        ..color = const Color(0xFFFFD700)
+        ..strokeWidth = 1.6,
+    );
+
+    // 3. 3D Kimono Torso & Golden Obi Sash with 3D Tied Knot
+    final torsoPath = Path()
+      ..moveTo(-16, -48 + breathe)
+      ..lineTo(16, -48 + breathe)
+      ..lineTo(14, -30)
+      ..lineTo(-14, -30)
+      ..close();
+    canvas.drawPath(torsoPath, Paint()..color = const Color(0xFF1E030D));
+    canvas.drawLine(
+      Offset(-14, -48 + breathe),
+      const Offset(4, -34),
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 2.0,
+    );
+    canvas.drawLine(
+      Offset(14, -48 + breathe),
+      const Offset(-4, -34),
+      Paint()
+        ..color = const Color(0xFFFFD700)
+        ..strokeWidth = 1.8,
+    );
+
+    // 3D Golden Obi Sash
+    final obiRect = Rect.fromLTWH(-13, -34, 26, 6);
+    canvas.drawRect(obiRect, Paint()..color = const Color(0xFFFFD700));
+    canvas.drawRect(
+      Rect.fromLTWH(-13, -31, 26, 2),
+      Paint()..color = const Color(0xFFFF003C),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: const Offset(0, -31), width: 8, height: 8),
+        const Radius.circular(2),
+      ),
+      Paint()..color = const Color(0xFFFFC107),
+    );
+    // Hanging Ofuda paper talisman from obi
+    final ofudaX = -4.0 + robeFlap * 0.4;
+    canvas.drawRect(
+      Rect.fromLTWH(ofudaX, -27, 7, 13),
+      Paint()..color = const Color(0xFFFFF9C4),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(ofudaX, -27, 7, 13),
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+    canvas.drawLine(
+      Offset(ofudaX + 3.5, -25),
+      Offset(ofudaX + 3.5, -16),
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 1.5,
+    );
+
+    // 4. 3D Floating Lacquered Shoulder Pauldrons (Sode)
+    void drawSode(double x, bool isRight) {
+      final sodeX = isRight ? x : x - 10;
+      final sPath = Path()
+        ..moveTo(sodeX, -50 + breathe)
+        ..lineTo(sodeX + 10, -50 + breathe)
+        ..lineTo(sodeX + 11, -38 + breathe)
+        ..lineTo(sodeX - 1, -38 + breathe)
+        ..close();
+      canvas.drawPath(sPath, Paint()..color = const Color(0xFF280312));
+      canvas.drawPath(
+        sPath,
+        Paint()
+          ..color = const Color(0xFFFF003C)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+      canvas.drawLine(
+        Offset(sodeX, -42 + breathe),
+        Offset(sodeX + 10, -42 + breathe),
+        Paint()
+          ..color = const Color(0xFFFFD700)
+          ..strokeWidth = 1.5,
+      );
     }
-    _renderImpactSparks(canvas);
+
+    drawSode(-14, false);
+    drawSode(14, true);
+
+    // 5. 3D Cursed Ninjato Katana Arm
+    final recoilOffset = armRecoil * 3.5;
+    final aimAngle = isAiming ? -0.25 : 0.0;
+    canvas.save();
+    canvas.translate(10, -42 + breathe);
+    canvas.rotate(aimAngle);
+
+    canvas.drawLine(
+      Offset.zero,
+      Offset(12 - recoilOffset, 6),
+      Paint()
+        ..color = const Color(0xFF1E030D)
+        ..strokeWidth = 6.0
+        ..strokeCap = StrokeCap.round,
+    );
+    final hiltPos = Offset(13 - recoilOffset, 6);
+    canvas.drawRect(
+      Rect.fromCenter(center: hiltPos, width: 4, height: 10),
+      Paint()..color = const Color(0xFFFFD700),
+    );
+    canvas.drawLine(
+      Offset(hiltPos.dx - 8, hiltPos.dy),
+      hiltPos,
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 3.5,
+    );
+    final tipPos = Offset(hiltPos.dx + 26, hiltPos.dy - 1);
+    canvas.drawLine(
+      hiltPos,
+      tipPos,
+      Paint()
+        ..color = const Color(0xFFEEEEEE)
+        ..strokeWidth = 2.6,
+    );
+    canvas.drawLine(
+      hiltPos,
+      tipPos,
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 1.4
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+
+    if (isAiming || muzzleFlash > 0.05) {
+      final chargeP = Paint()
+        ..color = const Color(
+          0xFFFF003C,
+        ).withValues(alpha: muzzleFlash > 0.1 ? 1.0 : 0.85)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+      canvas.drawCircle(tipPos, 7.0 + muzzleFlash * 7.0, chargeP);
+      canvas.drawCircle(tipPos, 3.0, Paint()..color = const Color(0xFFFFD700));
+      canvas.drawCircle(
+        tipPos,
+        12.0,
+        Paint()
+          ..color = const Color(0xFFFF003C)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+    }
     canvas.restore();
+
+    // 6. Volumetric 3D Cursed Tengu / Oni Battle Mask & Horns (Head)
+    final headY = -54.0 + breathe;
+    canvas.drawRect(
+      Rect.fromCenter(center: Offset(0, headY + 8), width: 10, height: 6),
+      Paint()..color = const Color(0xFF0F0106),
+    );
+
+    final maskPath = Path()
+      ..moveTo(-12, headY - 10)
+      ..lineTo(12, headY - 10)
+      ..lineTo(14, headY)
+      ..lineTo(4, headY + 10)
+      ..lineTo(-4, headY + 10)
+      ..lineTo(-14, headY)
+      ..close();
+    canvas.drawPath(maskPath, Paint()..color = const Color(0xFF22030E));
+    canvas.drawPath(
+      maskPath,
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
+
+    final beakPath = Path()
+      ..moveTo(0, headY - 4)
+      ..lineTo(5, headY + 4)
+      ..lineTo(0, headY + 8)
+      ..lineTo(-5, headY + 4)
+      ..close();
+    canvas.drawPath(beakPath, Paint()..color = const Color(0xFFFFD700));
+    canvas.drawLine(
+      Offset(0, headY - 4),
+      Offset(0, headY + 8),
+      Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 1.5,
+    );
+
+    final hornL = Path()
+      ..moveTo(-8, headY - 10)
+      ..quadraticBezierTo(-20, headY - 22, -14, headY - 28)
+      ..quadraticBezierTo(-10, headY - 18, -4, headY - 10)
+      ..close();
+    final hornR = Path()
+      ..moveTo(8, headY - 10)
+      ..quadraticBezierTo(20, headY - 22, 14, headY - 28)
+      ..quadraticBezierTo(10, headY - 18, 4, headY - 10)
+      ..close();
+    canvas.drawPath(hornL, Paint()..color = const Color(0xFFFF003C));
+    canvas.drawPath(hornR, Paint()..color = const Color(0xFFFF003C));
+    canvas.drawCircle(
+      Offset(-14, headY - 28),
+      2.2,
+      Paint()..color = const Color(0xFFFFD700),
+    );
+    canvas.drawCircle(
+      Offset(14, headY - 28),
+      2.2,
+      Paint()..color = const Color(0xFFFFD700),
+    );
+
+    final eyeSweep = isAiming ? 3.0 : sin(eyeScanTimer) * 4.0;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(-6 + eyeSweep * 0.3, headY - 1),
+        width: 6,
+        height: 3.5,
+      ),
+      Paint()
+        ..color = const Color(0xFFFFD700)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(6 + eyeSweep * 0.3, headY - 1),
+        width: 6,
+        height: 3.5,
+      ),
+      Paint()
+        ..color = const Color(0xFFFFD700)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+    canvas.drawCircle(
+      Offset(-6 + eyeSweep * 0.3, headY - 1),
+      1.2,
+      Paint()..color = Colors.white,
+    );
+    canvas.drawCircle(
+      Offset(6 + eyeSweep * 0.3, headY - 1),
+      1.2,
+      Paint()..color = Colors.white,
+    );
+  }
+
+  void _renderTacticalCombatAndroid(Canvas canvas) {
+    // 1. Digital Vector Targeting Reticle (Floor Projection)
+    final reticleCenter = const Offset(0, -1);
+    canvas.drawCircle(
+      reticleCenter,
+      18.0,
+      Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.25)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+    canvas.drawCircle(
+      reticleCenter,
+      10.0,
+      Paint()
+        ..color = const Color(0xFFFF007F).withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+    // Reticle Crosshairs
+    final crossHairPaint = Paint()
+      ..color = const Color(0xFF00F5FF)
+      ..strokeWidth = 1.0;
+    canvas.drawLine(
+      const Offset(-22, -1),
+      const Offset(-12, -1),
+      crossHairPaint,
+    );
+    canvas.drawLine(const Offset(12, -1), const Offset(22, -1), crossHairPaint);
+
+    // 2. Wireframe Vector Legs
+    final legSwing1 = sin(walkTimer) * 7.0;
+    final legSwing2 = -sin(walkTimer) * 7.0;
+    final legLift = max(0.0, sin(walkTimer)) * 4.0;
+
+    void drawWireframeLeg(
+      double x,
+      double swing,
+      double lift,
+      bool isForeground,
+    ) {
+      final hipY = -24.0 - lift;
+      final kneeY = -12.0 - lift * 0.5;
+      final footY = -1.0;
+      final hipX = x;
+      final kneeX = x + swing * 0.7;
+      final footX = x + swing;
+
+      final wireColor = isForeground
+          ? const Color(0xFF00F5FF)
+          : const Color(0xFFFF007F);
+
+      // Thigh Vector Line
+      canvas.drawLine(
+        Offset(hipX, hipY),
+        Offset(kneeX, kneeY),
+        Paint()
+          ..color = wireColor
+          ..strokeWidth = 2.4,
+      );
+      // Shin Vector Line
+      canvas.drawLine(
+        Offset(kneeX, kneeY),
+        Offset(footX, footY),
+        Paint()
+          ..color = wireColor
+          ..strokeWidth = 2.0,
+      );
+      // Joint Vertex Nodes
+      canvas.drawCircle(Offset(hipX, hipY), 2.2, Paint()..color = Colors.white);
+      canvas.drawCircle(
+        Offset(kneeX, kneeY),
+        2.5,
+        Paint()..color = Colors.white,
+      );
+      canvas.drawCircle(Offset(footX, footY), 2.2, Paint()..color = wireColor);
+
+      // Digital Energy Skate / Foot Thruster
+      canvas.drawLine(
+        Offset(footX - 6, footY),
+        Offset(footX + 6, footY),
+        Paint()
+          ..color = const Color(0xFF00F5FF)
+          ..strokeWidth = 2.5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+      );
+    }
+
+    drawWireframeLeg(-8, legSwing2, 0, false);
+    drawWireframeLeg(8, legSwing1, legLift, true);
+
+    // 3. Translucent Obsidian Torso with Wireframe Vectors
+    final torsoPath = Path()
+      ..moveTo(-16, -50)
+      ..lineTo(16, -50)
+      ..lineTo(11, -24)
+      ..lineTo(-11, -24)
+      ..close();
+    canvas.drawPath(torsoPath, Paint()..color = const Color(0xEE02050E));
+    canvas.drawPath(
+      torsoPath,
+      Paint()
+        ..color = const Color(0xFF00F5FF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8,
+    );
+
+    // Torso Internal Wireframe Matrix Diagonals
+    final diagPaint = Paint()
+      ..color = const Color(0xFFFF007F).withValues(alpha: 0.6)
+      ..strokeWidth = 1.2;
+    canvas.drawLine(const Offset(-16, -50), const Offset(11, -24), diagPaint);
+    canvas.drawLine(const Offset(16, -50), const Offset(-11, -24), diagPaint);
+
+    // 4. Central Floating Quantum Power Core
+    final corePos = const Offset(0, -37);
+    canvas.drawCircle(
+      corePos,
+      8.0,
+      Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.8)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    canvas.drawCircle(corePos, 5.0, Paint()..color = const Color(0xFFFF007F));
+    canvas.drawCircle(corePos, 2.5, Paint()..color = Colors.white);
+
+    // 5. Back Shoulder Vector Fin Wings (Flowing Data Streamers)
+    final finLeft = Path()
+      ..moveTo(-16, -48)
+      ..lineTo(-26, -64)
+      ..lineTo(-18, -42)
+      ..close();
+    canvas.drawPath(
+      finLeft,
+      Paint()
+        ..color = const Color(0xFF00F5FF).withValues(alpha: 0.7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
+    final finRight = Path()
+      ..moveTo(16, -48)
+      ..lineTo(26, -64)
+      ..lineTo(18, -42)
+      ..close();
+    canvas.drawPath(
+      finRight,
+      Paint()
+        ..color = const Color(0xFFFF007F).withValues(alpha: 0.7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
+
+    // 6. Arm & Digital Lightning Cannon
+    final recoilOffset = armRecoil * 3.5;
+    final cannonX = 12.0 - recoilOffset;
+    const cannonY = -37.0;
+
+    // Cannon Rail Emitter
+    canvas.drawLine(
+      Offset(cannonX, cannonY - 3),
+      Offset(cannonX + 22, cannonY - 3),
+      Paint()
+        ..color = const Color(0xFF00F5FF)
+        ..strokeWidth = 2.2,
+    );
+    canvas.drawLine(
+      Offset(cannonX, cannonY + 3),
+      Offset(cannonX + 22, cannonY + 3),
+      Paint()
+        ..color = const Color(0xFF00F5FF)
+        ..strokeWidth = 2.2,
+    );
+    // Floating Magnetic Ring on Cannon
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(cannonX + 14, cannonY),
+        width: 6,
+        height: 14,
+      ),
+      Paint()
+        ..color = const Color(0xFFFF007F)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
+
+    // Muzzle Plasma Flash / Targeting Guide
+    if (isAiming || muzzleFlash > 0.05) {
+      canvas.drawCircle(
+        Offset(cannonX + 24, cannonY),
+        8.0 + muzzleFlash * 8.0,
+        Paint()
+          ..color = const Color(0xFF00F5FF)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      );
+      canvas.drawCircle(
+        Offset(cannonX + 24, cannonY),
+        3.0,
+        Paint()..color = Colors.white,
+      );
+      // Targeting Laser
+      canvas.drawLine(
+        Offset(cannonX + 24, cannonY),
+        Offset(cannonX + 180, cannonY),
+        Paint()
+          ..color = const Color(0xFF00F5FF).withValues(alpha: 0.5)
+          ..strokeWidth = 1.2,
+      );
+    }
+
+    // 7. Digital Sentinel Helmet with Triple-Optic Sensor Matrix
+    final headCenter = const Offset(0, -58);
+    final headRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: headCenter, width: 18, height: 16),
+      const Radius.circular(3),
+    );
+    canvas.drawRRect(headRect, Paint()..color = const Color(0xFF030712));
+    canvas.drawRRect(
+      headRect,
+      Paint()
+        ..color = const Color(0xFF00F5FF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    // Triple Glowing Optic Sensor Eyes (Like in Concept Art!)
+    final eyePaint = Paint()
+      ..color = const Color(0xFFFF1744)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    canvas.drawCircle(const Offset(0, -61), 2.2, eyePaint);
+    canvas.drawCircle(const Offset(-4.5, -56), 2.0, eyePaint);
+    canvas.drawCircle(const Offset(4.5, -56), 2.0, eyePaint);
+    canvas.drawCircle(const Offset(0, -61), 1.0, Paint()..color = Colors.white);
+    canvas.drawCircle(
+      const Offset(-4.5, -56),
+      0.9,
+      Paint()..color = Colors.white,
+    );
+    canvas.drawCircle(
+      const Offset(4.5, -56),
+      0.9,
+      Paint()..color = Colors.white,
+    );
   }
 
   void _renderBullet(Canvas canvas, DroidBullet bullet) {
+    if (biome == SectorBiome.cyberShinto) {
+      // --- MAP 2: 3D CURSED OFUDA TALISMAN / FLYING SPIRIT SEAL ---
+      if (bullet.trail.isNotEmpty) {
+        for (int i = 0; i < bullet.trail.length; i++) {
+          final tPos = bullet.trail[i];
+          final progress = i / bullet.trail.length;
+          final tPaint = Paint()
+            ..color = const Color(0xFFFF003C).withValues(alpha: progress * 0.7)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+          canvas.drawCircle(
+            Offset(tPos.x, tPos.y),
+            2.0 + progress * 5.0,
+            tPaint,
+          );
+        }
+      }
+
+      canvas.save();
+      canvas.translate(bullet.position.x, bullet.position.y);
+      final angle = atan2(bullet.velocity.y, bullet.velocity.x);
+      canvas.rotate(angle);
+
+      // 3D Folding paper talisman with shadow and gold seal
+      final paperRect = Rect.fromCenter(
+        center: Offset.zero,
+        width: 18,
+        height: 10,
+      );
+      canvas.drawRect(
+        paperRect,
+        Paint()
+          ..color = const Color(0xFFFF003C).withValues(alpha: 0.6)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      );
+      // Main parchment
+      canvas.drawRect(paperRect, Paint()..color = const Color(0xFFFFFDE7));
+      // Folding crease depth
+      canvas.drawLine(
+        const Offset(-9, 0),
+        const Offset(9, 0),
+        Paint()
+          ..color = const Color(0xFFFFCDD2)
+          ..strokeWidth = 1.5,
+      );
+      // Red borders
+      canvas.drawRect(
+        paperRect,
+        Paint()
+          ..color = const Color(0xFFFF003C)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4,
+      );
+      // Cursed Kanji glyphs
+      final glyphP = Paint()
+        ..color = const Color(0xFFFF003C)
+        ..strokeWidth = 1.8;
+      canvas.drawLine(const Offset(-4, -2), const Offset(4, -2), glyphP);
+      canvas.drawLine(const Offset(0, -4), const Offset(0, 4), glyphP);
+      canvas.drawLine(const Offset(-3, 2), const Offset(3, 2), glyphP);
+      // Glowing gold talisman eye
+      canvas.drawCircle(
+        const Offset(6, 0),
+        2.0,
+        Paint()..color = const Color(0xFFFFD700),
+      );
+
+      canvas.restore();
+      return;
+    }
+
+    if (biome == SectorBiome.neoNebula) {
+      // --- MAP 3: HIGH-VELOCITY PLASMA PARTICLE BOLT ---
+      if (bullet.trail.isNotEmpty) {
+        for (int i = 0; i < bullet.trail.length; i++) {
+          final tPos = bullet.trail[i];
+          final progress = i / bullet.trail.length;
+          final tPaint = Paint()
+            ..color = const Color(0xFF00F5FF).withValues(alpha: progress * 0.75)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+          canvas.drawCircle(
+            Offset(tPos.x, tPos.y),
+            2.0 + progress * 4.0,
+            tPaint,
+          );
+        }
+      }
+
+      canvas.save();
+      canvas.translate(bullet.position.x, bullet.position.y);
+      final angle = atan2(bullet.velocity.y, bullet.velocity.x);
+      canvas.rotate(angle);
+
+      // Cyan Plasma Halo
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset.zero, width: 22, height: 8),
+        Paint()
+          ..color = const Color(0xFF00F5FF).withValues(alpha: 0.8)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      );
+      // Incandescent Core Spike
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset.zero, width: 16, height: 4),
+        Paint()..color = Colors.white,
+      );
+      // Trailing Magenta Ion Sparks
+      canvas.drawCircle(
+        const Offset(-8, 0),
+        2.0,
+        Paint()..color = const Color(0xFFFF007F),
+      );
+
+      canvas.restore();
+      return;
+    }
+
     // 1. Energetic Pulse Trail
     if (bullet.trail.isNotEmpty) {
       for (int i = 0; i < bullet.trail.length; i++) {

@@ -15,7 +15,7 @@ enum BoosterType { safeGround, matrixSlowMo, invisibility, killEyes }
 
 /// Hazard and Obstacle Types
 enum ObstacleType {
-  darkEye,
+  roofCannon,
   cyberCannon,
   bugCrawler,
   darkBox,
@@ -25,7 +25,9 @@ enum ObstacleType {
   stakesStatic,
   stakesAutoHide,
   roofStake,
-  movingPlatform,
+  movingPlatform;
+
+  static const ObstacleType darkEye = ObstacleType.roofCannon;
 }
 
 /// Death & Damage Types
@@ -63,6 +65,8 @@ enum SectorBiome {
   maglevTunnel, // 2000 - 3000m: Subterranean hyperloop, electric purple rails & arches
   orbitalSkyway, // 3000 - 4000m: High-altitude stratospheric glassway & emerald matrix
   quantumNexus, // 4000 - 5000m+: Cosmic void, shifting golden aura & crystalline monoliths
+  cyberShinto, // MAP 2: Cursed Japanese Cyber-Shinto Shrine, vermilion Torii, Oni spirits
+  neoNebula, // MAP 3: Neo-Nebula Sky-Citadel (Aether Core), high-altitude orbital maglev highway
 }
 
 extension SectorBiomeExtension on SectorBiome {
@@ -78,6 +82,10 @@ extension SectorBiomeExtension on SectorBiome {
         return 'SECTOR 04 [3000-4000M]';
       case SectorBiome.quantumNexus:
         return 'SECTOR 05 [4000M+]';
+      case SectorBiome.cyberShinto:
+        return 'MAP 02 [SHINTO SHRINE]';
+      case SectorBiome.neoNebula:
+        return 'MAP 03 [QUANTUM VOID]';
     }
   }
 
@@ -93,6 +101,10 @@ extension SectorBiomeExtension on SectorBiome {
         return 'ORBITAL SKYWAY';
       case SectorBiome.quantumNexus:
         return 'QUANTUM NEXUS';
+      case SectorBiome.cyberShinto:
+        return 'CYBER-SHINTO SHRINE';
+      case SectorBiome.neoNebula:
+        return 'QUANTUM CYBERSPACE';
     }
   }
 
@@ -108,6 +120,10 @@ extension SectorBiomeExtension on SectorBiome {
         return 'STRATOSPHERIC DATA GLASSWAY';
       case SectorBiome.quantumNexus:
         return 'ZERO-G COSMIC VOID';
+      case SectorBiome.cyberShinto:
+        return 'CURSED NEO-TOKYO SANCTUARY';
+      case SectorBiome.neoNebula:
+        return 'CRYSTALLINE LIGHT-RIBBON MATRIX';
     }
   }
 
@@ -123,6 +139,10 @@ extension SectorBiomeExtension on SectorBiome {
         return const Color(0xFF00E676); // Matrix Emerald
       case SectorBiome.quantumNexus:
         return const Color(0xFFFFD700); // Quantum Gold
+      case SectorBiome.cyberShinto:
+        return const Color(0xFFFF003C); // Cursed Blood Crimson
+      case SectorBiome.neoNebula:
+        return const Color(0xFF00F5FF); // Electric Cyan
     }
   }
 
@@ -138,6 +158,10 @@ extension SectorBiomeExtension on SectorBiome {
         return const Color(0xFF00B0FF); // Sky Blue
       case SectorBiome.quantumNexus:
         return const Color(0xFFE040FB); // Cosmic Violet
+      case SectorBiome.cyberShinto:
+        return const Color(0xFFFFD700); // Sacred Gold
+      case SectorBiome.neoNebula:
+        return const Color(0xFFFF007F); // Ultra Magenta
     }
   }
 
@@ -153,6 +177,10 @@ extension SectorBiomeExtension on SectorBiome {
         return const Color(0xFF0E201B);
       case SectorBiome.quantumNexus:
         return const Color(0xFF160E2A);
+      case SectorBiome.cyberShinto:
+        return const Color(0xFF140208); // Cursed Lacquered Obsidian
+      case SectorBiome.neoNebula:
+        return const Color(0xFF030712); // Translucent Crystalline Deck
     }
   }
 
@@ -168,6 +196,10 @@ extension SectorBiomeExtension on SectorBiome {
         return const Color(0xFF050E0C);
       case SectorBiome.quantumNexus:
         return const Color(0xFF080414);
+      case SectorBiome.cyberShinto:
+        return const Color(0xFF0A0105);
+      case SectorBiome.neoNebula:
+        return const Color(0xFF010308); // Digital Void Abyss
     }
   }
 
@@ -183,6 +215,10 @@ extension SectorBiomeExtension on SectorBiome {
         return const [Color(0xFF030D0A), Color(0xFF071C17), Color(0xFF0D2E26)];
       case SectorBiome.quantumNexus:
         return const [Color(0xFF04000D), Color(0xFF0B0320), Color(0xFF19063D)];
+      case SectorBiome.cyberShinto:
+        return const [Color(0xFF0F0106), Color(0xFF24030E), Color(0xFF3B0418)];
+      case SectorBiome.neoNebula:
+        return const [Color(0xFF000206), Color(0xFF020714), Color(0xFF050E24)];
     }
   }
 }

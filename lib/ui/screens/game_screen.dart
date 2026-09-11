@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/game_enums.dart';
 import '../../core/storage/save_service.dart';
-import '../../game/sqube_game.dart';
+import '../../game/cyber_ninja_game.dart';
 import '../overlays/death_overlay.dart';
 import '../overlays/hud_overlay.dart';
 import '../overlays/pause_overlay.dart';

@@ -5,6 +5,7 @@ import '../player/runner_player.dart';
 abstract class BaseHazard extends PositionComponent {
   final ObstacleType obstacleType;
   final DeathType deathType;
+  final SectorBiome biome;
 
   BaseHazard({
     required Vector2 position,
@@ -12,6 +13,7 @@ abstract class BaseHazard extends PositionComponent {
     required this.obstacleType,
     required this.deathType,
     Anchor anchor = Anchor.topLeft,
+    this.biome = SectorBiome.neonMetropolis,
   }) : super(position: position, size: size, anchor: anchor, priority: 20);
 
   /// Returns the world position accounting for parent chunk offset.

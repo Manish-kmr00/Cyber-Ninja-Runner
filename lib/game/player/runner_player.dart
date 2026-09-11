@@ -4,7 +4,7 @@ import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
-import '../sqube_game.dart';
+import '../cyber_ninja_game.dart';
 import 'corner_hide_controller.dart';
 
 /// A recorded ghost silhouette for high-speed phantom afterimage trails.

@@ -19,6 +19,7 @@ class Stakes extends BaseHazard {
     required super.position,
     this.spikeCount = 3,
     this.isRetracting = false,
+    super.biome,
   }) : super(
          size: Vector2(spikeCount * spikeWidth, spikeHeight),
          obstacleType: isRetracting
@@ -66,7 +67,6 @@ class Stakes extends BaseHazard {
     super.render(canvas);
 
     if (isRetracting && !isExtended) {
-      // Draw ground slit
       final slitPaint = Paint()
         ..color = const Color(0xFF222222)
         ..style = PaintingStyle.fill;
@@ -74,7 +74,183 @@ class Stakes extends BaseHazard {
       return;
     }
 
-    // 1. Industrial Hazard Base Plate (Anchors spikes firmly onto track)
+    if (biome == SectorBiome.cyberShinto) {
+      // --- MAP 2: 3D CURSED SAMURAI KATANAS EMBEDDED IN DECK ---
+      // 1. Lacquered Wood Base with Gold Trim
+      canvas.drawRect(
+        Rect.fromLTWH(0, -5.0, size.x, 5.0),
+        Paint()..color = const Color(0xFF140208),
+      );
+      canvas.drawLine(
+        const Offset(0, -5.0),
+        Offset(size.x, -5.0),
+        Paint()
+          ..color = const Color(0xFFFFD700)
+          ..strokeWidth = 2.0,
+      );
+
+      // 2. 3D Upright Cursed Katanas
+      for (int i = 0; i < spikeCount; i++) {
+        final startX = i * spikeWidth;
+        final midX = startX + spikeWidth / 2;
+        final tip = Offset(midX, -spikeHeight - 3);
+
+        // Blade Left Bevel (Shadowed steel)
+        final bladeL = Path()
+          ..moveTo(midX - 3.0, -5.0)
+          ..lineTo(tip.dx, tip.dy)
+          ..lineTo(midX, -5.0)
+          ..close();
+        canvas.drawPath(bladeL, Paint()..color = const Color(0xFF9E9E9E));
+
+        // Blade Right Bevel (Polished gleaming steel)
+        final bladeR = Path()
+          ..moveTo(midX, -5.0)
+          ..lineTo(tip.dx, tip.dy)
+          ..lineTo(midX + 3.0, -5.0)
+          ..close();
+        canvas.drawPath(bladeR, Paint()..color = Colors.white);
+
+        // Blood Edge Aura
+        canvas.drawLine(
+          Offset(midX, -5.0),
+          tip,
+          Paint()
+            ..color = const Color(0xFFFF003C)
+            ..strokeWidth = 2.0
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        );
+
+        // Golden Square Tsuba (Sword Guard)
+        canvas.drawRect(
+          Rect.fromCenter(center: Offset(midX, -6.0), width: 16, height: 3.5),
+          Paint()..color = const Color(0xFFFFD700),
+        );
+        canvas.drawCircle(
+          Offset(midX, -6.0),
+          1.5,
+          Paint()..color = const Color(0xFFFF003C),
+        );
+
+        // Fluttering White & Crimson Paper Ofuda Talisman
+        final ofudaRect = Rect.fromLTWH(midX + 3, -16, 6, 12);
+        canvas.drawRect(ofudaRect, Paint()..color = const Color(0xFFFFFDE7));
+        canvas.drawRect(
+          ofudaRect,
+          Paint()
+            ..color = const Color(0xFFFF003C)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0,
+        );
+        canvas.drawLine(
+          Offset(midX + 6, -15),
+          Offset(midX + 6, -6),
+          Paint()
+            ..color = const Color(0xFFFF003C)
+            ..strokeWidth = 1.2,
+        );
+
+        // Gleaming Tip Point
+        canvas.drawCircle(tip, 2.0, Paint()..color = const Color(0xFFFFD700));
+      }
+      return;
+    }
+
+    if (biome == SectorBiome.neoNebula) {
+      // --- MAP 3: 3D DIGITAL WIREFRAME LASER GATES ---
+      // 1. Digital Vector Floor Anchor
+      canvas.drawRect(
+        Rect.fromLTWH(0, -5.0, size.x, 5.0),
+        Paint()..color = const Color(0xDD000206),
+      );
+      canvas.drawLine(
+        const Offset(0, -5.0),
+        Offset(size.x, -5.0),
+        Paint()
+          ..color = const Color(0xFF00F5FF)
+          ..strokeWidth = 2.0,
+      );
+
+      // 2. Wireframe Vector Emitters & Quantum Laser Fence
+      for (int i = 0; i < spikeCount; i++) {
+        final startX = i * spikeWidth;
+        final midX = startX + spikeWidth / 2;
+        final colW = spikeWidth * 0.65;
+
+        // Wireframe Pillar
+        final pRect = Rect.fromLTWH(
+          midX - colW / 2,
+          -spikeHeight - 2,
+          colW,
+          spikeHeight + 2,
+        );
+        canvas.drawRect(pRect, Paint()..color = const Color(0xEE02050E));
+        canvas.drawRect(
+          pRect,
+          Paint()
+            ..color = const Color(0xFF00F5FF)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.4,
+        );
+        // Pillar Center Energy Line
+        canvas.drawLine(
+          Offset(midX, -spikeHeight - 2),
+          Offset(midX, 0),
+          Paint()
+            ..color = const Color(0xFFFF007F)
+            ..strokeWidth = 1.2,
+        );
+
+        // 3 Triple Horizontal Cyan/Pink Laser Fence Tripwires
+        for (int b = 0; b < 3; b++) {
+          final beamY = -spikeHeight * (0.25 + b * 0.35);
+
+          // Horizontal Laser Fence Beam
+          final laserGlow = Paint()
+            ..color =
+                (b % 2 == 0 ? const Color(0xFF00F5FF) : const Color(0xFFFF007F))
+                    .withValues(alpha: 0.9)
+            ..strokeWidth = 3.5
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.5);
+          canvas.drawLine(
+            Offset(startX - 10, beamY),
+            Offset(startX + spikeWidth + 10, beamY),
+            laserGlow,
+          );
+          canvas.drawLine(
+            Offset(startX - 10, beamY),
+            Offset(startX + spikeWidth + 10, beamY),
+            Paint()
+              ..color = Colors.white
+              ..strokeWidth = 1.2,
+          );
+
+          // Emitter Node Spark
+          canvas.drawCircle(
+            Offset(midX, beamY),
+            2.5,
+            Paint()..color = Colors.white,
+          );
+        }
+
+        // Top Pulsing Quantum Vertex Beacon
+        canvas.drawCircle(
+          Offset(midX, -spikeHeight - 4),
+          3.5,
+          Paint()
+            ..color = const Color(0xFFFF007F)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        );
+        canvas.drawCircle(
+          Offset(midX, -spikeHeight - 4),
+          1.5,
+          Paint()..color = Colors.white,
+        );
+      }
+      return;
+    }
+
+    // 1. Industrial Hazard Base Plate (Default Campaign)
     final basePlate = Rect.fromLTWH(0, -4.0, size.x, 4.0);
     final basePaint = Paint()
       ..color = const Color(0xFF141824)
@@ -108,7 +284,7 @@ class Stakes extends BaseHazard {
         ..style = PaintingStyle.fill;
       canvas.drawPath(frontFace, frontPaint);
 
-      // Face 2: 3D Shadowed Side Facet (giving 3D perspective depth)
+      // Face 2: 3D Shadowed Side Facet
       final sideFace = Path()
         ..moveTo(midX + 2.0, -3.0)
         ..lineTo(tip.dx, tip.dy)

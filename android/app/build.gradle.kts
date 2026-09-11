@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.cleanroom.squbedarkness.sqube_darkness_cleanroom"
+    namespace = "com.moonedgestudio.cyberninjarunner"
     compileSdk = flutter.compileSdkVersion
 
     compileOptions {
@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.cleanroom.squbedarkness.sqube_darkness_cleanroom"
+        applicationId = "com.moonedgestudio.cyberninjarunner"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

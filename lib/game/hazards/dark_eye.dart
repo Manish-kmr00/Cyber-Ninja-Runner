@@ -2,6 +2,7 @@ export 'cyber_cannon.dart';
 
 import 'cyber_cannon.dart';
 
-/// Legacy alias for CyberCannon (formerly DarkEye spotlight sentry).
-/// Replaced by the ceiling-mounted Cyber Cannon turret that shoots plasma bullets.
+/// Roof Cannon (formerly DarkEye sentry).
+/// Ceiling-mounted Roof Cannon turret that shoots plasma bullets.
+typedef RoofCannon = CyberCannon;
 typedef DarkEye = CyberCannon;
