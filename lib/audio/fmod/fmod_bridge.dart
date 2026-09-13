@@ -214,11 +214,17 @@ class FmodBridge {
 
   /// Starts or transitions a continuous/looping event (such as adaptive music).
   void playMusicTrack(String eventPath, {Map<String, double>? parameters}) {
-    if (!_isInitialized || _system == null || _bindings == null) return;
+    if (!_isInitialized || _system == null || _bindings == null) {
+      debugPrint('[FmodBridge] playMusicTrack failed: engine not initialized');
+      return;
+    }
 
     // Check if track is already running
     final existing = _activeMusicInstances[eventPath];
     if (existing != null) {
+      debugPrint(
+        '[FmodBridge] playMusicTrack: track $eventPath already running',
+      );
       if (parameters != null) {
         for (final entry in parameters.entries) {
           setParameterOnEvent(eventPath, entry.key, entry.value);
@@ -228,12 +234,22 @@ class FmodBridge {
     }
 
     final desc = _getEventDescription(eventPath);
-    if (desc == null) return;
+    if (desc == null) {
+      debugPrint(
+        '[FmodBridge] playMusicTrack failed: description null for $eventPath',
+      );
+      return;
+    }
 
     final instPtrPtr = calloc<Pointer<FmodStudioEventInstance>>();
     try {
       final res = _bindings!.eventDescriptionCreateInstance(desc, instPtrPtr);
-      if (res != FMOD_OK) return;
+      if (res != FMOD_OK) {
+        debugPrint(
+          '[FmodBridge] playMusicTrack failed: createInstance res=$res',
+        );
+        return;
+      }
 
       final inst = instPtrPtr.value;
       _activeMusicInstances[eventPath] = inst;
@@ -254,7 +270,10 @@ class FmodBridge {
         }
       }
 
-      _bindings!.eventInstanceStart(inst);
+      final startRes = _bindings!.eventInstanceStart(inst);
+      debugPrint(
+        '[FmodBridge] playMusicTrack: started $eventPath (inst=$inst, startRes=$startRes)',
+      );
     } finally {
       calloc.free(instPtrPtr);
     }
@@ -270,6 +289,9 @@ class FmodBridge {
       immediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT,
     );
     _bindings!.eventInstanceRelease(inst);
+    debugPrint(
+      '[FmodBridge] stopMusicTrack: stopped $eventPath (immediate=$immediate)',
+    );
   }
 
   /// Stops all active music tracks.
@@ -291,6 +313,48 @@ class FmodBridge {
     } finally {
       calloc.free(nameUtf8);
     }
+  }
+
+  /// Queries the current playback timeline position (in ms) of an active event.
+  int getTimelinePosition(String eventPath) {
+    final inst = _activeMusicInstances[eventPath];
+    if (inst == null || _bindings == null) {
+      debugPrint(
+        '[FmodBridge] getTimelinePosition: inst is null for $eventPath (active: ${_activeMusicInstances.keys.toList()})',
+      );
+      return -1;
+    }
+    final posPtr = calloc<Int32>();
+    try {
+      final res = _bindings!.eventInstanceGetTimelinePosition(inst, posPtr);
+      if (res != FMOD_OK) {
+        debugPrint(
+          '[FmodBridge] getTimelinePosition failed: res=$res for $eventPath',
+        );
+        return -1;
+      }
+      return posPtr.value;
+    } finally {
+      calloc.free(posPtr);
+    }
+  }
+
+  /// Sets the playback timeline position (in ms) of an active event.
+  bool setTimelinePosition(String eventPath, int positionMs) {
+    final inst = _activeMusicInstances[eventPath];
+    if (inst == null || _bindings == null) {
+      debugPrint(
+        '[FmodBridge] setTimelinePosition: inst is null for $eventPath',
+      );
+      return false;
+    }
+    final res = _bindings!.eventInstanceSetTimelinePosition(inst, positionMs);
+    if (res != FMOD_OK) {
+      debugPrint(
+        '[FmodBridge] setTimelinePosition failed: res=$res for $eventPath to $positionMs',
+      );
+    }
+    return res == FMOD_OK;
   }
 
   /// Modulates a global FMOD parameter.
@@ -586,10 +650,36 @@ class FmodBridge {
     report['lifecycle']['resumeSuccess'] = true;
     debugPrint('[AUDIO_QA] LIFECYCLE: bus:/ RESUMED (Foreground simulation)');
 
-    // 7. Final Summary
+    // 7. Audit Continuous Gameplay Music Loop Transitions (Loop 1 -> Loop 2 -> Loop 3 -> Loop 5)
+    debugPrint(
+      '[AUDIO_QA] AUDITING CONTINUOUS GAMEPLAY MUSIC LOOP BOUNDARY TRANSITIONS',
+    );
+    stopMusicTrack('event:/Music/Gameplay', immediate: true);
+    await Future.delayed(const Duration(milliseconds: 60));
+    playMusicTrack('event:/Music/Gameplay');
+    await Future.delayed(const Duration(milliseconds: 120));
+
+    final loopReports = <int, bool>{};
+    for (int loopNum = 1; loopNum <= 5; loopNum++) {
+      // Seek to 43,850 ms (150ms before 44,000 ms loop boundary)
+      setTimelinePosition('event:/Music/Gameplay', 43850);
+      await Future.delayed(const Duration(milliseconds: 750));
+      final posAfter = getTimelinePosition('event:/Music/Gameplay');
+      final hasLooped = posAfter >= 0 && posAfter < 15000;
+      loopReports[loopNum] = hasLooped;
+      debugPrint(
+        '[AUDIO_QA] GAMEPLAY MUSIC LOOP $loopNum: timeline = $posAfter ms -> ${hasLooped ? "SEAMLESS LOOP SUCCESS" : "LOOP FAILED"}',
+      );
+    }
+    stopMusicTrack('event:/Music/Gameplay', immediate: true);
+    report['gameplay_loops'] = loopReports;
+
+    // 8. Final Summary
+    final allLoopsPassed = loopReports.values.every((v) => v == true);
     final isPassed =
         (eventsPassed == allEvents.length &&
-        snapshotsPassed == snapshots.length);
+        snapshotsPassed == snapshots.length &&
+        allLoopsPassed);
     report['summary'] = {
       'totalEvents': allEvents.length,
       'eventsPassed': eventsPassed,

@@ -191,6 +191,25 @@ typedef FmodStudioEventInstanceSetParameterByNameDart =
       int ignoreseekspeed,
     );
 
+typedef FmodStudioEventInstanceGetTimelinePositionC =
+    Int32 Function(
+      Pointer<FmodStudioEventInstance> eventinstance,
+      Pointer<Int32> position,
+    );
+typedef FmodStudioEventInstanceGetTimelinePositionDart =
+    int Function(
+      Pointer<FmodStudioEventInstance> eventinstance,
+      Pointer<Int32> position,
+    );
+
+typedef FmodStudioEventInstanceSetTimelinePositionC =
+    Int32 Function(
+      Pointer<FmodStudioEventInstance> eventinstance,
+      Int32 position,
+    );
+typedef FmodStudioEventInstanceSetTimelinePositionDart =
+    int Function(Pointer<FmodStudioEventInstance> eventinstance, int position);
+
 typedef FmodStudioBusSetVolumeC =
     Int32 Function(Pointer<FmodStudioBus> bus, Float volume);
 typedef FmodStudioBusSetVolumeDart =
@@ -234,6 +253,10 @@ class FmodBindings {
   late final FmodStudioEventInstanceReleaseDart eventInstanceRelease;
   late final FmodStudioEventInstanceSetParameterByNameDart
   eventInstanceSetParameterByName;
+  late final FmodStudioEventInstanceGetTimelinePositionDart
+  eventInstanceGetTimelinePosition;
+  late final FmodStudioEventInstanceSetTimelinePositionDart
+  eventInstanceSetTimelinePosition;
   late final FmodStudioBusSetVolumeDart busSetVolume;
   late final FmodStudioBusSetMuteDart busSetMute;
   late final FmodStudioBusSetPausedDart busSetPaused;
@@ -314,6 +337,16 @@ class FmodBindings {
           FmodStudioEventInstanceSetParameterByNameC,
           FmodStudioEventInstanceSetParameterByNameDart
         >('FMOD_Studio_EventInstance_SetParameterByName');
+    eventInstanceGetTimelinePosition = _studioLib
+        .lookupFunction<
+          FmodStudioEventInstanceGetTimelinePositionC,
+          FmodStudioEventInstanceGetTimelinePositionDart
+        >('FMOD_Studio_EventInstance_GetTimelinePosition');
+    eventInstanceSetTimelinePosition = _studioLib
+        .lookupFunction<
+          FmodStudioEventInstanceSetTimelinePositionC,
+          FmodStudioEventInstanceSetTimelinePositionDart
+        >('FMOD_Studio_EventInstance_SetTimelinePosition');
     busSetVolume = _studioLib
         .lookupFunction<FmodStudioBusSetVolumeC, FmodStudioBusSetVolumeDart>(
           'FMOD_Studio_Bus_SetVolume',

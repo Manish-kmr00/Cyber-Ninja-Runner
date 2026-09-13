@@ -1,0 +1,23 @@
+{
+  "file": "music_gameplay_loop.wav",
+  "sample_rate": 48000,
+  "channels": 2,
+  "bit_depth": 24,
+  "duration_seconds": 44.0,
+  "total_frames": 2112000,
+  "peak_dbfs": -0.5,
+  "rms_dbfs": -12.41,
+  "dc_offset": 0.000106,
+  "clipping_samples": 0,
+  "estimated_bpm": 90.9,
+  "tonal_center": "D Minor",
+  "loop_boundary": {
+    "end_sample_value": 0.16435,
+    "start_sample_value": 0.16435,
+    "boundary_amplitude_jump": 0.0,
+    "slope_difference": 0.0,
+    "boundary_rms_ratio": 0.801,
+    "status": "SEAMLESS_CONTINUOUS",
+    "pop_click_risk": "NONE"
+  }
+}

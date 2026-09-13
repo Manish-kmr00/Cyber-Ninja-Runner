@@ -191,9 +191,17 @@ class AudioManager with WidgetsBindingObserver {
     }
   }
 
+  bool _isAudioQaRunning = false;
+
   /// Executes full runtime QA suite across all 35 events, banks, buses, and snapshots.
-  Future<Map<String, dynamic>> runRealDeviceAudioQASuite() =>
-      _fmod.runRuntimeAudioQASuite();
+  Future<Map<String, dynamic>> runRealDeviceAudioQASuite() async {
+    _isAudioQaRunning = true;
+    try {
+      return await _fmod.runRuntimeAudioQASuite();
+    } finally {
+      _isAudioQaRunning = false;
+    }
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -265,6 +273,12 @@ class AudioManager with WidgetsBindingObserver {
   // =========================================================================
 
   Future<void> setMusicState(MusicState newState) async {
+    if (_isAudioQaRunning) {
+      debugPrint(
+        '[AudioManager] setMusicState ($newState) ignored during active Audio QA suite',
+      );
+      return;
+    }
     if (_currentMusicState == newState) return;
     _currentMusicState = newState;
 

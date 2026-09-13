@@ -9,7 +9,6 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/services/daily_crate_service.dart';
 import '../../core/storage/save_service.dart';
 import '../widgets/daily_crate_dialog.dart';
-import 'dev_audio_test_screen.dart';
 import 'game_screen.dart';
 import 'leaderboard_screen.dart';
 import 'settings_screen.dart';
@@ -566,22 +565,6 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                 );
               },
             ),
-            if (kDebugMode) ...[
-              SizedBox(width: isCompact ? 6 : 8),
-              _buildRoundIconButton(
-                icon: Icons.terminal_rounded,
-                color: Colors.amberAccent,
-                isCompact: isCompact,
-                onTap: () {
-                  AudioService().playClick();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const DevAudioTestScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
           ],
         ),
       ],
