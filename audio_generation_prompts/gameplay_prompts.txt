@@ -1,0 +1,147 @@
+=== GAMEPLAY AUDIO GENERATION PROMPTS ===
+Total Assets: 16
+
+Filename: gameplay_collect_01.wav
+FMOD Event: event:/Gameplay/Collect
+Duration: 0.22s | Channels: Mono | Variation: 1
+Prompt:
+0.22-second premium futuristic collectible pickup SFX. Ultra-clean high-frequency glass-crystal chime with a subtle cybernetic sine blip, resolving into an upward pitch micro-shimmer. Pure, tactile, satisfying, high frequencies from 3 kHz to 12 kHz, mono.
+Negative Prompt:
+Mario coin copy, casino slot chime, dull wooden click, muddy bass, long ringing bell, retro 8-bit blip.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_collect_02.wav
+FMOD Event: event:/Gameplay/Collect
+Duration: 0.22s | Channels: Mono | Variation: 2
+Prompt:
+0.22-second cyber credit pickup. Crisp electronic coin ping layered with a delicate magnetized energy click. Instant attack (2 ms), zero latency, fast decay, mono.
+Negative Prompt:
+Mario coin copy, casino slot chime, dull wooden click, muddy bass, long ringing bell.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_collect_03.wav
+FMOD Event: event:/Gameplay/Collect
+Duration: 0.22s | Channels: Mono | Variation: 3
+Prompt:
+0.22-second data shard acquisition sound. Harmonic synthesizer bell tone with subtle stereo chorus emulation and micro-laser chirp. Extremely clean, addictive, mono.
+Negative Prompt:
+Mario coin copy, casino slot chime, dull wooden click, muddy bass.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_collect_04.wav
+FMOD Event: event:/Gameplay/Collect
+Duration: 0.22s | Channels: Mono | Variation: 4
+Prompt:
+0.22-second neon currency collect. Pristine high-tech drop of sonic energy, light metallic resonance with instant cutoff. Crisp transient, perfectly transparent in a busy mix, mono.
+Negative Prompt:
+Mario coin copy, casino slot chime, dull wooden click, muddy bass.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_checkpoint_01.wav
+FMOD Event: event:/Gameplay/Checkpoint
+Duration: 0.75s | Channels: Stereo | Variation: 1
+Prompt:
+0.75-second futuristic holographic checkpoint activation. Resonant, reassuring sonic pulse: fast ascending synth chord chime, sweeping energy gate pass-through sound, and a warm sustaining low-mid reassurance hum. Broad stereo expansion, triumphant and stabilizing.
+Negative Prompt:
+church bells, arcade checkpoint buzzer, brass fanfare, cheering crowd, muddy distorted boom, harsh click.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_checkpoint_02.wav
+FMOD Event: event:/Gameplay/Checkpoint
+Duration: 0.75s | Channels: Stereo | Variation: 2
+Prompt:
+0.75-second cyber runner checkpoint reached. High-speed telemetry verification sweep, pristine harmonic synth bell flourish, and a gentle sub-bass confirmation thud. Modern, clean, stereo.
+Negative Prompt:
+church bells, arcade checkpoint buzzer, brass fanfare, cheering crowd, muddy boom.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_checkpoint_03.wav
+FMOD Event: event:/Gameplay/Checkpoint
+Duration: 0.75s | Channels: Stereo | Variation: 3
+Prompt:
+0.75-second neon gate save-point sound. Clean electrical frequency surge blooming into a rich stereo harmonic chime and fading smoothly into the background. High clarity, professional stereo finish.
+Negative Prompt:
+church bells, arcade checkpoint buzzer, brass fanfare, cheering crowd.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_powerup_01.wav
+FMOD Event: event:/Gameplay/Powerup
+Duration: 0.8s | Channels: Stereo | Variation: 1
+Prompt:
+0.80-second futuristic powerup upgrade activation. Dynamic cybernetic power surge: fast upward frequency riser (200 Hz to 4 kHz), crisp high-energy electric latch sound, expanding into a rich, full-bodied stereo synthesizer pulse. Inspiring, powerful, high-tech.
+Negative Prompt:
+retro video game 1-up, cartoon mushroom sound, casino jingle, human voice 'power up', muddy rumble.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_powerup_02.wav
+FMOD Event: event:/Gameplay/Powerup
+Duration: 0.8s | Channels: Stereo | Variation: 2
+Prompt:
+0.80-second nano-overdrive powerup pickup. Concentrated energy injection pop, instant high-voltage reactor hum spinning up to max speed, and a glittering holographic tail. Punchy and uplifting, stereo.
+Negative Prompt:
+retro video game 1-up, cartoon mushroom sound, casino jingle, human voice.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_powerup_03.wav
+FMOD Event: event:/Gameplay/Powerup
+Duration: 0.8s | Channels: Stereo | Variation: 3
+Prompt:
+0.80-second cyber ninja power boost. Rapid charging coil sound with an explosive clean energy snap and wide stereo harmonic ring out. Exhilarating, punchy, stereo.
+Negative Prompt:
+retro video game 1-up, cartoon mushroom sound, casino jingle.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_shield_01.wav
+FMOD Event: event:/Gameplay/Shield
+Duration: 0.9s | Channels: Stereo | Variation: 1
+Prompt:
+0.90-second high-tech energy shield activation. Instant electromagnetic pulse burst, expanding hexagonal forcefield deployment snap, followed by a resonant protective crystalline hum that stabilizes cleanly. Protective, protective bass resonance, wide stereo.
+Negative Prompt:
+metal medieval shield clink, muffled hum, electrical drone that hurts ears, buzzer, low bitrate noise.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_shield_02.wav
+FMOD Event: event:/Gameplay/Shield
+Duration: 0.9s | Channels: Stereo | Variation: 2
+Prompt:
+0.90-second cybernetic barrier engagement. Pressurized magnetic field ignition with a glassy deflector ping and a smooth, low-humming containment loop transient. Crisp, sterile, high-tech, stereo.
+Negative Prompt:
+metal medieval shield clink, muffled hum, electrical drone, buzzer.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_shield_03.wav
+FMOD Event: event:/Gameplay/Shield
+Duration: 0.9s | Channels: Stereo | Variation: 3
+Prompt:
+0.90-second plasma aegis activation. Dual-tone upward energy envelope, instant shield locking transient, and a delicate high-frequency energy shimmer. Clean, confident, stereo.
+Negative Prompt:
+metal medieval shield clink, muffled hum, electrical drone.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_booster_01.wav
+FMOD Event: event:/Gameplay/Booster
+Duration: 0.65s | Channels: Mono | Variation: 1
+Prompt:
+0.65-second high-velocity speed booster pad sound. Violent jet-thruster acceleration blast: explosive pressurized air transient, sudden high-pitched Doppler turbo spool-up, and rapid whoosh past camera. Immense forward kinetic energy, mono.
+Negative Prompt:
+car tire burnout, slow airplane drone, fireworks whistle, cartoon zoom sound, muffled noise.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_booster_02.wav
+FMOD Event: event:/Gameplay/Booster
+Duration: 0.65s | Channels: Mono | Variation: 2
+Prompt:
+0.65-second magnetic accelerator boost. Instant rail-launch snap with powerful ionized propulsion burst and whistling velocity dissipation tail. Sharp, exhilarating, punchy, mono.
+Negative Prompt:
+car tire burnout, slow airplane drone, fireworks whistle, cartoon zoom.
+--------------------------------------------------------------------------------
+
+Filename: gameplay_booster_03.wav
+FMOD Event: event:/Gameplay/Booster
+Duration: 0.65s | Channels: Mono | Variation: 3
+Prompt:
+0.65-second cyber speed burst. Supercharged nitro-like electronic thruster discharge with tight low-end punch and razor-sharp air tearing transient. Fast, aggressive, mono.
+Negative Prompt:
+car tire burnout, slow airplane drone, fireworks whistle.
+--------------------------------------------------------------------------------
+

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
+import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../cyber_ninja_game.dart';
@@ -141,6 +142,7 @@ abstract class RunnerPlayer extends PositionComponent
       squashFactorX = 0.82;
       squashFactorY = 1.30;
       _spawnJumpPuff();
+      AudioService().playJump();
     } else if (canDoubleJump) {
       // High-octane mid-air double jump!
       velocity.y = AppConstants.doubleJumpForce;
@@ -149,6 +151,7 @@ abstract class RunnerPlayer extends PositionComponent
       squashFactorX = 0.78;
       squashFactorY = 1.38;
       onDoubleJump();
+      AudioService().playFlip();
     }
   }
 
@@ -175,6 +178,7 @@ abstract class RunnerPlayer extends PositionComponent
     squashFactorY = 0.55;
     onHeavyImpact?.call(0.30);
     onSlashAttack();
+    AudioService().playSlide();
   }
 
   void stopSlide() {
@@ -189,6 +193,7 @@ abstract class RunnerPlayer extends PositionComponent
       final impactSpeed = velocity.y;
       squashFactorX = 1.32;
       squashFactorY = 0.68;
+      AudioService().playLand();
 
       // Heavy ground shockwave ring
       shockwaves.add(
@@ -200,9 +205,10 @@ abstract class RunnerPlayer extends PositionComponent
         ),
       );
 
-      // Camera shake trauma
+      // Camera shake trauma and tactile haptic impact
       if (impactSpeed > 400) {
         onHeavyImpact?.call(min(1.0, impactSpeed / 800.0));
+        AudioService().triggerHaptic(heavy: true);
       }
     }
     isGrounded = true;

@@ -1,0 +1,165 @@
+=== UI AUDIO GENERATION PROMPTS ===
+Total Assets: 18
+
+Filename: ui_click_01.wav
+FMOD Event: event:/UI/Click
+Duration: 0.08s | Channels: Stereo | Variation: 1
+Prompt:
+0.08-second premium futuristic holographic UI button click. Extremely short, crisp acoustic glass-tap transient layered with a microscopic synthetic sine blip at 2.4 kHz. Tactile, precise, dry, zero reverb, stereo.
+Negative Prompt:
+dull plastic keyboard thud, mouse click copy, wet click, 8-bit blip, reverb tail, loud pop.
+--------------------------------------------------------------------------------
+
+Filename: ui_click_02.wav
+FMOD Event: event:/UI/Click
+Duration: 0.08s | Channels: Stereo | Variation: 2
+Prompt:
+0.08-second high-tech capacitive touch confirmation click. Sub-millisecond transient snap, delicate high-frequency digital ping, immediate silence. Pristine, modern luxury tech, stereo.
+Negative Prompt:
+dull plastic keyboard thud, mouse click copy, wet click, 8-bit blip.
+--------------------------------------------------------------------------------
+
+Filename: ui_click_03.wav
+FMOD Event: event:/UI/Click
+Duration: 0.08s | Channels: Stereo | Variation: 3
+Prompt:
+0.08-second cybernetic interface tick. Crisp mechanical micro-switch click with electronic micro-beep. Ultra-short, satisfying, zero tail, stereo.
+Negative Prompt:
+dull plastic keyboard thud, mouse click copy, wet click.
+--------------------------------------------------------------------------------
+
+Filename: ui_hover_01.wav
+FMOD Event: event:/UI/Hover
+Duration: 0.05s | Channels: Stereo | Variation: 1
+Prompt:
+0.05-second ultra-subtle futuristic menu hover sound. Soft high-frequency air blip, rounded delicate synth tone at -12 dB, completely non-intrusive, ephemeral holographic feedback, stereo.
+Negative Prompt:
+loud beep, harsh screech, buzzer, bass thud, cartoon whistle, distorted click.
+--------------------------------------------------------------------------------
+
+Filename: ui_hover_02.wav
+FMOD Event: event:/UI/Hover
+Duration: 0.05s | Channels: Stereo | Variation: 2
+Prompt:
+0.05-second soft digital cursor hover tick. Delicate optical sensor pulse, microscopic metallic shimmer, whisper quiet, stereo.
+Negative Prompt:
+loud beep, harsh screech, buzzer, bass thud, cartoon whistle.
+--------------------------------------------------------------------------------
+
+Filename: ui_menu_open_01.wav
+FMOD Event: event:/UI/MenuOpen
+Duration: 0.25s | Channels: Stereo | Variation: 1
+Prompt:
+0.25-second holographic menu interface expansion swoosh. Smooth upward stereo sweep of filtered white noise and crystalline chime, expanding rapidly across the stereo field like a HUD activating. Crisp, modern, cinematic, stereo.
+Negative Prompt:
+heavy door opening, creaking wood, thunder, cartoon pop, muffled thump.
+--------------------------------------------------------------------------------
+
+Filename: ui_menu_open_02.wav
+FMOD Event: event:/UI/MenuOpen
+Duration: 0.25s | Channels: Stereo | Variation: 2
+Prompt:
+0.25-second cybernetic dialog deploy sound. Swift pneumatic micro-flicker with ascending digital telemetry blip. High-tech, clean, stereo.
+Negative Prompt:
+heavy door opening, creaking wood, thunder, cartoon pop.
+--------------------------------------------------------------------------------
+
+Filename: ui_menu_close_01.wav
+FMOD Event: event:/UI/MenuClose
+Duration: 0.2s | Channels: Stereo | Variation: 1
+Prompt:
+0.20-second holographic menu dismiss sound. Downward filtering air swoosh with a soft high-tech suction dissipation and subtle magnetic click shut. Clean, conclusive, stereo.
+Negative Prompt:
+door slamming, glass shattering, heavy bass drop, cartoon squeak.
+--------------------------------------------------------------------------------
+
+Filename: ui_menu_close_02.wav
+FMOD Event: event:/UI/MenuClose
+Duration: 0.2s | Channels: Stereo | Variation: 2
+Prompt:
+0.20-second HUD collapse sound. Swift inward stereo sweep resolving into an instantaneous dry micro-snap. Elegant, minimal, stereo.
+Negative Prompt:
+door slamming, glass shattering, heavy bass drop, cartoon squeak.
+--------------------------------------------------------------------------------
+
+Filename: ui_purchase_01.wav
+FMOD Event: event:/UI/Purchase
+Duration: 0.65s | Channels: Stereo | Variation: 1
+Prompt:
+0.65-second futuristic store purchase confirmation sound. High-tech biometric approval sequence: rapid dual data chirp, a rich stereo credit dissipation chime, and a solid resonant metal lock confirming the transaction. Highly satisfying, valuable, stereo.
+Negative Prompt:
+cash register ka-ching, physical coins rattling, cartoon horn, casino win fanfare, speech.
+--------------------------------------------------------------------------------
+
+Filename: ui_purchase_02.wav
+FMOD Event: event:/UI/Purchase
+Duration: 0.65s | Channels: Stereo | Variation: 2
+Prompt:
+0.65-second cyber transaction successful chime. Smooth digital authorization tone ascending into a warm harmonic chime with subtle metallic shimmer. Premium, trustworthy, stereo.
+Negative Prompt:
+cash register ka-ching, physical coins rattling, cartoon horn, casino win.
+--------------------------------------------------------------------------------
+
+Filename: ui_reward_01.wav
+FMOD Event: event:/UI/Reward
+Duration: 1.1s | Channels: Stereo | Variation: 1
+Prompt:
+1.10-second cyber loot crate unlock fanfare. Pressurized futuristic container unsealing hiss, ascending high-frequency holographic light glissando, bursting into a rewarding neon chord bloom with deep sub-bass warmth. Exhilarating, prestigious, stereo.
+Negative Prompt:
+brass fanfare, slot machine alarm, casino clatter, party horns, cheering crowd, speech.
+--------------------------------------------------------------------------------
+
+Filename: ui_reward_02.wav
+FMOD Event: event:/UI/Reward
+Duration: 1.1s | Channels: Stereo | Variation: 2
+Prompt:
+1.10-second rare item unlock cue. Mechanical lock tumbling open followed by an energetic electronic synth chime burst and sparkling laser shimmer tail. Rewarding, elite, stereo.
+Negative Prompt:
+brass fanfare, slot machine alarm, casino clatter, party horns.
+--------------------------------------------------------------------------------
+
+Filename: ui_reward_03.wav
+FMOD Event: event:/UI/Reward
+Duration: 1.1s | Channels: Stereo | Variation: 3
+Prompt:
+1.10-second mission complete reward celebration sound. Uplifting futuristic tonal flourish layered with digital data stream sweeps and a punchy confirmation thud. Bright, triumphant, stereo.
+Negative Prompt:
+brass fanfare, slot machine alarm, casino clatter.
+--------------------------------------------------------------------------------
+
+Filename: ui_error_01.wav
+FMOD Event: event:/UI/Error
+Duration: 0.3s | Channels: Stereo | Variation: 1
+Prompt:
+0.30-second futuristic access denied / error alert sound. Dual rapid descending sawtooth synth buzzer pulses (180 Hz), crisp and electronic, communicates negative feedback without ear pain or harsh distortion. Clean, high-tech, dry, stereo.
+Negative Prompt:
+loud obnoxious buzzer, Windows error ding, car horn, cartoon raspberry, shrill screech.
+--------------------------------------------------------------------------------
+
+Filename: ui_error_02.wav
+FMOD Event: event:/UI/Error
+Duration: 0.3s | Channels: Stereo | Variation: 2
+Prompt:
+0.30-second cyber interface error tone. Low-voltage electrical rejection chirp with subtle sub-bass double-tap. Restrained, authoritative, futuristic, stereo.
+Negative Prompt:
+loud obnoxious buzzer, Windows error ding, car horn, cartoon raspberry.
+--------------------------------------------------------------------------------
+
+Filename: ui_notification_01.wav
+FMOD Event: event:/UI/Notification
+Duration: 0.4s | Channels: Stereo | Variation: 1
+Prompt:
+0.40-second subtle cybernetic HUD alert chime. Clean dual-tone synthetic bell chime (C6 to G6), perfectly rounded transient, delicate stereo delay tail. Informative, polite, high-tech ninja helmet display notification, stereo.
+Negative Prompt:
+iPhone notification copy, loud siren, speech, telephone ring, alarm clock, distorted beeping.
+--------------------------------------------------------------------------------
+
+Filename: ui_notification_02.wav
+FMOD Event: event:/UI/Notification
+Duration: 0.4s | Channels: Stereo | Variation: 2
+Prompt:
+0.40-second tactical radar notification ping. High-frequency digital blip with smooth decay and subtle spatial reverb pulse. Crisp, clear, stereo.
+Negative Prompt:
+iPhone notification copy, loud siren, speech, telephone ring.
+--------------------------------------------------------------------------------
+

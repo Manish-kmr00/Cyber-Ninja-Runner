@@ -55,6 +55,7 @@ class SaveService extends ChangeNotifier {
 
     // Sync audio and haptics preferences on launch
     AudioService().updateVolumes(
+      master: settings.masterVolume,
       music: settings.musicVolume,
       sfx: settings.sfxVolume,
       muted: settings.isMuted,
@@ -137,7 +138,6 @@ class SaveService extends ChangeNotifier {
     player.boosters[type]?.add(count);
     saveAll();
   }
-
 
   bool unlockTenXMode() {
     const cost = 50000;

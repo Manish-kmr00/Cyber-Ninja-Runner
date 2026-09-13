@@ -567,8 +567,10 @@ class CyberNinjaPlayer extends RunnerPlayer {
   void _renderTorso(Canvas canvas, Color primary, Color secondary, Color neon) {
     final torsoWidth = size.x * 0.38;
     final torsoHeight = size.y * 0.36;
+    final torsoStartX = size.x * 0.32;
+
     final torsoRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(size.x * 0.32, size.y * 0.30, torsoWidth, torsoHeight),
+      Rect.fromLTWH(torsoStartX, size.y * 0.30, torsoWidth, torsoHeight),
       const Radius.circular(7.0),
     );
 
@@ -580,23 +582,25 @@ class CyberNinjaPlayer extends RunnerPlayer {
 
     // 2. 3D Bevel Facet on Chest
     final chestPlates = Path()
-      ..moveTo(size.x * 0.32, size.y * 0.30)
-      ..lineTo(size.x * 0.32 + torsoWidth, size.y * 0.30)
-      ..lineTo(size.x * 0.32 + torsoWidth * 0.75, size.y * 0.44)
-      ..lineTo(size.x * 0.32, size.y * 0.42)
+      ..moveTo(torsoStartX, size.y * 0.30)
+      ..lineTo(torsoStartX + torsoWidth, size.y * 0.30)
+      ..lineTo(torsoStartX + torsoWidth * 0.75, size.y * 0.44)
+      ..lineTo(torsoStartX, size.y * 0.42)
       ..close();
     final chestPaint = Paint()
       ..color = secondary
       ..style = PaintingStyle.fill;
     canvas.drawPath(chestPlates, chestPaint);
 
-    // 3. Glowing Shinobi Clan Crest (Pulsing Diamond Core)
-    final crestCenter = Offset(size.x * 0.48, size.y * 0.42);
+    // 3. Glowing Shinobi Clan Crest / Core
+    final crestCenter = Offset(torsoStartX + torsoWidth * 0.50, size.y * 0.41);
     final pulseScale = 1.0 + 0.15 * sin(corePulseTimer);
 
     final crestPaint = Paint()
       ..color = neon
       ..style = PaintingStyle.fill;
+
+    // Diamond Crest
     final crest = Path()
       ..moveTo(crestCenter.dx, crestCenter.dy - 6.0 * pulseScale)
       ..lineTo(crestCenter.dx + 4.8 * pulseScale, crestCenter.dy)
@@ -610,7 +614,7 @@ class CyberNinjaPlayer extends RunnerPlayer {
       ..color = const Color(0xFF0F1218)
       ..style = PaintingStyle.fill;
     canvas.drawRect(
-      Rect.fromLTWH(size.x * 0.31, size.y * 0.54, torsoWidth + 2, 5.5),
+      Rect.fromLTWH(torsoStartX - 1, size.y * 0.54, torsoWidth + 2, 5.5),
       beltPaint,
     );
 
@@ -619,7 +623,7 @@ class CyberNinjaPlayer extends RunnerPlayer {
       ..color = neon
       ..style = PaintingStyle.fill;
     canvas.drawRect(
-      Rect.fromLTWH(size.x * 0.46, size.y * 0.53, 5.5, 7.5),
+      Rect.fromLTWH(crestCenter.dx - 2.8, size.y * 0.53, 5.6, 7.5),
       bucklePaint,
     );
   }

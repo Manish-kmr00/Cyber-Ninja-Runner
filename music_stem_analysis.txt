@@ -1,0 +1,58 @@
+======================================================================
+CYBER NINJA RUNNER - MUSIC STEM QA & SYNCHRONIZATION ANALYSIS
+======================================================================
+Target specification: 138 BPM | D Minor | 4/4 | 16 Bars (27.826s, 1,335,652 samples)
+----------------------------------------------------------------------
+
+[FILE: music_gameplay_base.wav]
+  Sample Rate:     48000 Hz | Channels: 2 | Bit Depth: 24-bit
+  Sample Count:    2112000 samples (44.000 s)
+  Peak Level:      -0.5 dBFS (linear: 0.9441)
+  RMS Level:       -10.89 dBFS (linear: 0.28555)
+  Estimated BPM:   170.2 BPM
+  Dominant Pitch:  C
+  Spectral Center: 712.7 Hz | Rolloff 85%: 56.1 Hz
+  Detected Onsets: 271 transients detected
+  Loop Edges:      Start: 0.10474, End: 0.00032, @16-Bar Mark: 0.25311
+
+[FILE: music_gameplay_intensity.wav]
+  Sample Rate:     48000 Hz | Channels: 2 | Bit Depth: 24-bit
+  Sample Count:    2112000 samples (44.000 s)
+  Peak Level:      -0.5 dBFS (linear: 0.9441)
+  RMS Level:       -24.36 dBFS (linear: 0.06056)
+  Estimated BPM:   137.36 BPM
+  Dominant Pitch:  B
+  Spectral Center: 8585.6 Hz | Rolloff 85%: 19639.4 Hz
+  Detected Onsets: 145 transients detected
+  Loop Edges:      Start: 0.23242, End: 0.01495, @16-Bar Mark: 0.04324
+
+[FILE: music_gameplay_danger.wav]
+  Sample Rate:     48000 Hz | Channels: 2 | Bit Depth: 24-bit
+  Sample Count:    2112000 samples (44.000 s)
+  Peak Level:      -0.5 dBFS (linear: 0.9441)
+  RMS Level:       -16.09 dBFS (linear: 0.15686)
+  Estimated BPM:   143.94 BPM
+  Dominant Pitch:  B
+  Spectral Center: 8027.6 Hz | Rolloff 85%: 20822.0 Hz
+  Detected Onsets: 221 transients detected
+  Loop Edges:      Start: 0.00021, End: 0.00047, @16-Bar Mark: 0.32702
+
+======================================================================
+INTER-STEM SYNCHRONIZATION & CROSS-CORRELATION MATRIX
+======================================================================
+Waveform Cross-Correlation:
+  Base vs Intensity:     0.0001
+  Base vs Danger:        -0.0000
+  Intensity vs Danger:   0.0019
+Harmonic Chroma Similarity:
+  Base vs Intensity:     0.9315
+  Base vs Danger:        0.9690
+  Intensity vs Danger:   0.9893
+
+======================================================================
+SYNCHRONIZATION VERDICT & TECHNICAL QA ASSESSMENT
+======================================================================
+VERDICT: REQUIRES MANUAL MUSIC PRODUCTION
+ANALYSIS DETAIL:
+CRITICAL MUSICAL MISMATCH DETECTED: The three files were synthesized as independent musical compositions rather than stems exported from a single DAW master session. They exhibit divergent beat onsets, differing internal tempos, and independent harmonic progressions. Merely looping or time-stretching them will cause severe cacophony and audible dissonance when played concurrently.
+======================================================================

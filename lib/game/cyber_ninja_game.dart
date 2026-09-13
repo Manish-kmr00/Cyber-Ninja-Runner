@@ -99,6 +99,15 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       player.position.x,
       AppConstants.virtualHeight / 2,
     );
+
+    // 6. Start gameplay background music
+    AudioService().startGameplayMusic();
+  }
+
+  @override
+  void onRemove() {
+    AudioService().stopMusic();
+    super.onRemove();
   }
 
   @override
@@ -150,6 +159,7 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       );
       if (newSector != currentSector) {
         currentSector = newSector;
+        AudioService().playCheckpoint();
         onSectorChanged?.call(currentSector);
       }
     }
@@ -312,8 +322,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 if (!hazard.isSliced) {
                   hazard.sliceAndDestroy();
                   shakeCamera(0.60);
-                  AudioService().playClick();
-                  AudioService().playSfx('laser');
+                  AudioService().playSlash();
+                  AudioService().playEnemyDestroy();
                   final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
                   collectedCP += cpBonus;
                   saveService.addCyberPoints(cpBonus);
@@ -322,9 +332,9 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 if (!hazard.isSliced) {
                   hazard.takeDamage(amount: 1);
                   shakeCamera(0.80); // massive boss explosion shake
-                  AudioService().playClick();
-                  AudioService().playSfx('laser');
+                  AudioService().playSlash();
                   if (hazard.isSliced) {
+                    AudioService().playEnemyDestroy();
                     final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
                     collectedCP += cpBonus;
                     saveService.addCyberPoints(cpBonus);
@@ -333,7 +343,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
               } else {
                 hazardsToDestroy.add(hazard);
                 shakeCamera(0.45);
-                AudioService().playClick();
+                AudioService().playSlash();
+                AudioService().playEnemyDestroy();
                 final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
                 collectedCP += cpBonus;
                 saveService.addCyberPoints(cpBonus);
@@ -352,8 +363,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 if (!hazard.isSliced) {
                   hazard.sliceAndDestroy();
                   shakeCamera(0.60);
-                  AudioService().playClick();
-                  AudioService().playSfx('laser');
+                  AudioService().playSlash();
+                  AudioService().playEnemyDestroy();
                   final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
                   collectedCP += cpBonus;
                   saveService.addCyberPoints(cpBonus);
@@ -362,9 +373,9 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 if (!hazard.isSliced) {
                   hazard.takeDamage(amount: 1);
                   shakeCamera(0.80);
-                  AudioService().playClick();
-                  AudioService().playSfx('laser');
+                  AudioService().playSlash();
                   if (hazard.isSliced) {
+                    AudioService().playEnemyDestroy();
                     final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
                     collectedCP += cpBonus;
                     saveService.addCyberPoints(cpBonus);
@@ -373,7 +384,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
               } else {
                 hazardsToDestroy.add(hazard);
                 shakeCamera(0.40);
-                AudioService().playClick();
+                AudioService().playSlash();
+                AudioService().playEnemyDestroy();
                 final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
                 collectedCP += cpBonus;
                 saveService.addCyberPoints(cpBonus);
@@ -421,7 +433,9 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     }
     if (isGameOver) return;
     isGameOver = true;
+    AudioService().resetCombo();
     player.isDead = true;
+    AudioService().stopMusic();
     AudioService().playDeath();
 
     // 1. Camera screen-shake effect (using camera controller)
@@ -452,6 +466,7 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       BoosterType.invisibility,
     ); // Give temporary invulnerability on revive
     overlays.remove('DeathOverlay');
+    AudioService().startGameplayMusic();
   }
 
   /// Restarts the mission completely from 0 meters
@@ -462,6 +477,7 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     deathTimeScale = 1.0;
     currentDistance = 0;
     collectedCP = 0;
+    AudioService().resetCombo();
     screenShakeIntensity = 0.0;
     currentSector = ProceduralGenerator.getBiomeForDistance(0, mode: mode);
 
@@ -499,17 +515,20 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
     overlays.remove('DeathOverlay');
     overlays.remove('PauseOverlay');
+    AudioService().startGameplayMusic();
     onDistanceChanged?.call();
     onSectorChanged?.call(currentSector);
   }
 
   void pauseGame() {
     isGamePaused = true;
+    AudioService().pauseMusic();
     overlays.add('PauseOverlay');
   }
 
   void resumeGame() {
     isGamePaused = false;
+    AudioService().resumeMusic();
     overlays.remove('PauseOverlay');
   }
 
@@ -609,7 +628,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
           event.logicalKey == LogicalKeyboardKey.arrowUp ||
           event.logicalKey == LogicalKeyboardKey.keyW) {
         player.jump();
-        AudioService().playJump();
         return KeyEventResult.handled;
       }
 
@@ -617,7 +635,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
           event.logicalKey == LogicalKeyboardKey.keyS ||
           event.logicalKey == LogicalKeyboardKey.shiftLeft) {
         player.startSlide();
-        AudioService().playSlide();
         return KeyEventResult.handled;
       }
 

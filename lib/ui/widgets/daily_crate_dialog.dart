@@ -123,7 +123,7 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
       });
     } else if (_stage == _CrateStage.cracking2) {
       // Final burst open!
-      AudioService().playCollect();
+      AudioService().playCrateOpen();
       _burstController.forward(from: 0.0);
 
       _generatedReward = _crateService.generateReward(saveService);

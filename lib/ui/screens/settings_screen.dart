@@ -705,6 +705,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       onChanged: (active) {
                                         saveService.settings.isMuted = !active;
                                         AudioService().updateVolumes(
+                                          master:
+                                              saveService.settings.masterVolume,
                                           music:
                                               saveService.settings.musicVolume,
                                           sfx: saveService.settings.sfxVolume,
@@ -733,6 +735,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       onChanged: (val) {
                                         saveService.settings.musicVolume = val;
                                         AudioService().updateVolumes(
+                                          master:
+                                              saveService.settings.masterVolume,
                                           music: val,
                                           sfx: saveService.settings.sfxVolume,
                                         );
@@ -754,6 +758,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       onChanged: (val) {
                                         saveService.settings.sfxVolume = val;
                                         AudioService().updateVolumes(
+                                          master:
+                                              saveService.settings.masterVolume,
                                           music:
                                               saveService.settings.musicVolume,
                                           sfx: val,

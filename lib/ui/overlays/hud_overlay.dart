@@ -31,12 +31,10 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
     if (now - _lastJumpTime < 160) return;
     _lastJumpTime = now;
     widget.game.player.jump();
-    AudioService().playJump();
   }
 
   void _triggerSlide() {
     widget.game.player.startSlide();
-    AudioService().playSlide();
   }
 
   @override
@@ -83,7 +81,6 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
           _announcedSector = newSector;
         });
         _sectorBannerController.forward(from: 0.0);
-        AudioService().playBooster();
         Future.delayed(const Duration(milliseconds: 2600), () {
           if (mounted && _announcedSector == newSector) {
             _sectorBannerController.reverse();

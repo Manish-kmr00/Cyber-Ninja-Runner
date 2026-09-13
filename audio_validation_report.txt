@@ -1,0 +1,105 @@
+============================================================
+CYBER NINJA RUNNER - AUDIO VALIDATION REPORT
+============================================================
+Generated on: 2026-09-13 13:51:54
+Total Required Assets: 96
+------------------------------------------------------------
+[VALID]   music/music_menu_loop.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   music/music_gameplay_base.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   music/music_gameplay_intensity.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   music/music_gameplay_danger.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   music/music_danger.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   music/music_victory.wav | 10.96s | 48kHz | 24b | 2ch
+[VALID]   music/music_gameover.wav | 9.6s | 48kHz | 24b | 2ch
+[VALID]   player/player_jump_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_jump_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_jump_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_jump_04.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_walljump_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_walljump_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_walljump_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_land_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_land_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_land_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_slide_01.wav | 1.28s | 48kHz | 24b | 1ch
+[VALID]   player/player_slide_02.wav | 1.28s | 48kHz | 24b | 1ch
+[VALID]   player/player_slide_03.wav | 1.28s | 48kHz | 24b | 1ch
+[VALID]   player/player_damage_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_damage_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_damage_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   player/player_death_01.wav | 2.72s | 48kHz | 24b | 2ch
+[VALID]   player/player_death_02.wav | 2.72s | 48kHz | 24b | 2ch
+[VALID]   player/player_death_03.wav | 2.72s | 48kHz | 24b | 2ch
+[VALID]   combat/combat_attack_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_attack_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_attack_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_attack_04.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_hit_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_hit_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_hit_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_hit_04.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_critical_hit_01.wav | 1.04s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_critical_hit_02.wav | 1.04s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_critical_hit_03.wav | 1.04s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_laser_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_laser_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_laser_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_cannon_fire_01.wav | 1.68s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_cannon_fire_02.wav | 1.68s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_cannon_fire_03.wav | 1.68s | 48kHz | 24b | 1ch
+[VALID]   combat/combat_explosion_01.wav | 2.4s | 48kHz | 24b | 2ch
+[VALID]   combat/combat_explosion_02.wav | 2.4s | 48kHz | 24b | 2ch
+[VALID]   combat/combat_explosion_03.wav | 2.4s | 48kHz | 24b | 2ch
+[VALID]   combat/combat_explosion_04.wav | 2.4s | 48kHz | 24b | 2ch
+[VALID]   enemies/enemy_spawn_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_spawn_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_spawn_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_attack_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_attack_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_attack_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_hit_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_hit_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_hit_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_destroy_01.wav | 1.84s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_destroy_02.wav | 1.84s | 48kHz | 24b | 1ch
+[VALID]   enemies/enemy_destroy_03.wav | 1.84s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_collect_01.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_collect_02.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_collect_03.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_collect_04.wav | 0.96s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_checkpoint_01.wav | 1.44s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_checkpoint_02.wav | 1.44s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_checkpoint_03.wav | 1.44s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_powerup_01.wav | 1.6s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_powerup_02.wav | 1.6s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_powerup_03.wav | 1.6s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_shield_01.wav | 1.76s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_shield_02.wav | 1.76s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_shield_03.wav | 1.76s | 48kHz | 24b | 2ch
+[VALID]   gameplay/gameplay_booster_01.wav | 1.28s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_booster_02.wav | 1.28s | 48kHz | 24b | 1ch
+[VALID]   gameplay/gameplay_booster_03.wav | 1.28s | 48kHz | 24b | 1ch
+[VALID]   ui/ui_click_01.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_click_02.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_click_03.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_hover_01.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_hover_02.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_menu_open_01.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_menu_open_02.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_menu_close_01.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_menu_close_02.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_purchase_01.wav | 1.28s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_purchase_02.wav | 1.28s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_reward_01.wav | 2.16s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_reward_02.wav | 2.16s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_reward_03.wav | 2.16s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_error_01.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_error_02.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_notification_01.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   ui/ui_notification_02.wav | 0.96s | 48kHz | 24b | 2ch
+[VALID]   environment/environment_cybercity_loop_01.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   environment/environment_cybercity_loop_02.wav | 44.0s | 48kHz | 24b | 2ch
+[VALID]   environment/environment_cybercity_loop_03.wav | 44.0s | 48kHz | 24b | 2ch
+============================================================
+SUMMARY: Valid: 96 | Invalid: 0 | Missing: 0 | Total: 96
+============================================================

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{f7377c30-a1c9-4323-8e59-e2f9c42862fe}">
+		<property name="assetPath">
+			<value>gameplay_booster_01.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>1</value>
+		</property>
+		<property name="length">
+			<value>1.28</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b087853b-5da2-4b87-a3f9-758f5ca16276}</destination>
+		</relationship>
+	</object>
+</objects>

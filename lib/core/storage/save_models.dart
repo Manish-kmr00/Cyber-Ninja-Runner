@@ -147,6 +147,7 @@ class StatsData {
 }
 
 class SettingsData {
+  double masterVolume = 1.0;
   double musicVolume = 0.8;
   double sfxVolume = 1.0;
   bool isMuted = false;
@@ -160,6 +161,7 @@ class SettingsData {
   String languageCode = 'en';
 
   Map<String, dynamic> toJson() => {
+    'masterVolume': masterVolume,
     'musicVolume': musicVolume,
     'sfxVolume': sfxVolume,
     'isMuted': isMuted,
@@ -174,6 +176,7 @@ class SettingsData {
   };
 
   void loadJson(Map<String, dynamic> json) {
+    masterVolume = (json['masterVolume'] as num?)?.toDouble() ?? 1.0;
     musicVolume = (json['musicVolume'] as num?)?.toDouble() ?? 0.8;
     sfxVolume = (json['sfxVolume'] as num?)?.toDouble() ?? 1.0;
     isMuted = json['isMuted'] ?? false;

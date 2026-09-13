@@ -14,22 +14,27 @@ class IAPService extends ChangeNotifier {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   // Google Play Console Consumable Product IDs
-  static const String idCP500 = 'cp_500';
-  static const String idCP2000 = 'cp_2000';
+  static const String idCP1000 = 'cp_1000';
   static const String idCP5000 = 'cp_5000';
+  static const String idCP10000 = 'cp_10000';
 
-  static const Set<String> kProductIds = {idCP500, idCP2000, idCP5000};
+  static const Set<String> kProductIds = {idCP1000, idCP5000, idCP10000};
 
   static const Map<String, int> kCPAmounts = {
-    idCP500: 500,
-    idCP2000: 2000,
+    idCP1000: 1000,
     idCP5000: 5000,
+    idCP10000: 10000,
+    // Backward compatibility aliases if needed
+    'cp_500': 1000,
+    'cp_2000': 5000,
   };
 
   static const Map<String, String> kFallbackPrices = {
-    idCP500: '\$0.99',
-    idCP2000: '\$2.99',
-    idCP5000: '\$5.99',
+    idCP1000: '\$0.99',
+    idCP5000: '\$2.99',
+    idCP10000: '\$5.99',
+    'cp_500': '\$0.99',
+    'cp_2000': '\$2.99',
   };
 
   SaveService? _saveService;

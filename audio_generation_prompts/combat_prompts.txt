@@ -1,0 +1,192 @@
+=== COMBAT AUDIO GENERATION PROMPTS ===
+Total Assets: 21
+
+Filename: combat_attack_01.wav
+FMOD Event: event:/Combat/Attack
+Duration: 0.32s | Channels: Mono | Variation: 1
+Prompt:
+0.32-second futuristic energy katana sword slash. Hyper-fast aerodynamic whip whoosh combined with a buzzing high-voltage plasma cutting edge. Razor-sharp high-frequency sizzle, tight low-mid punch, whipping air transient, mono.
+Negative Prompt:
+dull stick swing, wooden bat whoosh, cartoon swish, swashbuckling pirate sword cling, prolonged reverb, voice.
+--------------------------------------------------------------------------------
+
+Filename: combat_attack_02.wav
+FMOD Event: event:/Combat/Attack
+Duration: 0.32s | Channels: Mono | Variation: 2
+Prompt:
+0.32-second cybernetic blade slice. Intense clean swoosh with ionized electrical blade hum and metallic resonant zing. Fast attack, rapid decay, extremely sharp and deadly, mono.
+Negative Prompt:
+dull stick swing, wooden bat whoosh, cartoon swish, pirate sword cling.
+--------------------------------------------------------------------------------
+
+Filename: combat_attack_03.wav
+FMOD Event: event:/Combat/Attack
+Duration: 0.32s | Channels: Mono | Variation: 3
+Prompt:
+0.32-second energy blade backhand strike. Low-frequency whoosh building instantly into a high-pitched laser edge whir and sharp air displacement. Aggressive, agile, mono.
+Negative Prompt:
+dull stick swing, wooden bat whoosh, cartoon swish, voice.
+--------------------------------------------------------------------------------
+
+Filename: combat_attack_04.wav
+FMOD Event: event:/Combat/Attack
+Duration: 0.32s | Channels: Mono | Variation: 4
+Prompt:
+0.32-second high-velocity katana cut. High-frequency plasma air tear followed by a deep electromagnetic pulse whoosh. Crisp, modern, cinematic anime sword slash, mono.
+Negative Prompt:
+dull stick swing, wooden bat whoosh, cartoon swish, pirate sword.
+--------------------------------------------------------------------------------
+
+Filename: combat_hit_01.wav
+FMOD Event: event:/Combat/Hit
+Duration: 0.3s | Channels: Mono | Variation: 1
+Prompt:
+0.30-second plasma blade striking robotic titanium chassis. Violent high-density metallic cleave impact layered with a burst of high-voltage electrical sparks and a hollow mechanical crunch. Deep transient punch, short tail, mono.
+Negative Prompt:
+fleshy wet squish, human vocal ouch, cartoon bonk, dull plastic thud, long ringing bell, reverb wash.
+--------------------------------------------------------------------------------
+
+Filename: combat_hit_02.wav
+FMOD Event: event:/Combat/Hit
+Duration: 0.3s | Channels: Mono | Variation: 2
+Prompt:
+0.30-second energy sword slicing metal armor. Searing plasma burn sizzle mixed with shearing metal sheet sound and micro-explosion crack. Visceral, punchy, metallic, mono.
+Negative Prompt:
+fleshy wet squish, human vocal ouch, cartoon bonk, dull plastic thud.
+--------------------------------------------------------------------------------
+
+Filename: combat_hit_03.wav
+FMOD Event: event:/Combat/Hit
+Duration: 0.3s | Channels: Mono | Variation: 3
+Prompt:
+0.30-second heavy cyber blade hit. Solid structural impact against reinforced plating with electric discharge arc and flying debris snap. Fast, impactful, tight low end, mono.
+Negative Prompt:
+fleshy wet squish, human vocal ouch, cartoon bonk, long ringing bell.
+--------------------------------------------------------------------------------
+
+Filename: combat_hit_04.wav
+FMOD Event: event:/Combat/Hit
+Duration: 0.3s | Channels: Mono | Variation: 4
+Prompt:
+0.30-second sword impact on cybernetic unit. Sharp blade puncture transient combined with hydraulic oil spray hiss and circuit spark. Punchy, clean, zero muddy sustain, mono.
+Negative Prompt:
+fleshy wet squish, human vocal ouch, cartoon bonk, reverb wash.
+--------------------------------------------------------------------------------
+
+Filename: combat_critical_hit_01.wav
+FMOD Event: event:/Combat/CriticalHit
+Duration: 0.55s | Channels: Mono | Variation: 1
+Prompt:
+0.55-second devastating critical strike SFX. Massive dual-layered energy rupture: deafening laser cleave transient, followed immediately by an explosive sub-bass pressure pop at 60 Hz, electrical short-circuit cascade, and a high-frequency crystalline shatter. Huge cinematic impact, mono.
+Negative Prompt:
+orchestral hit, cartoon trumpet, squishy organic gore, human scream, slow riser, muddy rumble.
+--------------------------------------------------------------------------------
+
+Filename: combat_critical_hit_02.wav
+FMOD Event: event:/Combat/CriticalHit
+Duration: 0.55s | Channels: Mono | Variation: 2
+Prompt:
+0.55-second cybernetic execution hit. Extreme kinetic armor piercing sound layered with an intense electromagnetic pulse shockwave and bass distortion snap. Dramatic, lethal, crunchy transient, mono.
+Negative Prompt:
+orchestral hit, cartoon trumpet, squishy organic gore, human scream.
+--------------------------------------------------------------------------------
+
+Filename: combat_critical_hit_03.wav
+FMOD Event: event:/Combat/CriticalHit
+Duration: 0.55s | Channels: Mono | Variation: 3
+Prompt:
+0.55-second critical blade strike. Supercharged plasma blade impact that shatters target shielding with a high-pitched glass-like energy break and heavy low-end slam. Punchy, visceral, mono.
+Negative Prompt:
+orchestral hit, cartoon trumpet, squishy organic gore, human scream.
+--------------------------------------------------------------------------------
+
+Filename: combat_laser_01.wav
+FMOD Event: event:/Combat/Laser
+Duration: 0.42s | Channels: Mono | Variation: 1
+Prompt:
+0.42-second futuristic laser blaster shot. Instant micro-second pre-charge click launching into a razor-sharp high-energy plasma bolt crack and brief ionized tail. Tight, focused, high-velocity sci-fi projectile, mono, 48kHz.
+Negative Prompt:
+retro 8-bit pew pew, Star Wars blaster copy, gun powder bang, shotgun blast, cartoon ricochet.
+--------------------------------------------------------------------------------
+
+Filename: combat_laser_02.wav
+FMOD Event: event:/Combat/Laser
+Duration: 0.42s | Channels: Mono | Variation: 2
+Prompt:
+0.42-second high-tech energy weapon discharge. Punchy electromagnetic coil transient firing a concentrated neon beam, sharp sonic crack with subtle pitch drop-off. Clean, punchy, zero retro pew-pew character, mono.
+Negative Prompt:
+retro 8-bit pew pew, Star Wars blaster copy, gun powder bang.
+--------------------------------------------------------------------------------
+
+Filename: combat_laser_03.wav
+FMOD Event: event:/Combat/Laser
+Duration: 0.42s | Channels: Mono | Variation: 3
+Prompt:
+0.42-second pulse rifle shot. Compressed energy blast with rich mid-range body and metallic beam projection snap. Fast, lethal, high-tech, mono.
+Negative Prompt:
+retro 8-bit pew pew, Star Wars blaster copy, shotgun blast.
+--------------------------------------------------------------------------------
+
+Filename: combat_cannon_fire_01.wav
+FMOD Event: event:/Combat/CannonFire
+Duration: 0.85s | Channels: Mono | Variation: 1
+Prompt:
+0.85-second heavy futuristic railgun cannon shot. Massive pressurized pneumatic breach opening, followed by an earth-shaking magnetic projectile launch with chest-thumping sub-bass (50 Hz), violent mechanical recoil clank, and distant sonic boom dissipation tail. Huge scale, industrial, mono.
+Negative Prompt:
+traditional black powder cannon, fireworks pop, muffled rumble, human yell, tinny toy gun, low fidelity.
+--------------------------------------------------------------------------------
+
+Filename: combat_cannon_fire_02.wav
+FMOD Event: event:/Combat/CannonFire
+Duration: 0.85s | Channels: Mono | Variation: 2
+Prompt:
+0.85-second heavy plasma siege cannon blast. Super-dense energy projectile launch, explosive plasma muzzle crack, deep low-frequency displacement, and sustained magnetic vent exhaust hiss. Authoritative, powerful, mono.
+Negative Prompt:
+traditional black powder cannon, fireworks pop, muffled rumble, human yell.
+--------------------------------------------------------------------------------
+
+Filename: combat_cannon_fire_03.wav
+FMOD Event: event:/Combat/CannonFire
+Duration: 0.85s | Channels: Mono | Variation: 3
+Prompt:
+0.85-second automated cyber cannon fire. Heavy mechanized chamber load snap firing a high-caliber explosive slug; punchy acoustic crack combined with futuristic electronic propulsion boom. Deep, violent, mono.
+Negative Prompt:
+traditional black powder cannon, fireworks pop, muffled rumble, tinny toy gun.
+--------------------------------------------------------------------------------
+
+Filename: combat_explosion_01.wav
+FMOD Event: event:/Combat/Explosion
+Duration: 1.2s | Channels: Stereo | Variation: 1
+Prompt:
+1.20-second massive futuristic mechanical explosion. Violent initial shockwave snap, heavy low-frequency detonation body (45-80 Hz), metal shrapnel and glass debris scattering outwards, and a sizzling high-voltage electrical failure tail. Cinematic, wide stereo field, high dynamic punch.
+Negative Prompt:
+muffled rumble, low-bitrate boom, fireworks crackle, grenade from WW2 movie, clapping, human screams, slow build.
+--------------------------------------------------------------------------------
+
+Filename: combat_explosion_02.wav
+FMOD Event: event:/Combat/Explosion
+Duration: 1.2s | Channels: Stereo | Variation: 2
+Prompt:
+1.20-second robotic drone explosion. Sharp electrical fireball detonation, fuel cell rupture roar, raining metallic parts, and a dying servo whine in stereo. Dense mid-range impact, clean sub-bass, zero muddy wash.
+Negative Prompt:
+muffled rumble, low-bitrate boom, fireworks crackle, human screams.
+--------------------------------------------------------------------------------
+
+Filename: combat_explosion_03.wav
+FMOD Event: event:/Combat/Explosion
+Duration: 1.2s | Channels: Stereo | Variation: 3
+Prompt:
+1.20-second cybernetic facility blast. High-tech EMP bomb detonation with compressed sonic vacuum pull followed by an explosive blast wave and crackling lightning arcs across the stereo panorama. Massive, clean, professional.
+Negative Prompt:
+muffled rumble, low-bitrate boom, fireworks crackle, human screams.
+--------------------------------------------------------------------------------
+
+Filename: combat_explosion_04.wav
+FMOD Event: event:/Combat/Explosion
+Duration: 1.2s | Channels: Stereo | Variation: 4
+Prompt:
+1.20-second plasma canister explosion. Blinding energy rupture sound, deep bass pressure release, high-frequency scorched metal sizzle, and fast-dissipating fiery debris. Crisp, punchy, stereo.
+Negative Prompt:
+muffled rumble, low-bitrate boom, fireworks crackle, human screams.
+--------------------------------------------------------------------------------
+

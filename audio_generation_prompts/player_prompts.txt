@@ -1,0 +1,174 @@
+=== PLAYER AUDIO GENERATION PROMPTS ===
+Total Assets: 19
+
+Filename: player_jump_01.wav
+FMOD Event: event:/Player/Jump
+Duration: 0.35s | Channels: Mono | Variation: 1
+Prompt:
+0.35-second futuristic ninja jump SFX. Punchy pneumatic air release transient followed by a crisp upward synthetic micro-whoosh and tight magnetic coil burst. Agile, athletic, high-tech. Peak transient at 12 ms, tight decay, zero reverb wash, mono, 48kHz.
+Negative Prompt:
+cartoon boing, spring sound, low-quality white noise, mouth whoosh, footsteps, reverb tail, music, voices, 8-bit jump.
+--------------------------------------------------------------------------------
+
+Filename: player_jump_02.wav
+FMOD Event: event:/Player/Jump
+Duration: 0.35s | Channels: Mono | Variation: 2
+Prompt:
+0.35-second cyber parkour jump sound. Sharp carbon-fiber spring compression click transitioning instantly into a fast high-frequency air dispersion hiss and subtle sub-bass thud. Quick, punchy, lightweight, mono, clean decay.
+Negative Prompt:
+cartoon boing, spring sound, white noise, mouth whoosh, footsteps, reverb tail, music, voices.
+--------------------------------------------------------------------------------
+
+Filename: player_jump_03.wav
+FMOD Event: event:/Player/Jump
+Duration: 0.35s | Channels: Mono | Variation: 3
+Prompt:
+0.35-second cybernetic jump sound. Electric servo burst with subtle electromagnetic whine pitching up rapidly, paired with a short laser-clean propulsion pop. Crisp high frequencies, tight low-mid punch, mono.
+Negative Prompt:
+cartoon boing, spring sound, white noise, footsteps, reverb tail, voices.
+--------------------------------------------------------------------------------
+
+Filename: player_jump_04.wav
+FMOD Event: event:/Player/Jump
+Duration: 0.35s | Channels: Mono | Variation: 4
+Prompt:
+0.35-second futuristic leap audio. Dual transient: athletic foot kick-off against metallic surface layered with a tiny ionized air pop. Tight, focused, zero background noise, studio master quality, mono.
+Negative Prompt:
+cartoon boing, spring sound, low-quality white noise, footsteps, reverb tail, voices.
+--------------------------------------------------------------------------------
+
+Filename: player_walljump_01.wav
+FMOD Event: event:/Player/WallJump
+Duration: 0.4s | Channels: Mono | Variation: 1
+Prompt:
+0.40-second sci-fi wall jump SFX. Heavy directional foot strike against vertical metal panel followed immediately by a sharp pneumatic lateral push thrust. Metallic resonance with quick damping, pressurized air burst, mono.
+Negative Prompt:
+reverb wash, muddy bass, human grunt, shoe squeak, wood sound, cartoon effects.
+--------------------------------------------------------------------------------
+
+Filename: player_walljump_02.wav
+FMOD Event: event:/Player/WallJump
+Duration: 0.4s | Channels: Mono | Variation: 2
+Prompt:
+0.40-second cyber ninja wall kick sound. Crisp carbon boot impact against concrete/steel with a synthetic energy discharge kickback. Sharp attack transient, focused mid-range punch, controlled tail, mono.
+Negative Prompt:
+reverb wash, muddy bass, human grunt, shoe squeak, cartoon effects.
+--------------------------------------------------------------------------------
+
+Filename: player_walljump_03.wav
+FMOD Event: event:/Player/WallJump
+Duration: 0.4s | Channels: Mono | Variation: 3
+Prompt:
+0.40-second energetic acrobatic wall push. Magnetized boot detachment click combined with a fast horizontal gas thruster burst. High-tech, metallic, punchy, clean transient, mono.
+Negative Prompt:
+reverb wash, muddy bass, human grunt, shoe squeak, wood sound.
+--------------------------------------------------------------------------------
+
+Filename: player_land_01.wav
+FMOD Event: event:/Player/Land
+Duration: 0.38s | Channels: Mono | Variation: 1
+Prompt:
+0.38-second futuristic landing impact sound. Solid dual-foot impact on reinforced metallic flooring, layered with an immediate pneumatic suspension hiss from cybernetic legs and suit armor settling. Heavy sub-punch at 90 Hz, crisp high transient, mono.
+Negative Prompt:
+squish, mud, bone break, human scream, vocal breath, cartoon splat, extended reverb tail.
+--------------------------------------------------------------------------------
+
+Filename: player_land_02.wav
+FMOD Event: event:/Player/Land
+Duration: 0.38s | Channels: Mono | Variation: 2
+Prompt:
+0.38-second athletic cyber ninja landing. Dense mechanical body impact with shock-absorbing hydraulic compression sound. Dampened metallic thud, zero hollow ring, tight low end, clean high frequency armor rattle, mono.
+Negative Prompt:
+squish, mud, bone break, human scream, cartoon splat, reverb tail.
+--------------------------------------------------------------------------------
+
+Filename: player_land_03.wav
+FMOD Event: event:/Player/Land
+Duration: 0.38s | Channels: Mono | Variation: 3
+Prompt:
+0.38-second high-speed landing on hard asphalt/metal. Deep shock-wave dissipation transient layered with a short high-tech nano-suit compression whir. Powerful, grounded, zero muddy rumble, mono.
+Negative Prompt:
+squish, mud, bone break, human scream, cartoon splat.
+--------------------------------------------------------------------------------
+
+Filename: player_slide_01.wav
+FMOD Event: event:/Player/Slide
+Duration: 0.65s | Channels: Mono | Variation: 1
+Prompt:
+0.65-second high-speed futuristic slide sound. Fast friction of Kevlar/ceramic knee pads skimming across smooth neon-lit steel grating, layered with a continuous pressurized air hiss and subtle electric spark jitter. Dynamic decrescendo, crisp high-end scrape, mono.
+Negative Prompt:
+tire squeal, bowling ball, wood scraping, human vocal, cloth rustle, water splash, low rumble.
+--------------------------------------------------------------------------------
+
+Filename: player_slide_02.wav
+FMOD Event: event:/Player/Slide
+Duration: 0.65s | Channels: Mono | Variation: 2
+Prompt:
+0.65-second cyber ninja dash slide. Intense sonic whoosh mixed with metallic abrasive skid on road surface and ionized spark crackles. Strong attack transient, smoothly tapering friction tail, mono.
+Negative Prompt:
+tire squeal, bowling ball, wood scraping, human vocal, cloth rustle.
+--------------------------------------------------------------------------------
+
+Filename: player_slide_03.wav
+FMOD Event: event:/Player/Slide
+Duration: 0.65s | Channels: Mono | Variation: 3
+Prompt:
+0.65-second smooth technological slide. Ceramic plate sliding over asphalt at 30 mph with high-pressure air dispersion wash and micro-servo stabilizing whir. Clean, detailed, aggressive friction, mono.
+Negative Prompt:
+tire squeal, bowling ball, wood scraping, human vocal, water splash.
+--------------------------------------------------------------------------------
+
+Filename: player_damage_01.wav
+FMOD Event: event:/Player/Damage
+Duration: 0.45s | Channels: Mono | Variation: 1
+Prompt:
+0.45-second high-tech armor damage impact. Violent blunt-force hit on high-tech exo-suit, paired with an electric circuit glitch spark and high-voltage energy shield fracture snap. High transient punch, no human voice or groan, pure technology failure, mono.
+Negative Prompt:
+human voice, groan, grunt, scream, blood squirt, flesh impact, cartoon smack, retro blip.
+--------------------------------------------------------------------------------
+
+Filename: player_damage_02.wav
+FMOD Event: event:/Player/Damage
+Duration: 0.45s | Channels: Mono | Variation: 2
+Prompt:
+0.45-second cybernetic hit reaction sound. Hard kinetic ceramic plate fracture layered with an electrical short-circuit pop and rapid downward pitch glitch. Sharp, painful mechanical crunch, clean mono.
+Negative Prompt:
+human voice, groan, grunt, scream, blood squirt, flesh impact, cartoon smack.
+--------------------------------------------------------------------------------
+
+Filename: player_damage_03.wav
+FMOD Event: event:/Player/Damage
+Duration: 0.45s | Channels: Mono | Variation: 3
+Prompt:
+0.45-second energy beam hit on suit. Scorching plasma impact snap combined with a micro-EMP burst and suit overload alarm pip. Brutal, sudden, punchy, mono.
+Negative Prompt:
+human voice, groan, grunt, scream, blood squirt, flesh impact.
+--------------------------------------------------------------------------------
+
+Filename: player_death_01.wav
+FMOD Event: event:/Player/Death
+Duration: 1.4s | Channels: Stereo | Variation: 1
+Prompt:
+1.40-second catastrophic cyber ninja death and system failure. Catastrophic mechanical core breach: crushing kinetic impact, immediate high-voltage arc explosion, digital disintegration glitch cascade, and a deep sub-bass vacuum implosion fading to low static. Cinematic, terminal, stereo width, high impact.
+Negative Prompt:
+human screaming, blood, gore, organic splat, funny cartoon sounds, comedy whistle, speech, words, music loop.
+--------------------------------------------------------------------------------
+
+Filename: player_death_02.wav
+FMOD Event: event:/Player/Death
+Duration: 1.4s | Channels: Stereo | Variation: 2
+Prompt:
+1.40-second cybernetic destruction sequence. Heavy structural armor fracture followed by a rapid electric circuit burnout, high-pitched power plant winding down, and a dispersed holographic fizzle out. Tragic, technologically definitive, stereo.
+Negative Prompt:
+human screaming, blood, gore, organic splat, speech, words.
+--------------------------------------------------------------------------------
+
+Filename: player_death_03.wav
+FMOD Event: event:/Player/Death
+Duration: 1.4s | Channels: Stereo | Variation: 3
+Prompt:
+1.40-second fatal system overload. Kinetic strike shattering energy containment, followed by a violent EMP blast wave, digitized telemetry error whine, and a low resonant metallic thud as the body collapses. Pristine studio stereo master.
+Negative Prompt:
+human screaming, blood, gore, organic splat, comedy whistle.
+--------------------------------------------------------------------------------
+

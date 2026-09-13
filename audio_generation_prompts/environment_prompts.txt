@@ -1,0 +1,30 @@
+=== ENVIRONMENT AUDIO GENERATION PROMPTS ===
+Total Assets: 3
+
+Filename: environment_cybercity_loop_01.wav
+FMOD Event: event:/Environment/CyberCity
+Duration: 45.0s | Channels: Stereo | Variation: 1
+Prompt:
+45-second seamless atmospheric loop of a rain-soaked futuristic cyberpunk megacity at night. Deep sub-frequency building infrastructure drone (60-100 Hz), gentle acid rain pattering on corrugated composite rooftop panels, subtle high-frequency 60Hz neon transformer buzz in mid-distance, and smooth, distant futuristic aerodyne traffic whooshes panning across the far horizon. Immersive, dark, lonely, dystopian, spacious stereo panorama, no voices, no sirens, no music, seamless loop.
+Negative Prompt:
+voices, chatter, crowd noise, footsteps, honking horns, internal combustion engine sounds, radio music, dogs, birds, speech, sudden loud transients.
+--------------------------------------------------------------------------------
+
+Filename: environment_cybercity_loop_02.wav
+FMOD Event: event:/Environment/CyberCity
+Duration: 45.0s | Channels: Stereo | Variation: 2
+Prompt:
+45-second seamless ambient loop of high-altitude cyberpunk city rooftop. High-velocity wind whipping around steel girders, rhythmic heavy industrial ventilation intake fans cycling in distance, subtle electromagnetic drone hum, occasional quiet metallic creak. Dark, tense, vertical parkour atmosphere, pristine stereo, seamless loop.
+Negative Prompt:
+voices, chatter, crowd noise, footsteps, honking horns, internal combustion engine sounds, radio music, birds, speech.
+--------------------------------------------------------------------------------
+
+Filename: environment_cybercity_loop_03.wav
+FMOD Event: event:/Environment/CyberCity
+Duration: 45.0s | Channels: Stereo | Variation: 3
+Prompt:
+45-second seamless futuristic urban ambience loop. Damp subterranean street atmosphere, wet pavement reflections, low industrial electrical generator vibrations, distant automated metro transit rumble through tunnel walls, gentle electric neon vapor hiss. Rich low-end, spacious depth, seamless loop.
+Negative Prompt:
+voices, chatter, crowd noise, footsteps, honking horns, internal combustion engine sounds, radio music, dogs, birds.
+--------------------------------------------------------------------------------
+

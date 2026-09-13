@@ -389,27 +389,13 @@ class _ShopScreenState extends State<ShopScreen> {
                   children: [
                     Expanded(
                       child: _buildCPCard(
-                        amount: 500,
-                        label: '+500 CP',
-                        priceTag: iapService.getPrice(IAPService.idCP500),
+                        amount: 1000,
+                        label: '+1000 CP',
+                        priceTag: iapService.getPrice(IAPService.idCP1000),
                         isLoading: iapService.isLoading,
                         onTap: () async {
                           AudioService().playClick();
-                          await iapService.buyCP(IAPService.idCP500);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildCPCard(
-                        amount: 2000,
-                        label: '+2000 CP',
-                        priceTag: iapService.getPrice(IAPService.idCP2000),
-                        isBestValue: true,
-                        isLoading: iapService.isLoading,
-                        onTap: () async {
-                          AudioService().playClick();
-                          await iapService.buyCP(IAPService.idCP2000);
+                          await iapService.buyCP(IAPService.idCP1000);
                         },
                       ),
                     ),
@@ -419,10 +405,24 @@ class _ShopScreenState extends State<ShopScreen> {
                         amount: 5000,
                         label: '+5000 CP',
                         priceTag: iapService.getPrice(IAPService.idCP5000),
+                        isBestValue: true,
                         isLoading: iapService.isLoading,
                         onTap: () async {
                           AudioService().playClick();
                           await iapService.buyCP(IAPService.idCP5000);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildCPCard(
+                        amount: 10000,
+                        label: '+10000 CP',
+                        priceTag: iapService.getPrice(IAPService.idCP10000),
+                        isLoading: iapService.isLoading,
+                        onTap: () async {
+                          AudioService().playClick();
+                          await iapService.buyCP(IAPService.idCP10000);
                         },
                       ),
                     ),
@@ -472,11 +472,13 @@ class _ShopScreenState extends State<ShopScreen> {
         AudioService().playClick();
         saveService.equipSkin(skin);
       } else {
-        if (saveService.spendCyberPoints(price)) {
-          AudioService().playCollect();
+        if (price == 0 || saveService.spendCyberPoints(price)) {
+          AudioService().playPurchase();
           saveService.unlockSkin(skin);
+          saveService.equipSkin(skin);
           _showPurchasedToast(context, '$name Unlocked & Equipped!');
         } else {
+          AudioService().playAlert();
           _showPurchasedToast(context, 'Not enough Cyber Ninja Points!');
         }
       }
@@ -511,7 +513,7 @@ class _ShopScreenState extends State<ShopScreen> {
         ),
         child: Column(
           children: [
-            // Cyber Cat Skin Preview Box
+            // Cyber Character Skin Preview Box
             Container(
               width: 64,
               height: 64,
@@ -590,6 +592,30 @@ class _ShopScreenState extends State<ShopScreen> {
                       fontSize: 10.5,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              )
+            else if (price == 0)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00FF88).withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF00FF88)),
+                ),
+                child: const Center(
+                  child: Text(
+                    'CLAIM FREE',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF00FF88),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -687,9 +713,10 @@ class _ShopScreenState extends State<ShopScreen> {
             onPressed: () {
               if (saveService.spendCyberPoints(price)) {
                 saveService.addBooster(type, count);
-                AudioService().playCollect();
+                AudioService().playPurchase();
                 _showPurchasedToast(context, 'Purchased +$count Boosters!');
               } else {
+                AudioService().playAlert();
                 _showPurchasedToast(context, 'Not enough Cyber Ninja Points!');
               }
             },

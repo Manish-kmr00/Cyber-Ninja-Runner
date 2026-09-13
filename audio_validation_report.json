@@ -1,0 +1,1545 @@
+{
+  "timestamp": "2026-09-13T13:51:54",
+  "total_required": 96,
+  "valid": 96,
+  "invalid": 0,
+  "missing": 0,
+  "assets": [
+    {
+      "filename": "music_menu_loop.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_menu_loop.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "music_gameplay_base.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_gameplay_base.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "music_gameplay_intensity.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_gameplay_intensity.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "music_gameplay_danger.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_gameplay_danger.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "music_danger.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_danger.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "music_victory.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_victory.wav",
+        "file_size": 3156524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 526080,
+        "duration_seconds": 10.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "music_gameover.wav",
+      "category": "music",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\music\\music_gameover.wav",
+        "file_size": 2764844,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 460800,
+        "duration_seconds": 9.6,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_jump_01.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_jump_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_jump_02.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_jump_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_jump_03.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_jump_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_jump_04.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_jump_04.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_walljump_01.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_walljump_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_walljump_02.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_walljump_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_walljump_03.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_walljump_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_land_01.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_land_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_land_02.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_land_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_land_03.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_land_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_slide_01.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_slide_01.wav",
+        "file_size": 184364,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_slide_02.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_slide_02.wav",
+        "file_size": 184364,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_slide_03.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_slide_03.wav",
+        "file_size": 184364,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_damage_01.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_damage_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_damage_02.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_damage_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_damage_03.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_damage_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_death_01.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_death_01.wav",
+        "file_size": 783404,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 130560,
+        "duration_seconds": 2.72,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_death_02.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_death_02.wav",
+        "file_size": 783404,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 130560,
+        "duration_seconds": 2.72,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "player_death_03.wav",
+      "category": "player",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\player\\player_death_03.wav",
+        "file_size": 783404,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 130560,
+        "duration_seconds": 2.72,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_attack_01.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_attack_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_attack_02.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_attack_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_attack_03.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_attack_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_attack_04.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_attack_04.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_hit_01.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_hit_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_hit_02.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_hit_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_hit_03.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_hit_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_hit_04.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_hit_04.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_critical_hit_01.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_critical_hit_01.wav",
+        "file_size": 149804,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 49920,
+        "duration_seconds": 1.04,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_critical_hit_02.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_critical_hit_02.wav",
+        "file_size": 149804,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 49920,
+        "duration_seconds": 1.04,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_critical_hit_03.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_critical_hit_03.wav",
+        "file_size": 149804,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 49920,
+        "duration_seconds": 1.04,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_laser_01.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_laser_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_laser_02.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_laser_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_laser_03.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_laser_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_cannon_fire_01.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_cannon_fire_01.wav",
+        "file_size": 241964,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 80640,
+        "duration_seconds": 1.68,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_cannon_fire_02.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_cannon_fire_02.wav",
+        "file_size": 241964,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 80640,
+        "duration_seconds": 1.68,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_cannon_fire_03.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_cannon_fire_03.wav",
+        "file_size": 241964,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 80640,
+        "duration_seconds": 1.68,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_explosion_01.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_explosion_01.wav",
+        "file_size": 691244,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 115200,
+        "duration_seconds": 2.4,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_explosion_02.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_explosion_02.wav",
+        "file_size": 691244,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 115200,
+        "duration_seconds": 2.4,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_explosion_03.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_explosion_03.wav",
+        "file_size": 691244,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 115200,
+        "duration_seconds": 2.4,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "combat_explosion_04.wav",
+      "category": "combat",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\combat\\combat_explosion_04.wav",
+        "file_size": 691244,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 115200,
+        "duration_seconds": 2.4,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_spawn_01.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_spawn_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_spawn_02.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_spawn_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_spawn_03.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_spawn_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_attack_01.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_attack_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_attack_02.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_attack_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_attack_03.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_attack_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_hit_01.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_hit_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_hit_02.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_hit_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_hit_03.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_hit_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_destroy_01.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_destroy_01.wav",
+        "file_size": 265004,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 88320,
+        "duration_seconds": 1.84,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_destroy_02.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_destroy_02.wav",
+        "file_size": 265004,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 88320,
+        "duration_seconds": 1.84,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "enemy_destroy_03.wav",
+      "category": "enemies",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\enemies\\enemy_destroy_03.wav",
+        "file_size": 265004,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 88320,
+        "duration_seconds": 1.84,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_collect_01.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_collect_01.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_collect_02.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_collect_02.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_collect_03.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_collect_03.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_collect_04.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_collect_04.wav",
+        "file_size": 138284,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_checkpoint_01.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_checkpoint_01.wav",
+        "file_size": 414764,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 69120,
+        "duration_seconds": 1.44,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_checkpoint_02.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_checkpoint_02.wav",
+        "file_size": 414764,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 69120,
+        "duration_seconds": 1.44,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_checkpoint_03.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_checkpoint_03.wav",
+        "file_size": 414764,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 69120,
+        "duration_seconds": 1.44,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_powerup_01.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_powerup_01.wav",
+        "file_size": 460844,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 76800,
+        "duration_seconds": 1.6,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_powerup_02.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_powerup_02.wav",
+        "file_size": 460844,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 76800,
+        "duration_seconds": 1.6,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_powerup_03.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_powerup_03.wav",
+        "file_size": 460844,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 76800,
+        "duration_seconds": 1.6,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_shield_01.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_shield_01.wav",
+        "file_size": 506924,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 84480,
+        "duration_seconds": 1.76,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_shield_02.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_shield_02.wav",
+        "file_size": 506924,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 84480,
+        "duration_seconds": 1.76,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_shield_03.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_shield_03.wav",
+        "file_size": 506924,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 84480,
+        "duration_seconds": 1.76,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_booster_01.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_booster_01.wav",
+        "file_size": 184364,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_booster_02.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_booster_02.wav",
+        "file_size": 184364,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "gameplay_booster_03.wav",
+      "category": "gameplay",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\gameplay\\gameplay_booster_03.wav",
+        "file_size": 184364,
+        "channels": 1,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_click_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_click_01.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_click_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_click_02.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_click_03.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_click_03.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_hover_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_hover_01.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_hover_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_hover_02.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_menu_open_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_menu_open_01.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_menu_open_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_menu_open_02.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_menu_close_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_menu_close_01.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_menu_close_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_menu_close_02.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_purchase_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_purchase_01.wav",
+        "file_size": 368684,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_purchase_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_purchase_02.wav",
+        "file_size": 368684,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 61440,
+        "duration_seconds": 1.28,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_reward_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_reward_01.wav",
+        "file_size": 622124,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 103680,
+        "duration_seconds": 2.16,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_reward_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_reward_02.wav",
+        "file_size": 622124,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 103680,
+        "duration_seconds": 2.16,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_reward_03.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_reward_03.wav",
+        "file_size": 622124,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 103680,
+        "duration_seconds": 2.16,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_error_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_error_01.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_error_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_error_02.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_notification_01.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_notification_01.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "ui_notification_02.wav",
+      "category": "ui",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\ui\\ui_notification_02.wav",
+        "file_size": 276524,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 46080,
+        "duration_seconds": 0.96,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "environment_cybercity_loop_01.wav",
+      "category": "environment",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\environment\\environment_cybercity_loop_01.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "environment_cybercity_loop_02.wav",
+      "category": "environment",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\environment\\environment_cybercity_loop_02.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "filename": "environment_cybercity_loop_03.wav",
+      "category": "environment",
+      "status": "VALID",
+      "details": {
+        "file": "C:\\Users\\mailm\\Documents\\New folder\\assets\\audio\\environment\\environment_cybercity_loop_03.wav",
+        "file_size": 12672044,
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 24,
+        "frames": 2112000,
+        "duration_seconds": 44.0,
+        "valid": true,
+        "errors": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "analysis_timestamp": "2026-09-13T14:15:00",
+  "target_spec": {
+    "bpm": 138,
+    "key": "D Minor",
+    "meter": "4/4",
+    "bars": 16,
+    "target_duration_seconds": 27.8260869565,
+    "target_samples_48khz": 1335652
+  },
+  "stem_results": {
+    "music_gameplay_base.wav": {
+      "filename": "music_gameplay_base.wav",
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_count": 2112000,
+      "duration_seconds": 44.0,
+      "levels": {
+        "peak_linear": 0.9441,
+        "peak_dbfs": -0.5,
+        "rms_linear": 0.28555,
+        "rms_dbfs": -10.89
+      },
+      "detected_onsets_count": 271,
+      "estimated_bpm": 170.2,
+      "first_downbeats_sec": [
+        0.1173,
+        1.5275,
+        2.9376,
+        4.3477,
+        5.7579,
+        7.168,
+        8.5781,
+        9.9883
+      ],
+      "spectral": {
+        "spectral_centroid_hz": 712.7,
+        "spectral_rolloff_85_hz": 56.1
+      },
+      "harmonic": {
+        "chroma_profile": {
+          "C": 0.37,
+          "C#": 0.3518,
+          "D": 0.303,
+          "D#": 0.2713,
+          "E": 0.3039,
+          "F": 0.3049,
+          "F#": 0.2477,
+          "G": 0.2184,
+          "G#": 0.2385,
+          "A": 0.2638,
+          "A#": 0.3097,
+          "B": 0.2391
+        },
+        "predominant_pitch_class": "C"
+      },
+      "loop_boundary": {
+        "start_sample_amp": 0.104745,
+        "end_sample_amp": 0.000322,
+        "sample_at_16bars_amp": 0.253107,
+        "exact_target_16bar_samples": 1335652,
+        "file_exceeds_16bars_by_samples": 776348
+      }
+    },
+    "music_gameplay_intensity.wav": {
+      "filename": "music_gameplay_intensity.wav",
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_count": 2112000,
+      "duration_seconds": 44.0,
+      "levels": {
+        "peak_linear": 0.9441,
+        "peak_dbfs": -0.5,
+        "rms_linear": 0.06056,
+        "rms_dbfs": -24.36
+      },
+      "detected_onsets_count": 145,
+      "estimated_bpm": 137.36,
+      "first_downbeats_sec": [
+        0.032,
+        1.7792,
+        3.5264,
+        5.2736,
+        7.0208,
+        8.768,
+        10.5152,
+        12.2624
+      ],
+      "spectral": {
+        "spectral_centroid_hz": 8585.6,
+        "spectral_rolloff_85_hz": 19639.4
+      },
+      "harmonic": {
+        "chroma_profile": {
+          "C": 0.1725,
+          "C#": 0.1956,
+          "D": 0.2253,
+          "D#": 0.2109,
+          "E": 0.2261,
+          "F": 0.2829,
+          "F#": 0.2727,
+          "G": 0.3099,
+          "G#": 0.3548,
+          "A": 0.3484,
+          "A#": 0.3602,
+          "B": 0.3978
+        },
+        "predominant_pitch_class": "B"
+      },
+      "loop_boundary": {
+        "start_sample_amp": 0.232419,
+        "end_sample_amp": 0.014954,
+        "sample_at_16bars_amp": 0.043236,
+        "exact_target_16bar_samples": 1335652,
+        "file_exceeds_16bars_by_samples": 776348
+      }
+    },
+    "music_gameplay_danger.wav": {
+      "filename": "music_gameplay_danger.wav",
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_count": 2112000,
+      "duration_seconds": 44.0,
+      "levels": {
+        "peak_linear": 0.9441,
+        "peak_dbfs": -0.5,
+        "rms_linear": 0.15686,
+        "rms_dbfs": -16.09
+      },
+      "detected_onsets_count": 221,
+      "estimated_bpm": 143.94,
+      "first_downbeats_sec": [
+        3.8933,
+        5.5607,
+        7.2282,
+        8.8956,
+        10.563,
+        12.2304,
+        13.8978,
+        15.5652
+      ],
+      "spectral": {
+        "spectral_centroid_hz": 8027.6,
+        "spectral_rolloff_85_hz": 20822.0
+      },
+      "harmonic": {
+        "chroma_profile": {
+          "C": 0.2382,
+          "C#": 0.2711,
+          "D": 0.2533,
+          "D#": 0.2701,
+          "E": 0.2483,
+          "F": 0.273,
+          "F#": 0.2782,
+          "G": 0.268,
+          "G#": 0.312,
+          "A": 0.3035,
+          "A#": 0.3341,
+          "B": 0.3824
+        },
+        "predominant_pitch_class": "B"
+      },
+      "loop_boundary": {
+        "start_sample_amp": 0.00021,
+        "end_sample_amp": 0.00047,
+        "sample_at_16bars_amp": 0.327018,
+        "exact_target_16bar_samples": 1335652,
+        "file_exceeds_16bars_by_samples": 776348
+      }
+    }
+  },
+  "inter_stem_analysis": {
+    "signal_cross_correlation": {
+      "base_vs_intensity": 0.0001,
+      "base_vs_danger": -0.0,
+      "intensity_vs_danger": 0.0019
+    },
+    "harmonic_chroma_similarity": {
+      "base_vs_intensity": 0.9315,
+      "base_vs_danger": 0.969,
+      "intensity_vs_danger": 0.9893
+    }
+  },
+  "verdict": "REQUIRES MANUAL MUSIC PRODUCTION",
+  "verdict_description": "CRITICAL MUSICAL MISMATCH DETECTED: The three files were synthesized as independent musical compositions rather than stems exported from a single DAW master session. They exhibit divergent beat onsets, differing internal tempos, and independent harmonic progressions. Merely looping or time-stretching them will cause severe cacophony and audible dissonance when played concurrently."
+}

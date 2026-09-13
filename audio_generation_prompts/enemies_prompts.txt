@@ -1,0 +1,111 @@
+=== ENEMIES AUDIO GENERATION PROMPTS ===
+Total Assets: 12
+
+Filename: enemy_spawn_01.wav
+FMOD Event: event:/Enemies/Spawn
+Duration: 0.5s | Channels: Mono | Variation: 1
+Prompt:
+0.50-second futuristic enemy teleportation / spawn sound. High-tech digital materialization cue: rapid ascending frequency sweep, holographic shimmer transient, followed by a heavy mechanical drop and servo lock-in click. Modern, digital, crisp, mono.
+Negative Prompt:
+magic sparkle, fantasy portal chime, demon growl, human laugh, retro 8-bit teleport, muffled thud.
+--------------------------------------------------------------------------------
+
+Filename: enemy_spawn_02.wav
+FMOD Event: event:/Enemies/Spawn
+Duration: 0.5s | Channels: Mono | Variation: 2
+Prompt:
+0.50-second patrol drone deployment SFX. Compressed pneumatic drop from ceiling clamp, instant high-speed electric fan/thruster spool-up whir, and automated optic boot chime. High-tech robotic entry, mono.
+Negative Prompt:
+magic sparkle, fantasy portal chime, demon growl, human laugh, retro 8-bit teleport.
+--------------------------------------------------------------------------------
+
+Filename: enemy_spawn_03.wav
+FMOD Event: event:/Enemies/Spawn
+Duration: 0.5s | Channels: Mono | Variation: 3
+Prompt:
+0.50-second robotic security unit activation. Power grid tap surge, mechanical chassis unfolding click-clack, and glowing sensor flare blip. Threatening, mechanized, mono.
+Negative Prompt:
+magic sparkle, fantasy portal chime, demon growl, human laugh.
+--------------------------------------------------------------------------------
+
+Filename: enemy_attack_01.wav
+FMOD Event: event:/Enemies/Attack
+Duration: 0.4s | Channels: Mono | Variation: 1
+Prompt:
+0.40-second robotic melee weapon swipe. Fast mechanized arm swing with an abrasive electric buzzsaw edge and pneumatic propulsion hiss. Aggressive, robotic, cold, mono.
+Negative Prompt:
+monster roar, animal growl, human grunt, cartoon punch, bow and arrow, soft whoosh.
+--------------------------------------------------------------------------------
+
+Filename: enemy_attack_02.wav
+FMOD Event: event:/Enemies/Attack
+Duration: 0.4s | Channels: Mono | Variation: 2
+Prompt:
+0.40-second enemy plasma stun blast. Quick targeting telemetry click into a sharp high-voltage twin-bolt discharge. Snappy, menacing, electric transient, mono.
+Negative Prompt:
+monster roar, animal growl, human grunt, cartoon punch, bow and arrow.
+--------------------------------------------------------------------------------
+
+Filename: enemy_attack_03.wav
+FMOD Event: event:/Enemies/Attack
+Duration: 0.4s | Channels: Mono | Variation: 3
+Prompt:
+0.40-second drone kinetic strike. High-speed metal ramrod thrust accompanied by a pressurized piston pop and mechanical lock. Sharp, abrupt, mono.
+Negative Prompt:
+monster roar, animal growl, human grunt, cartoon punch.
+--------------------------------------------------------------------------------
+
+Filename: enemy_hit_01.wav
+FMOD Event: event:/Enemies/Hit
+Duration: 0.28s | Channels: Mono | Variation: 1
+Prompt:
+0.28-second robot receiving damage. Solid kinetic strike on dense cybernetic chassis with metallic clink, micro-circuit short spark, and momentary motor hitch. Short, punchy, industrial, mono.
+Negative Prompt:
+human scream, blood, wet impact, organic grunt, squish, cartoon spring, muffled bass.
+--------------------------------------------------------------------------------
+
+Filename: enemy_hit_02.wav
+FMOD Event: event:/Enemies/Hit
+Duration: 0.28s | Channels: Mono | Variation: 2
+Prompt:
+0.28-second drone hit reaction. High-frequency casing puncture snap, spinning rotor deflection rattle, and small electrical pop. Tight transient, zero reverb, mono.
+Negative Prompt:
+human scream, blood, wet impact, organic grunt, squish, cartoon spring.
+--------------------------------------------------------------------------------
+
+Filename: enemy_hit_03.wav
+FMOD Event: event:/Enemies/Hit
+Duration: 0.28s | Channels: Mono | Variation: 3
+Prompt:
+0.28-second heavy armored mech hit. Hard deflection thud against composite armor plating with subtle electric grounding buzz. Crisp, heavy, mono.
+Negative Prompt:
+human scream, blood, wet impact, organic grunt, squish.
+--------------------------------------------------------------------------------
+
+Filename: enemy_destroy_01.wav
+FMOD Event: event:/Enemies/Destroy
+Duration: 0.95s | Channels: Mono | Variation: 1
+Prompt:
+0.95-second robotic enemy catastrophic destruction. Rapid mechanical structural collapse: high-voltage electric capacitor burst, crunching titanium frame fracture, exploding internal gears, and a rapid power-loss whine. Punchy, satisfying, mono.
+Negative Prompt:
+death groan, zombie noise, human scream, squishy gore, huge nuclear bomb reverb, slow fade.
+--------------------------------------------------------------------------------
+
+Filename: enemy_destroy_02.wav
+FMOD Event: event:/Enemies/Destroy
+Duration: 0.95s | Channels: Mono | Variation: 2
+Prompt:
+0.95-second cyber drone disintegration. Internal battery rupture snap, shower of sizzling sparks, collapsing rotor assembly, and low-end impact as chassis hits the deck. Clean industrial destruction, mono.
+Negative Prompt:
+death groan, zombie noise, human scream, squishy gore, huge nuclear bomb reverb.
+--------------------------------------------------------------------------------
+
+Filename: enemy_destroy_03.wav
+FMOD Event: event:/Enemies/Destroy
+Duration: 0.95s | Channels: Mono | Variation: 3
+Prompt:
+0.95-second automated sentry demolition. Electrical overload screech resolving instantly into a sharp localized metallic explosion and tumbling metal debris. High impact, punchy mid-range, mono.
+Negative Prompt:
+death groan, zombie noise, human scream, squishy gore.
+--------------------------------------------------------------------------------
+

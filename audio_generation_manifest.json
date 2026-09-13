@@ -1,0 +1,968 @@
+{
+  "project": "Cyber Ninja Runner",
+  "audio_runtime": "FMOD Studio 2.03.14",
+  "required_source_format": "48000 Hz, 24-bit PCM WAV",
+  "total_assets": 96,
+  "assets": [
+    {
+      "filename": "music_menu_loop.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/Menu",
+      "duration": 60.0,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Dark cyberpunk menu theme, atmospheric synthwave with cinematic weight, tempo 128 BPM in D minor. Deep analog Reese bass drone, pulsing mid-tempo electronic arpeggio with subtle analog chorus, ethereal holographic choir synth pads, warm tape saturation, restrained minimalist heartbeat kick drum every 4 beats. Mysterious, sleek, high-tech, futuristic ninja preparation vibe. Clean 32-bar seamless loop structure, pristine high-end clarity, low sub-bass rumble, no abrupt transients, no vocals, no recognizable melodies.",
+      "negative_prompt": "vocals, singing, speech, lyrics, pop melodies, acoustic guitar, piano, brass, retro 8-bit chiptune, aggressive metal guitars, loud snares, drop beats, dubstep growls, distortion, clipping."
+    },
+    {
+      "filename": "music_gameplay_base.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/Gameplay",
+      "duration": 27.83,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Isolated base layer stem for adaptive cyberpunk runner game music, locked at exactly 138 BPM in D minor, 16 bars seamless loop. Rhythmic foundation only: punchy 4-on-the-floor electro-cyber kick drum with tight transient, driving sidechained 16th-note rolling synth bassline (cutoff around 600 Hz), minimalist metallic hi-hat tick every 8th note, subtle dystopian synth drone in background. Clean frequency pocket carved between 1 kHz and 5 kHz for SFX headroom. No melodic leads, no snares, no cymbals, no vocals, seamless loop boundary.",
+      "negative_prompt": "melody, synth leads, snare drums, claps, guitar solos, brass, vocals, speech, loud crash cymbals, distorted screech, muddy bass, 8-bit sounds, sudden tempo changes."
+    },
+    {
+      "filename": "music_gameplay_intensity.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/Gameplay",
+      "duration": 27.83,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Isolated rhythmic intensity and percussion stem for cyberpunk action runner, locked at exactly 138 BPM in D minor, 16 bars seamless loop, harmonically matching D minor baseline. Energetic elements: crisp electronic snare with layered metallic clap on beats 2 and 4, driving running 16th-note shaker and closed cyber hi-hat patterns, fast rising syncopated pluck synth arpeggio bouncing between left and right stereo channels. High energy, breathless parkour momentum. No kick drum, no heavy sub-bass (empty under 150 Hz), no vocals, seamless loop.",
+      "negative_prompt": "kick drum, sub-bass, 808 boom, vocals, distorted guitars, orchestral brass, erratic rhythms, swing timing, jazz chords, ambient pads."
+    },
+    {
+      "filename": "music_gameplay_danger.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/Gameplay",
+      "duration": 27.83,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Isolated danger and tension stem for adaptive cyberpunk music, locked at exactly 138 BPM in D minor, 16 bars seamless loop. Aggressive elements: distorted saw-tooth alarm pulse synths, cutting acid bass resonance sweep, distorted industrial percussion accents on off-beats, tense rising pitch risers terminating every 4 bars into heavy downbeats, gritty overdrive texture. Pure adrenaline threat. No primary kick drum, no clean melodic leads, zero vocal chants, mathematically aligned loop.",
+      "negative_prompt": "melodic pop leads, clean acoustic piano, soft pads, romantic chords, vocals, words, silence, kick drum, slow tempo, disjointed rhythm."
+    },
+    {
+      "filename": "music_danger.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/Danger",
+      "duration": 27.83,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Full standalone high-octane cyberpunk combat boss music loop, 138 BPM, key of D minor. Blistering electronic drums, heavy compressed industrial kick, layered aggressive snare, screaming distorted synth leads, dark pulsing cybernetic bass ostinato, relentless futuristic chase energy, razor-sharp transients, menacing cinematic tension. 16-bar seamless loop, perfectly mix-ready with high headroom for sword slash and explosion SFX. No vocals, no guitar solos, no retro arcade audio.",
+      "negative_prompt": "vocals, singing, speech, acoustic drums, rock guitar, chip tune, cheerful melody, major chords, ambient meditation, fadeout."
+    },
+    {
+      "filename": "music_victory.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/Victory",
+      "duration": 5.5,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Futuristic cyberpunk victory stinger and stage clear fanfare, duration 5.5 seconds. Begins with a rapid high-tech synth riser and punchy sub drop, exploding into a triumphant, gleaming futuristic chord progression with shimmering neon synth brass and crystalline arpeggio flourish, resolving cleanly on a warm sustaining analog bass note with decaying cyber delay tail. Rewarding, elite, cinematic, high-speed celebration. No orchestral brass, no cheese, no choir, no vocals.",
+      "negative_prompt": "orchestral fanfares, trumpets, cartoon jingles, 8-bit victory tunes, vocals, clapping, applause, speech, whistling."
+    },
+    {
+      "filename": "music_gameover.wav",
+      "category": "Music",
+      "fmod_event": "event:/Music/GameOver",
+      "duration": 4.8,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "Dark cinematic cyber ninja defeat and game over musical cue, duration 4.8 seconds. Sudden dramatic cutoff of rhythm followed by a crushing low-frequency pitch drop, analog synthesizer circuit-bending power-down whine, mournful low cello-like synth drone fading into dark static reverb wash. Emotional, definitive, cold, robotic shutdown. No melodramatic orchestral strings, no speech, no vocals, high dynamic range.",
+      "negative_prompt": "sad trombone, cartoon fail sounds, 8-bit death jingles, vocals, groaning, speech, cheerful music, drum fills."
+    },
+    {
+      "filename": "player_jump_01.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Jump",
+      "duration": 0.35,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.35-second futuristic ninja jump SFX. Punchy pneumatic air release transient followed by a crisp upward synthetic micro-whoosh and tight magnetic coil burst. Agile, athletic, high-tech. Peak transient at 12 ms, tight decay, zero reverb wash, mono, 48kHz.",
+      "negative_prompt": "cartoon boing, spring sound, low-quality white noise, mouth whoosh, footsteps, reverb tail, music, voices, 8-bit jump."
+    },
+    {
+      "filename": "player_jump_02.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Jump",
+      "duration": 0.35,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.35-second cyber parkour jump sound. Sharp carbon-fiber spring compression click transitioning instantly into a fast high-frequency air dispersion hiss and subtle sub-bass thud. Quick, punchy, lightweight, mono, clean decay.",
+      "negative_prompt": "cartoon boing, spring sound, white noise, mouth whoosh, footsteps, reverb tail, music, voices."
+    },
+    {
+      "filename": "player_jump_03.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Jump",
+      "duration": 0.35,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.35-second cybernetic jump sound. Electric servo burst with subtle electromagnetic whine pitching up rapidly, paired with a short laser-clean propulsion pop. Crisp high frequencies, tight low-mid punch, mono.",
+      "negative_prompt": "cartoon boing, spring sound, white noise, footsteps, reverb tail, voices."
+    },
+    {
+      "filename": "player_jump_04.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Jump",
+      "duration": 0.35,
+      "channels": "Mono",
+      "variation_number": 4,
+      "prompt": "0.35-second futuristic leap audio. Dual transient: athletic foot kick-off against metallic surface layered with a tiny ionized air pop. Tight, focused, zero background noise, studio master quality, mono.",
+      "negative_prompt": "cartoon boing, spring sound, low-quality white noise, footsteps, reverb tail, voices."
+    },
+    {
+      "filename": "player_walljump_01.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/WallJump",
+      "duration": 0.4,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.40-second sci-fi wall jump SFX. Heavy directional foot strike against vertical metal panel followed immediately by a sharp pneumatic lateral push thrust. Metallic resonance with quick damping, pressurized air burst, mono.",
+      "negative_prompt": "reverb wash, muddy bass, human grunt, shoe squeak, wood sound, cartoon effects."
+    },
+    {
+      "filename": "player_walljump_02.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/WallJump",
+      "duration": 0.4,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.40-second cyber ninja wall kick sound. Crisp carbon boot impact against concrete/steel with a synthetic energy discharge kickback. Sharp attack transient, focused mid-range punch, controlled tail, mono.",
+      "negative_prompt": "reverb wash, muddy bass, human grunt, shoe squeak, cartoon effects."
+    },
+    {
+      "filename": "player_walljump_03.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/WallJump",
+      "duration": 0.4,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.40-second energetic acrobatic wall push. Magnetized boot detachment click combined with a fast horizontal gas thruster burst. High-tech, metallic, punchy, clean transient, mono.",
+      "negative_prompt": "reverb wash, muddy bass, human grunt, shoe squeak, wood sound."
+    },
+    {
+      "filename": "player_land_01.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Land",
+      "duration": 0.38,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.38-second futuristic landing impact sound. Solid dual-foot impact on reinforced metallic flooring, layered with an immediate pneumatic suspension hiss from cybernetic legs and suit armor settling. Heavy sub-punch at 90 Hz, crisp high transient, mono.",
+      "negative_prompt": "squish, mud, bone break, human scream, vocal breath, cartoon splat, extended reverb tail."
+    },
+    {
+      "filename": "player_land_02.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Land",
+      "duration": 0.38,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.38-second athletic cyber ninja landing. Dense mechanical body impact with shock-absorbing hydraulic compression sound. Dampened metallic thud, zero hollow ring, tight low end, clean high frequency armor rattle, mono.",
+      "negative_prompt": "squish, mud, bone break, human scream, cartoon splat, reverb tail."
+    },
+    {
+      "filename": "player_land_03.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Land",
+      "duration": 0.38,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.38-second high-speed landing on hard asphalt/metal. Deep shock-wave dissipation transient layered with a short high-tech nano-suit compression whir. Powerful, grounded, zero muddy rumble, mono.",
+      "negative_prompt": "squish, mud, bone break, human scream, cartoon splat."
+    },
+    {
+      "filename": "player_slide_01.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Slide",
+      "duration": 0.65,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.65-second high-speed futuristic slide sound. Fast friction of Kevlar/ceramic knee pads skimming across smooth neon-lit steel grating, layered with a continuous pressurized air hiss and subtle electric spark jitter. Dynamic decrescendo, crisp high-end scrape, mono.",
+      "negative_prompt": "tire squeal, bowling ball, wood scraping, human vocal, cloth rustle, water splash, low rumble."
+    },
+    {
+      "filename": "player_slide_02.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Slide",
+      "duration": 0.65,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.65-second cyber ninja dash slide. Intense sonic whoosh mixed with metallic abrasive skid on road surface and ionized spark crackles. Strong attack transient, smoothly tapering friction tail, mono.",
+      "negative_prompt": "tire squeal, bowling ball, wood scraping, human vocal, cloth rustle."
+    },
+    {
+      "filename": "player_slide_03.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Slide",
+      "duration": 0.65,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.65-second smooth technological slide. Ceramic plate sliding over asphalt at 30 mph with high-pressure air dispersion wash and micro-servo stabilizing whir. Clean, detailed, aggressive friction, mono.",
+      "negative_prompt": "tire squeal, bowling ball, wood scraping, human vocal, water splash."
+    },
+    {
+      "filename": "player_damage_01.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Damage",
+      "duration": 0.45,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.45-second high-tech armor damage impact. Violent blunt-force hit on high-tech exo-suit, paired with an electric circuit glitch spark and high-voltage energy shield fracture snap. High transient punch, no human voice or groan, pure technology failure, mono.",
+      "negative_prompt": "human voice, groan, grunt, scream, blood squirt, flesh impact, cartoon smack, retro blip."
+    },
+    {
+      "filename": "player_damage_02.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Damage",
+      "duration": 0.45,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.45-second cybernetic hit reaction sound. Hard kinetic ceramic plate fracture layered with an electrical short-circuit pop and rapid downward pitch glitch. Sharp, painful mechanical crunch, clean mono.",
+      "negative_prompt": "human voice, groan, grunt, scream, blood squirt, flesh impact, cartoon smack."
+    },
+    {
+      "filename": "player_damage_03.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Damage",
+      "duration": 0.45,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.45-second energy beam hit on suit. Scorching plasma impact snap combined with a micro-EMP burst and suit overload alarm pip. Brutal, sudden, punchy, mono.",
+      "negative_prompt": "human voice, groan, grunt, scream, blood squirt, flesh impact."
+    },
+    {
+      "filename": "player_death_01.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Death",
+      "duration": 1.4,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "1.40-second catastrophic cyber ninja death and system failure. Catastrophic mechanical core breach: crushing kinetic impact, immediate high-voltage arc explosion, digital disintegration glitch cascade, and a deep sub-bass vacuum implosion fading to low static. Cinematic, terminal, stereo width, high impact.",
+      "negative_prompt": "human screaming, blood, gore, organic splat, funny cartoon sounds, comedy whistle, speech, words, music loop."
+    },
+    {
+      "filename": "player_death_02.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Death",
+      "duration": 1.4,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "1.40-second cybernetic destruction sequence. Heavy structural armor fracture followed by a rapid electric circuit burnout, high-pitched power plant winding down, and a dispersed holographic fizzle out. Tragic, technologically definitive, stereo.",
+      "negative_prompt": "human screaming, blood, gore, organic splat, speech, words."
+    },
+    {
+      "filename": "player_death_03.wav",
+      "category": "Player",
+      "fmod_event": "event:/Player/Death",
+      "duration": 1.4,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "1.40-second fatal system overload. Kinetic strike shattering energy containment, followed by a violent EMP blast wave, digitized telemetry error whine, and a low resonant metallic thud as the body collapses. Pristine studio stereo master.",
+      "negative_prompt": "human screaming, blood, gore, organic splat, comedy whistle."
+    },
+    {
+      "filename": "combat_attack_01.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Attack",
+      "duration": 0.32,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.32-second futuristic energy katana sword slash. Hyper-fast aerodynamic whip whoosh combined with a buzzing high-voltage plasma cutting edge. Razor-sharp high-frequency sizzle, tight low-mid punch, whipping air transient, mono.",
+      "negative_prompt": "dull stick swing, wooden bat whoosh, cartoon swish, swashbuckling pirate sword cling, prolonged reverb, voice."
+    },
+    {
+      "filename": "combat_attack_02.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Attack",
+      "duration": 0.32,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.32-second cybernetic blade slice. Intense clean swoosh with ionized electrical blade hum and metallic resonant zing. Fast attack, rapid decay, extremely sharp and deadly, mono.",
+      "negative_prompt": "dull stick swing, wooden bat whoosh, cartoon swish, pirate sword cling."
+    },
+    {
+      "filename": "combat_attack_03.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Attack",
+      "duration": 0.32,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.32-second energy blade backhand strike. Low-frequency whoosh building instantly into a high-pitched laser edge whir and sharp air displacement. Aggressive, agile, mono.",
+      "negative_prompt": "dull stick swing, wooden bat whoosh, cartoon swish, voice."
+    },
+    {
+      "filename": "combat_attack_04.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Attack",
+      "duration": 0.32,
+      "channels": "Mono",
+      "variation_number": 4,
+      "prompt": "0.32-second high-velocity katana cut. High-frequency plasma air tear followed by a deep electromagnetic pulse whoosh. Crisp, modern, cinematic anime sword slash, mono.",
+      "negative_prompt": "dull stick swing, wooden bat whoosh, cartoon swish, pirate sword."
+    },
+    {
+      "filename": "combat_hit_01.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Hit",
+      "duration": 0.3,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.30-second plasma blade striking robotic titanium chassis. Violent high-density metallic cleave impact layered with a burst of high-voltage electrical sparks and a hollow mechanical crunch. Deep transient punch, short tail, mono.",
+      "negative_prompt": "fleshy wet squish, human vocal ouch, cartoon bonk, dull plastic thud, long ringing bell, reverb wash."
+    },
+    {
+      "filename": "combat_hit_02.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Hit",
+      "duration": 0.3,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.30-second energy sword slicing metal armor. Searing plasma burn sizzle mixed with shearing metal sheet sound and micro-explosion crack. Visceral, punchy, metallic, mono.",
+      "negative_prompt": "fleshy wet squish, human vocal ouch, cartoon bonk, dull plastic thud."
+    },
+    {
+      "filename": "combat_hit_03.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Hit",
+      "duration": 0.3,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.30-second heavy cyber blade hit. Solid structural impact against reinforced plating with electric discharge arc and flying debris snap. Fast, impactful, tight low end, mono.",
+      "negative_prompt": "fleshy wet squish, human vocal ouch, cartoon bonk, long ringing bell."
+    },
+    {
+      "filename": "combat_hit_04.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Hit",
+      "duration": 0.3,
+      "channels": "Mono",
+      "variation_number": 4,
+      "prompt": "0.30-second sword impact on cybernetic unit. Sharp blade puncture transient combined with hydraulic oil spray hiss and circuit spark. Punchy, clean, zero muddy sustain, mono.",
+      "negative_prompt": "fleshy wet squish, human vocal ouch, cartoon bonk, reverb wash."
+    },
+    {
+      "filename": "combat_critical_hit_01.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/CriticalHit",
+      "duration": 0.55,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.55-second devastating critical strike SFX. Massive dual-layered energy rupture: deafening laser cleave transient, followed immediately by an explosive sub-bass pressure pop at 60 Hz, electrical short-circuit cascade, and a high-frequency crystalline shatter. Huge cinematic impact, mono.",
+      "negative_prompt": "orchestral hit, cartoon trumpet, squishy organic gore, human scream, slow riser, muddy rumble."
+    },
+    {
+      "filename": "combat_critical_hit_02.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/CriticalHit",
+      "duration": 0.55,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.55-second cybernetic execution hit. Extreme kinetic armor piercing sound layered with an intense electromagnetic pulse shockwave and bass distortion snap. Dramatic, lethal, crunchy transient, mono.",
+      "negative_prompt": "orchestral hit, cartoon trumpet, squishy organic gore, human scream."
+    },
+    {
+      "filename": "combat_critical_hit_03.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/CriticalHit",
+      "duration": 0.55,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.55-second critical blade strike. Supercharged plasma blade impact that shatters target shielding with a high-pitched glass-like energy break and heavy low-end slam. Punchy, visceral, mono.",
+      "negative_prompt": "orchestral hit, cartoon trumpet, squishy organic gore, human scream."
+    },
+    {
+      "filename": "combat_laser_01.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Laser",
+      "duration": 0.42,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.42-second futuristic laser blaster shot. Instant micro-second pre-charge click launching into a razor-sharp high-energy plasma bolt crack and brief ionized tail. Tight, focused, high-velocity sci-fi projectile, mono, 48kHz.",
+      "negative_prompt": "retro 8-bit pew pew, Star Wars blaster copy, gun powder bang, shotgun blast, cartoon ricochet."
+    },
+    {
+      "filename": "combat_laser_02.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Laser",
+      "duration": 0.42,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.42-second high-tech energy weapon discharge. Punchy electromagnetic coil transient firing a concentrated neon beam, sharp sonic crack with subtle pitch drop-off. Clean, punchy, zero retro pew-pew character, mono.",
+      "negative_prompt": "retro 8-bit pew pew, Star Wars blaster copy, gun powder bang."
+    },
+    {
+      "filename": "combat_laser_03.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Laser",
+      "duration": 0.42,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.42-second pulse rifle shot. Compressed energy blast with rich mid-range body and metallic beam projection snap. Fast, lethal, high-tech, mono.",
+      "negative_prompt": "retro 8-bit pew pew, Star Wars blaster copy, shotgun blast."
+    },
+    {
+      "filename": "combat_cannon_fire_01.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/CannonFire",
+      "duration": 0.85,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.85-second heavy futuristic railgun cannon shot. Massive pressurized pneumatic breach opening, followed by an earth-shaking magnetic projectile launch with chest-thumping sub-bass (50 Hz), violent mechanical recoil clank, and distant sonic boom dissipation tail. Huge scale, industrial, mono.",
+      "negative_prompt": "traditional black powder cannon, fireworks pop, muffled rumble, human yell, tinny toy gun, low fidelity."
+    },
+    {
+      "filename": "combat_cannon_fire_02.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/CannonFire",
+      "duration": 0.85,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.85-second heavy plasma siege cannon blast. Super-dense energy projectile launch, explosive plasma muzzle crack, deep low-frequency displacement, and sustained magnetic vent exhaust hiss. Authoritative, powerful, mono.",
+      "negative_prompt": "traditional black powder cannon, fireworks pop, muffled rumble, human yell."
+    },
+    {
+      "filename": "combat_cannon_fire_03.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/CannonFire",
+      "duration": 0.85,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.85-second automated cyber cannon fire. Heavy mechanized chamber load snap firing a high-caliber explosive slug; punchy acoustic crack combined with futuristic electronic propulsion boom. Deep, violent, mono.",
+      "negative_prompt": "traditional black powder cannon, fireworks pop, muffled rumble, tinny toy gun."
+    },
+    {
+      "filename": "combat_explosion_01.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Explosion",
+      "duration": 1.2,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "1.20-second massive futuristic mechanical explosion. Violent initial shockwave snap, heavy low-frequency detonation body (45-80 Hz), metal shrapnel and glass debris scattering outwards, and a sizzling high-voltage electrical failure tail. Cinematic, wide stereo field, high dynamic punch.",
+      "negative_prompt": "muffled rumble, low-bitrate boom, fireworks crackle, grenade from WW2 movie, clapping, human screams, slow build."
+    },
+    {
+      "filename": "combat_explosion_02.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Explosion",
+      "duration": 1.2,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "1.20-second robotic drone explosion. Sharp electrical fireball detonation, fuel cell rupture roar, raining metallic parts, and a dying servo whine in stereo. Dense mid-range impact, clean sub-bass, zero muddy wash.",
+      "negative_prompt": "muffled rumble, low-bitrate boom, fireworks crackle, human screams."
+    },
+    {
+      "filename": "combat_explosion_03.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Explosion",
+      "duration": 1.2,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "1.20-second cybernetic facility blast. High-tech EMP bomb detonation with compressed sonic vacuum pull followed by an explosive blast wave and crackling lightning arcs across the stereo panorama. Massive, clean, professional.",
+      "negative_prompt": "muffled rumble, low-bitrate boom, fireworks crackle, human screams."
+    },
+    {
+      "filename": "combat_explosion_04.wav",
+      "category": "Combat",
+      "fmod_event": "event:/Combat/Explosion",
+      "duration": 1.2,
+      "channels": "Stereo",
+      "variation_number": 4,
+      "prompt": "1.20-second plasma canister explosion. Blinding energy rupture sound, deep bass pressure release, high-frequency scorched metal sizzle, and fast-dissipating fiery debris. Crisp, punchy, stereo.",
+      "negative_prompt": "muffled rumble, low-bitrate boom, fireworks crackle, human screams."
+    },
+    {
+      "filename": "enemy_spawn_01.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Spawn",
+      "duration": 0.5,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.50-second futuristic enemy teleportation / spawn sound. High-tech digital materialization cue: rapid ascending frequency sweep, holographic shimmer transient, followed by a heavy mechanical drop and servo lock-in click. Modern, digital, crisp, mono.",
+      "negative_prompt": "magic sparkle, fantasy portal chime, demon growl, human laugh, retro 8-bit teleport, muffled thud."
+    },
+    {
+      "filename": "enemy_spawn_02.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Spawn",
+      "duration": 0.5,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.50-second patrol drone deployment SFX. Compressed pneumatic drop from ceiling clamp, instant high-speed electric fan/thruster spool-up whir, and automated optic boot chime. High-tech robotic entry, mono.",
+      "negative_prompt": "magic sparkle, fantasy portal chime, demon growl, human laugh, retro 8-bit teleport."
+    },
+    {
+      "filename": "enemy_spawn_03.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Spawn",
+      "duration": 0.5,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.50-second robotic security unit activation. Power grid tap surge, mechanical chassis unfolding click-clack, and glowing sensor flare blip. Threatening, mechanized, mono.",
+      "negative_prompt": "magic sparkle, fantasy portal chime, demon growl, human laugh."
+    },
+    {
+      "filename": "enemy_attack_01.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Attack",
+      "duration": 0.4,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.40-second robotic melee weapon swipe. Fast mechanized arm swing with an abrasive electric buzzsaw edge and pneumatic propulsion hiss. Aggressive, robotic, cold, mono.",
+      "negative_prompt": "monster roar, animal growl, human grunt, cartoon punch, bow and arrow, soft whoosh."
+    },
+    {
+      "filename": "enemy_attack_02.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Attack",
+      "duration": 0.4,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.40-second enemy plasma stun blast. Quick targeting telemetry click into a sharp high-voltage twin-bolt discharge. Snappy, menacing, electric transient, mono.",
+      "negative_prompt": "monster roar, animal growl, human grunt, cartoon punch, bow and arrow."
+    },
+    {
+      "filename": "enemy_attack_03.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Attack",
+      "duration": 0.4,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.40-second drone kinetic strike. High-speed metal ramrod thrust accompanied by a pressurized piston pop and mechanical lock. Sharp, abrupt, mono.",
+      "negative_prompt": "monster roar, animal growl, human grunt, cartoon punch."
+    },
+    {
+      "filename": "enemy_hit_01.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Hit",
+      "duration": 0.28,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.28-second robot receiving damage. Solid kinetic strike on dense cybernetic chassis with metallic clink, micro-circuit short spark, and momentary motor hitch. Short, punchy, industrial, mono.",
+      "negative_prompt": "human scream, blood, wet impact, organic grunt, squish, cartoon spring, muffled bass."
+    },
+    {
+      "filename": "enemy_hit_02.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Hit",
+      "duration": 0.28,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.28-second drone hit reaction. High-frequency casing puncture snap, spinning rotor deflection rattle, and small electrical pop. Tight transient, zero reverb, mono.",
+      "negative_prompt": "human scream, blood, wet impact, organic grunt, squish, cartoon spring."
+    },
+    {
+      "filename": "enemy_hit_03.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Hit",
+      "duration": 0.28,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.28-second heavy armored mech hit. Hard deflection thud against composite armor plating with subtle electric grounding buzz. Crisp, heavy, mono.",
+      "negative_prompt": "human scream, blood, wet impact, organic grunt, squish."
+    },
+    {
+      "filename": "enemy_destroy_01.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Destroy",
+      "duration": 0.95,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.95-second robotic enemy catastrophic destruction. Rapid mechanical structural collapse: high-voltage electric capacitor burst, crunching titanium frame fracture, exploding internal gears, and a rapid power-loss whine. Punchy, satisfying, mono.",
+      "negative_prompt": "death groan, zombie noise, human scream, squishy gore, huge nuclear bomb reverb, slow fade."
+    },
+    {
+      "filename": "enemy_destroy_02.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Destroy",
+      "duration": 0.95,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.95-second cyber drone disintegration. Internal battery rupture snap, shower of sizzling sparks, collapsing rotor assembly, and low-end impact as chassis hits the deck. Clean industrial destruction, mono.",
+      "negative_prompt": "death groan, zombie noise, human scream, squishy gore, huge nuclear bomb reverb."
+    },
+    {
+      "filename": "enemy_destroy_03.wav",
+      "category": "Enemies",
+      "fmod_event": "event:/Enemies/Destroy",
+      "duration": 0.95,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.95-second automated sentry demolition. Electrical overload screech resolving instantly into a sharp localized metallic explosion and tumbling metal debris. High impact, punchy mid-range, mono.",
+      "negative_prompt": "death groan, zombie noise, human scream, squishy gore."
+    },
+    {
+      "filename": "gameplay_collect_01.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Collect",
+      "duration": 0.22,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.22-second premium futuristic collectible pickup SFX. Ultra-clean high-frequency glass-crystal chime with a subtle cybernetic sine blip, resolving into an upward pitch micro-shimmer. Pure, tactile, satisfying, high frequencies from 3 kHz to 12 kHz, mono.",
+      "negative_prompt": "Mario coin copy, casino slot chime, dull wooden click, muddy bass, long ringing bell, retro 8-bit blip."
+    },
+    {
+      "filename": "gameplay_collect_02.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Collect",
+      "duration": 0.22,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.22-second cyber credit pickup. Crisp electronic coin ping layered with a delicate magnetized energy click. Instant attack (2 ms), zero latency, fast decay, mono.",
+      "negative_prompt": "Mario coin copy, casino slot chime, dull wooden click, muddy bass, long ringing bell."
+    },
+    {
+      "filename": "gameplay_collect_03.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Collect",
+      "duration": 0.22,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.22-second data shard acquisition sound. Harmonic synthesizer bell tone with subtle stereo chorus emulation and micro-laser chirp. Extremely clean, addictive, mono.",
+      "negative_prompt": "Mario coin copy, casino slot chime, dull wooden click, muddy bass."
+    },
+    {
+      "filename": "gameplay_collect_04.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Collect",
+      "duration": 0.22,
+      "channels": "Mono",
+      "variation_number": 4,
+      "prompt": "0.22-second neon currency collect. Pristine high-tech drop of sonic energy, light metallic resonance with instant cutoff. Crisp transient, perfectly transparent in a busy mix, mono.",
+      "negative_prompt": "Mario coin copy, casino slot chime, dull wooden click, muddy bass."
+    },
+    {
+      "filename": "gameplay_checkpoint_01.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Checkpoint",
+      "duration": 0.75,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.75-second futuristic holographic checkpoint activation. Resonant, reassuring sonic pulse: fast ascending synth chord chime, sweeping energy gate pass-through sound, and a warm sustaining low-mid reassurance hum. Broad stereo expansion, triumphant and stabilizing.",
+      "negative_prompt": "church bells, arcade checkpoint buzzer, brass fanfare, cheering crowd, muddy distorted boom, harsh click."
+    },
+    {
+      "filename": "gameplay_checkpoint_02.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Checkpoint",
+      "duration": 0.75,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.75-second cyber runner checkpoint reached. High-speed telemetry verification sweep, pristine harmonic synth bell flourish, and a gentle sub-bass confirmation thud. Modern, clean, stereo.",
+      "negative_prompt": "church bells, arcade checkpoint buzzer, brass fanfare, cheering crowd, muddy boom."
+    },
+    {
+      "filename": "gameplay_checkpoint_03.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Checkpoint",
+      "duration": 0.75,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "0.75-second neon gate save-point sound. Clean electrical frequency surge blooming into a rich stereo harmonic chime and fading smoothly into the background. High clarity, professional stereo finish.",
+      "negative_prompt": "church bells, arcade checkpoint buzzer, brass fanfare, cheering crowd."
+    },
+    {
+      "filename": "gameplay_powerup_01.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Powerup",
+      "duration": 0.8,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.80-second futuristic powerup upgrade activation. Dynamic cybernetic power surge: fast upward frequency riser (200 Hz to 4 kHz), crisp high-energy electric latch sound, expanding into a rich, full-bodied stereo synthesizer pulse. Inspiring, powerful, high-tech.",
+      "negative_prompt": "retro video game 1-up, cartoon mushroom sound, casino jingle, human voice 'power up', muddy rumble."
+    },
+    {
+      "filename": "gameplay_powerup_02.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Powerup",
+      "duration": 0.8,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.80-second nano-overdrive powerup pickup. Concentrated energy injection pop, instant high-voltage reactor hum spinning up to max speed, and a glittering holographic tail. Punchy and uplifting, stereo.",
+      "negative_prompt": "retro video game 1-up, cartoon mushroom sound, casino jingle, human voice."
+    },
+    {
+      "filename": "gameplay_powerup_03.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Powerup",
+      "duration": 0.8,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "0.80-second cyber ninja power boost. Rapid charging coil sound with an explosive clean energy snap and wide stereo harmonic ring out. Exhilarating, punchy, stereo.",
+      "negative_prompt": "retro video game 1-up, cartoon mushroom sound, casino jingle."
+    },
+    {
+      "filename": "gameplay_shield_01.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Shield",
+      "duration": 0.9,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.90-second high-tech energy shield activation. Instant electromagnetic pulse burst, expanding hexagonal forcefield deployment snap, followed by a resonant protective crystalline hum that stabilizes cleanly. Protective, protective bass resonance, wide stereo.",
+      "negative_prompt": "metal medieval shield clink, muffled hum, electrical drone that hurts ears, buzzer, low bitrate noise."
+    },
+    {
+      "filename": "gameplay_shield_02.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Shield",
+      "duration": 0.9,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.90-second cybernetic barrier engagement. Pressurized magnetic field ignition with a glassy deflector ping and a smooth, low-humming containment loop transient. Crisp, sterile, high-tech, stereo.",
+      "negative_prompt": "metal medieval shield clink, muffled hum, electrical drone, buzzer."
+    },
+    {
+      "filename": "gameplay_shield_03.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Shield",
+      "duration": 0.9,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "0.90-second plasma aegis activation. Dual-tone upward energy envelope, instant shield locking transient, and a delicate high-frequency energy shimmer. Clean, confident, stereo.",
+      "negative_prompt": "metal medieval shield clink, muffled hum, electrical drone."
+    },
+    {
+      "filename": "gameplay_booster_01.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Booster",
+      "duration": 0.65,
+      "channels": "Mono",
+      "variation_number": 1,
+      "prompt": "0.65-second high-velocity speed booster pad sound. Violent jet-thruster acceleration blast: explosive pressurized air transient, sudden high-pitched Doppler turbo spool-up, and rapid whoosh past camera. Immense forward kinetic energy, mono.",
+      "negative_prompt": "car tire burnout, slow airplane drone, fireworks whistle, cartoon zoom sound, muffled noise."
+    },
+    {
+      "filename": "gameplay_booster_02.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Booster",
+      "duration": 0.65,
+      "channels": "Mono",
+      "variation_number": 2,
+      "prompt": "0.65-second magnetic accelerator boost. Instant rail-launch snap with powerful ionized propulsion burst and whistling velocity dissipation tail. Sharp, exhilarating, punchy, mono.",
+      "negative_prompt": "car tire burnout, slow airplane drone, fireworks whistle, cartoon zoom."
+    },
+    {
+      "filename": "gameplay_booster_03.wav",
+      "category": "Gameplay",
+      "fmod_event": "event:/Gameplay/Booster",
+      "duration": 0.65,
+      "channels": "Mono",
+      "variation_number": 3,
+      "prompt": "0.65-second cyber speed burst. Supercharged nitro-like electronic thruster discharge with tight low-end punch and razor-sharp air tearing transient. Fast, aggressive, mono.",
+      "negative_prompt": "car tire burnout, slow airplane drone, fireworks whistle."
+    },
+    {
+      "filename": "ui_click_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Click",
+      "duration": 0.08,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.08-second premium futuristic holographic UI button click. Extremely short, crisp acoustic glass-tap transient layered with a microscopic synthetic sine blip at 2.4 kHz. Tactile, precise, dry, zero reverb, stereo.",
+      "negative_prompt": "dull plastic keyboard thud, mouse click copy, wet click, 8-bit blip, reverb tail, loud pop."
+    },
+    {
+      "filename": "ui_click_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Click",
+      "duration": 0.08,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.08-second high-tech capacitive touch confirmation click. Sub-millisecond transient snap, delicate high-frequency digital ping, immediate silence. Pristine, modern luxury tech, stereo.",
+      "negative_prompt": "dull plastic keyboard thud, mouse click copy, wet click, 8-bit blip."
+    },
+    {
+      "filename": "ui_click_03.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Click",
+      "duration": 0.08,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "0.08-second cybernetic interface tick. Crisp mechanical micro-switch click with electronic micro-beep. Ultra-short, satisfying, zero tail, stereo.",
+      "negative_prompt": "dull plastic keyboard thud, mouse click copy, wet click."
+    },
+    {
+      "filename": "ui_hover_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Hover",
+      "duration": 0.05,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.05-second ultra-subtle futuristic menu hover sound. Soft high-frequency air blip, rounded delicate synth tone at -12 dB, completely non-intrusive, ephemeral holographic feedback, stereo.",
+      "negative_prompt": "loud beep, harsh screech, buzzer, bass thud, cartoon whistle, distorted click."
+    },
+    {
+      "filename": "ui_hover_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Hover",
+      "duration": 0.05,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.05-second soft digital cursor hover tick. Delicate optical sensor pulse, microscopic metallic shimmer, whisper quiet, stereo.",
+      "negative_prompt": "loud beep, harsh screech, buzzer, bass thud, cartoon whistle."
+    },
+    {
+      "filename": "ui_menu_open_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/MenuOpen",
+      "duration": 0.25,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.25-second holographic menu interface expansion swoosh. Smooth upward stereo sweep of filtered white noise and crystalline chime, expanding rapidly across the stereo field like a HUD activating. Crisp, modern, cinematic, stereo.",
+      "negative_prompt": "heavy door opening, creaking wood, thunder, cartoon pop, muffled thump."
+    },
+    {
+      "filename": "ui_menu_open_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/MenuOpen",
+      "duration": 0.25,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.25-second cybernetic dialog deploy sound. Swift pneumatic micro-flicker with ascending digital telemetry blip. High-tech, clean, stereo.",
+      "negative_prompt": "heavy door opening, creaking wood, thunder, cartoon pop."
+    },
+    {
+      "filename": "ui_menu_close_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/MenuClose",
+      "duration": 0.2,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.20-second holographic menu dismiss sound. Downward filtering air swoosh with a soft high-tech suction dissipation and subtle magnetic click shut. Clean, conclusive, stereo.",
+      "negative_prompt": "door slamming, glass shattering, heavy bass drop, cartoon squeak."
+    },
+    {
+      "filename": "ui_menu_close_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/MenuClose",
+      "duration": 0.2,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.20-second HUD collapse sound. Swift inward stereo sweep resolving into an instantaneous dry micro-snap. Elegant, minimal, stereo.",
+      "negative_prompt": "door slamming, glass shattering, heavy bass drop, cartoon squeak."
+    },
+    {
+      "filename": "ui_purchase_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Purchase",
+      "duration": 0.65,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.65-second futuristic store purchase confirmation sound. High-tech biometric approval sequence: rapid dual data chirp, a rich stereo credit dissipation chime, and a solid resonant metal lock confirming the transaction. Highly satisfying, valuable, stereo.",
+      "negative_prompt": "cash register ka-ching, physical coins rattling, cartoon horn, casino win fanfare, speech."
+    },
+    {
+      "filename": "ui_purchase_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Purchase",
+      "duration": 0.65,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.65-second cyber transaction successful chime. Smooth digital authorization tone ascending into a warm harmonic chime with subtle metallic shimmer. Premium, trustworthy, stereo.",
+      "negative_prompt": "cash register ka-ching, physical coins rattling, cartoon horn, casino win."
+    },
+    {
+      "filename": "ui_reward_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Reward",
+      "duration": 1.1,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "1.10-second cyber loot crate unlock fanfare. Pressurized futuristic container unsealing hiss, ascending high-frequency holographic light glissando, bursting into a rewarding neon chord bloom with deep sub-bass warmth. Exhilarating, prestigious, stereo.",
+      "negative_prompt": "brass fanfare, slot machine alarm, casino clatter, party horns, cheering crowd, speech."
+    },
+    {
+      "filename": "ui_reward_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Reward",
+      "duration": 1.1,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "1.10-second rare item unlock cue. Mechanical lock tumbling open followed by an energetic electronic synth chime burst and sparkling laser shimmer tail. Rewarding, elite, stereo.",
+      "negative_prompt": "brass fanfare, slot machine alarm, casino clatter, party horns."
+    },
+    {
+      "filename": "ui_reward_03.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Reward",
+      "duration": 1.1,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "1.10-second mission complete reward celebration sound. Uplifting futuristic tonal flourish layered with digital data stream sweeps and a punchy confirmation thud. Bright, triumphant, stereo.",
+      "negative_prompt": "brass fanfare, slot machine alarm, casino clatter."
+    },
+    {
+      "filename": "ui_error_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Error",
+      "duration": 0.3,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.30-second futuristic access denied / error alert sound. Dual rapid descending sawtooth synth buzzer pulses (180 Hz), crisp and electronic, communicates negative feedback without ear pain or harsh distortion. Clean, high-tech, dry, stereo.",
+      "negative_prompt": "loud obnoxious buzzer, Windows error ding, car horn, cartoon raspberry, shrill screech."
+    },
+    {
+      "filename": "ui_error_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Error",
+      "duration": 0.3,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.30-second cyber interface error tone. Low-voltage electrical rejection chirp with subtle sub-bass double-tap. Restrained, authoritative, futuristic, stereo.",
+      "negative_prompt": "loud obnoxious buzzer, Windows error ding, car horn, cartoon raspberry."
+    },
+    {
+      "filename": "ui_notification_01.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Notification",
+      "duration": 0.4,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "0.40-second subtle cybernetic HUD alert chime. Clean dual-tone synthetic bell chime (C6 to G6), perfectly rounded transient, delicate stereo delay tail. Informative, polite, high-tech ninja helmet display notification, stereo.",
+      "negative_prompt": "iPhone notification copy, loud siren, speech, telephone ring, alarm clock, distorted beeping."
+    },
+    {
+      "filename": "ui_notification_02.wav",
+      "category": "UI",
+      "fmod_event": "event:/UI/Notification",
+      "duration": 0.4,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "0.40-second tactical radar notification ping. High-frequency digital blip with smooth decay and subtle spatial reverb pulse. Crisp, clear, stereo.",
+      "negative_prompt": "iPhone notification copy, loud siren, speech, telephone ring."
+    },
+    {
+      "filename": "environment_cybercity_loop_01.wav",
+      "category": "Environment",
+      "fmod_event": "event:/Environment/CyberCity",
+      "duration": 45.0,
+      "channels": "Stereo",
+      "variation_number": 1,
+      "prompt": "45-second seamless atmospheric loop of a rain-soaked futuristic cyberpunk megacity at night. Deep sub-frequency building infrastructure drone (60-100 Hz), gentle acid rain pattering on corrugated composite rooftop panels, subtle high-frequency 60Hz neon transformer buzz in mid-distance, and smooth, distant futuristic aerodyne traffic whooshes panning across the far horizon. Immersive, dark, lonely, dystopian, spacious stereo panorama, no voices, no sirens, no music, seamless loop.",
+      "negative_prompt": "voices, chatter, crowd noise, footsteps, honking horns, internal combustion engine sounds, radio music, dogs, birds, speech, sudden loud transients."
+    },
+    {
+      "filename": "environment_cybercity_loop_02.wav",
+      "category": "Environment",
+      "fmod_event": "event:/Environment/CyberCity",
+      "duration": 45.0,
+      "channels": "Stereo",
+      "variation_number": 2,
+      "prompt": "45-second seamless ambient loop of high-altitude cyberpunk city rooftop. High-velocity wind whipping around steel girders, rhythmic heavy industrial ventilation intake fans cycling in distance, subtle electromagnetic drone hum, occasional quiet metallic creak. Dark, tense, vertical parkour atmosphere, pristine stereo, seamless loop.",
+      "negative_prompt": "voices, chatter, crowd noise, footsteps, honking horns, internal combustion engine sounds, radio music, birds, speech."
+    },
+    {
+      "filename": "environment_cybercity_loop_03.wav",
+      "category": "Environment",
+      "fmod_event": "event:/Environment/CyberCity",
+      "duration": 45.0,
+      "channels": "Stereo",
+      "variation_number": 3,
+      "prompt": "45-second seamless futuristic urban ambience loop. Damp subterranean street atmosphere, wet pavement reflections, low industrial electrical generator vibrations, distant automated metro transit rumble through tunnel walls, gentle electric neon vapor hiss. Rich low-end, spacious depth, seamless loop.",
+      "negative_prompt": "voices, chatter, crowd noise, footsteps, honking horns, internal combustion engine sounds, radio music, dogs, birds."
+    }
+  ]
+}

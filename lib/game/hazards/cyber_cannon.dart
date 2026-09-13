@@ -187,7 +187,7 @@ class CyberCannon extends BaseHazard
 
     recoil = 8.5;
     muzzleFlash = 1.0;
-    AudioService().playSfx('laser');
+    AudioService().playCannonFire();
   }
 
   void _spawnImpactSparks(Vector2 localPos) {

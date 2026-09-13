@@ -1,0 +1,66 @@
+=== MUSIC AUDIO GENERATION PROMPTS ===
+Total Assets: 7
+
+Filename: music_menu_loop.wav
+FMOD Event: event:/Music/Menu
+Duration: 60.0s | Channels: Stereo | Variation: 1
+Prompt:
+Dark cyberpunk menu theme, atmospheric synthwave with cinematic weight, tempo 128 BPM in D minor. Deep analog Reese bass drone, pulsing mid-tempo electronic arpeggio with subtle analog chorus, ethereal holographic choir synth pads, warm tape saturation, restrained minimalist heartbeat kick drum every 4 beats. Mysterious, sleek, high-tech, futuristic ninja preparation vibe. Clean 32-bar seamless loop structure, pristine high-end clarity, low sub-bass rumble, no abrupt transients, no vocals, no recognizable melodies.
+Negative Prompt:
+vocals, singing, speech, lyrics, pop melodies, acoustic guitar, piano, brass, retro 8-bit chiptune, aggressive metal guitars, loud snares, drop beats, dubstep growls, distortion, clipping.
+--------------------------------------------------------------------------------
+
+Filename: music_gameplay_base.wav
+FMOD Event: event:/Music/Gameplay
+Duration: 27.83s | Channels: Stereo | Variation: 1
+Prompt:
+Isolated base layer stem for adaptive cyberpunk runner game music, locked at exactly 138 BPM in D minor, 16 bars seamless loop. Rhythmic foundation only: punchy 4-on-the-floor electro-cyber kick drum with tight transient, driving sidechained 16th-note rolling synth bassline (cutoff around 600 Hz), minimalist metallic hi-hat tick every 8th note, subtle dystopian synth drone in background. Clean frequency pocket carved between 1 kHz and 5 kHz for SFX headroom. No melodic leads, no snares, no cymbals, no vocals, seamless loop boundary.
+Negative Prompt:
+melody, synth leads, snare drums, claps, guitar solos, brass, vocals, speech, loud crash cymbals, distorted screech, muddy bass, 8-bit sounds, sudden tempo changes.
+--------------------------------------------------------------------------------
+
+Filename: music_gameplay_intensity.wav
+FMOD Event: event:/Music/Gameplay
+Duration: 27.83s | Channels: Stereo | Variation: 1
+Prompt:
+Isolated rhythmic intensity and percussion stem for cyberpunk action runner, locked at exactly 138 BPM in D minor, 16 bars seamless loop, harmonically matching D minor baseline. Energetic elements: crisp electronic snare with layered metallic clap on beats 2 and 4, driving running 16th-note shaker and closed cyber hi-hat patterns, fast rising syncopated pluck synth arpeggio bouncing between left and right stereo channels. High energy, breathless parkour momentum. No kick drum, no heavy sub-bass (empty under 150 Hz), no vocals, seamless loop.
+Negative Prompt:
+kick drum, sub-bass, 808 boom, vocals, distorted guitars, orchestral brass, erratic rhythms, swing timing, jazz chords, ambient pads.
+--------------------------------------------------------------------------------
+
+Filename: music_gameplay_danger.wav
+FMOD Event: event:/Music/Gameplay
+Duration: 27.83s | Channels: Stereo | Variation: 1
+Prompt:
+Isolated danger and tension stem for adaptive cyberpunk music, locked at exactly 138 BPM in D minor, 16 bars seamless loop. Aggressive elements: distorted saw-tooth alarm pulse synths, cutting acid bass resonance sweep, distorted industrial percussion accents on off-beats, tense rising pitch risers terminating every 4 bars into heavy downbeats, gritty overdrive texture. Pure adrenaline threat. No primary kick drum, no clean melodic leads, zero vocal chants, mathematically aligned loop.
+Negative Prompt:
+melodic pop leads, clean acoustic piano, soft pads, romantic chords, vocals, words, silence, kick drum, slow tempo, disjointed rhythm.
+--------------------------------------------------------------------------------
+
+Filename: music_danger.wav
+FMOD Event: event:/Music/Danger
+Duration: 27.83s | Channels: Stereo | Variation: 1
+Prompt:
+Full standalone high-octane cyberpunk combat boss music loop, 138 BPM, key of D minor. Blistering electronic drums, heavy compressed industrial kick, layered aggressive snare, screaming distorted synth leads, dark pulsing cybernetic bass ostinato, relentless futuristic chase energy, razor-sharp transients, menacing cinematic tension. 16-bar seamless loop, perfectly mix-ready with high headroom for sword slash and explosion SFX. No vocals, no guitar solos, no retro arcade audio.
+Negative Prompt:
+vocals, singing, speech, acoustic drums, rock guitar, chip tune, cheerful melody, major chords, ambient meditation, fadeout.
+--------------------------------------------------------------------------------
+
+Filename: music_victory.wav
+FMOD Event: event:/Music/Victory
+Duration: 5.5s | Channels: Stereo | Variation: 1
+Prompt:
+Futuristic cyberpunk victory stinger and stage clear fanfare, duration 5.5 seconds. Begins with a rapid high-tech synth riser and punchy sub drop, exploding into a triumphant, gleaming futuristic chord progression with shimmering neon synth brass and crystalline arpeggio flourish, resolving cleanly on a warm sustaining analog bass note with decaying cyber delay tail. Rewarding, elite, cinematic, high-speed celebration. No orchestral brass, no cheese, no choir, no vocals.
+Negative Prompt:
+orchestral fanfares, trumpets, cartoon jingles, 8-bit victory tunes, vocals, clapping, applause, speech, whistling.
+--------------------------------------------------------------------------------
+
+Filename: music_gameover.wav
+FMOD Event: event:/Music/GameOver
+Duration: 4.8s | Channels: Stereo | Variation: 1
+Prompt:
+Dark cinematic cyber ninja defeat and game over musical cue, duration 4.8 seconds. Sudden dramatic cutoff of rhythm followed by a crushing low-frequency pitch drop, analog synthesizer circuit-bending power-down whine, mournful low cello-like synth drone fading into dark static reverb wash. Emotional, definitive, cold, robotic shutdown. No melodramatic orchestral strings, no speech, no vocals, high dynamic range.
+Negative Prompt:
+sad trombone, cartoon fail sounds, 8-bit death jingles, vocals, groaning, speech, cheerful music, drum fills.
+--------------------------------------------------------------------------------
+
