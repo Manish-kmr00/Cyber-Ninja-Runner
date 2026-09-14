@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../hazards/base_hazard.dart';
 import '../cyber_ninja_game.dart';
+import 'track_segment_models.dart';
 
 /// 3D Volumetric Shadow Haven: An extruded stealth sanctuary with perspective canopy.
 class ShadowHaven extends PositionComponent {
@@ -602,6 +603,11 @@ class WorldChunk extends PositionComponent
   final double pitStartX;
   final double pitWidth;
   final SectorBiome biome;
+  final TrackSegmentType segmentType;
+  final CyberEnvironmentTheme environmentTheme;
+  final SegmentGameplayEvent gameplayEvent;
+  final double entryElevation;
+  final double exitElevation;
 
   final List<BaseHazard> hazards = [];
   final List<ShadowHaven> shadowHavens = [];
@@ -617,11 +623,24 @@ class WorldChunk extends PositionComponent
     this.pitStartX = 0,
     this.pitWidth = 0,
     this.biome = SectorBiome.neonMetropolis,
+    this.segmentType = TrackSegmentType.straightNeonBoulevard,
+    this.environmentTheme = CyberEnvironmentTheme.cyberAlley,
+    this.gameplayEvent = SegmentGameplayEvent.runPacing,
+    this.entryElevation = 0.0,
+    this.exitElevation = 0.0,
   }) : super(
          position: Vector2(startX, 0),
          size: Vector2(length, AppConstants.virtualHeight),
          priority: 10,
        );
+
+  /// Returns the top surface Y coordinate of the running track at the given world X coordinate.
+  double getSurfaceY(double worldX) {
+    final relX = (worldX - startX).clamp(0.0, length);
+    final t = length > 0 ? relX / length : 0.0;
+    final elev = entryElevation + (exitElevation - entryElevation) * t;
+    return groundY + elev;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -645,37 +664,68 @@ class WorldChunk extends PositionComponent
     super.render(canvas);
 
     const trackDepth = AppConstants.trackDepth;
-    final topRoadwayY = groundY - trackDepth;
+    final entryGroundY = groundY + entryElevation;
+    final exitGroundY = groundY + exitElevation;
+    final entryTopY = entryGroundY - trackDepth;
+    final exitTopY = exitGroundY - trackDepth;
 
     // 1. Distant 3D Cyber Grid Pillars (creates parallax depth)
     final gridPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.035)
       ..strokeWidth = 1.0;
     for (double x = 0; x < length; x += 140) {
-      canvas.drawLine(Offset(x, roofY + 16), Offset(x, topRoadwayY), gridPaint);
+      final t = length > 0 ? x / length : 0.0;
+      final curTopY = entryTopY + (exitTopY - entryTopY) * t;
+      canvas.drawLine(Offset(x, roofY + 16), Offset(x, curTopY), gridPaint);
     }
 
     // 2. Render 2.5D Extruded 3D Running Track
     if (!hasPit) {
-      _renderSolid3DTrack(canvas, 0, length, topRoadwayY, groundY, trackDepth);
+      _renderSolid3DTrack(
+        canvas,
+        0,
+        length,
+        entryTopY,
+        exitTopY,
+        entryGroundY,
+        exitGroundY,
+        trackDepth,
+      );
     } else {
+      final t1 = length > 0 ? (pitStartX / length).clamp(0.0, 1.0) : 0.0;
+      final pitEntryGroundY = entryGroundY + (exitGroundY - entryGroundY) * t1;
+      final pitEntryTopY = pitEntryGroundY - trackDepth;
+
       // Segment 1: Left 3D Track before pit
       _renderSolid3DTrack(
         canvas,
         0,
         pitStartX,
-        topRoadwayY,
-        groundY,
+        entryTopY,
+        pitEntryTopY,
+        entryGroundY,
+        pitEntryGroundY,
         trackDepth,
       );
 
+      final afterPitX = pitStartX + pitWidth;
+      final t2 = length > 0 ? (afterPitX / length).clamp(0.0, 1.0) : 1.0;
+      final pitExitGroundY = entryGroundY + (exitGroundY - entryGroundY) * t2;
+      final pitExitTopY = pitExitGroundY - trackDepth;
+
       // 3D Chasm Walls in the Pit
+      final tMid = length > 0
+          ? ((pitStartX + afterPitX) * 0.5 / length).clamp(0.0, 1.0)
+          : 0.0;
+      final pitMidTop = entryTopY + (exitTopY - entryTopY) * tMid;
+      final pitMidGround = entryGroundY + (exitGroundY - entryGroundY) * tMid;
+
       _render3DChasm(
         canvas,
         pitStartX,
-        pitStartX + pitWidth,
-        topRoadwayY,
-        groundY,
+        afterPitX,
+        pitMidTop,
+        pitMidGround,
         trackDepth,
       );
 
@@ -689,26 +739,49 @@ class WorldChunk extends PositionComponent
         _renderHardLightBridge(
           canvas,
           pitStartX,
-          pitStartX + pitWidth,
-          topRoadwayY,
-          groundY,
+          afterPitX,
+          pitMidTop,
+          pitMidGround,
           trackDepth,
         );
       }
 
       // Segment 2: Right 3D Track after pit
-      final afterPitX = pitStartX + pitWidth;
       _renderSolid3DTrack(
         canvas,
         afterPitX,
         length - afterPitX,
-        topRoadwayY,
-        groundY,
+        pitExitTopY,
+        exitTopY,
+        pitExitGroundY,
+        exitGroundY,
         trackDepth,
       );
     }
 
-    // 3. 3D Overhead Industrial Roof Girder
+    // 3. Render 50m Modular Segment-Specific Architecture (Pylons, Trusses, Cables, Billboards, Pipes, Gantries)
+    _renderSegmentArchitecture(
+      canvas,
+      length,
+      entryTopY,
+      exitTopY,
+      entryGroundY,
+      exitGroundY,
+      trackDepth,
+    );
+
+    // 4. Render 9 Environment Theme Props (Alley, Rooftop, Tunnel, Hologram, Sky Bridge, Dark Sector, Industrial, Market, Highway)
+    _renderEnvironmentThemeProps(
+      canvas,
+      length,
+      entryTopY,
+      exitTopY,
+      entryGroundY,
+      exitGroundY,
+      trackDepth,
+    );
+
+    // 5. 3D Overhead Industrial Roof Girder
     _render3DRoof(canvas, length, roofY);
   }
 
@@ -717,11 +790,16 @@ class WorldChunk extends PositionComponent
     Canvas canvas,
     double startX,
     double trackLength,
-    double topRoadwayY,
-    double frontCurbY,
+    double topRoadwayY1,
+    double topRoadwayY2,
+    double frontCurbY1,
+    double frontCurbY2,
     double depth,
   ) {
     if (trackLength <= 0) return;
+
+    final avgTop = (topRoadwayY1 + topRoadwayY2) * 0.5;
+    final avgFront = (frontCurbY1 + frontCurbY2) * 0.5;
 
     // Completely distinct custom 3D tracks for Map 2 and Map 3:
     if (biome == SectorBiome.cyberShinto) {
@@ -729,8 +807,8 @@ class WorldChunk extends PositionComponent
         canvas,
         startX,
         trackLength,
-        topRoadwayY,
-        frontCurbY,
+        avgTop,
+        avgFront,
         depth,
       );
       return;
@@ -740,8 +818,8 @@ class WorldChunk extends PositionComponent
         canvas,
         startX,
         trackLength,
-        topRoadwayY,
-        frontCurbY,
+        avgTop,
+        avgFront,
         depth,
       );
       return;
@@ -749,10 +827,10 @@ class WorldChunk extends PositionComponent
 
     // A. 3D Top Roadway (Walkable Depth Plane)
     final topRoadwayPath = Path()
-      ..moveTo(startX, topRoadwayY)
-      ..lineTo(startX + trackLength, topRoadwayY)
-      ..lineTo(startX + trackLength, frontCurbY)
-      ..lineTo(startX, frontCurbY)
+      ..moveTo(startX, topRoadwayY1)
+      ..lineTo(startX + trackLength, topRoadwayY2)
+      ..lineTo(startX + trackLength, frontCurbY2)
+      ..lineTo(startX, frontCurbY1)
       ..close();
 
     final roadwayPaint = Paint()
@@ -761,7 +839,7 @@ class WorldChunk extends PositionComponent
     canvas.drawPath(topRoadwayPath, roadwayPaint);
 
     // Biome-Specific Roadway Patterns & Decals
-    _renderRoadwayDecals(canvas, startX, trackLength, topRoadwayY, frontCurbY);
+    _renderRoadwayDecals(canvas, startX, trackLength, avgTop, avgFront);
 
     // Back Curb Line (Distant Z-Plane)
     final backCurbPaint = Paint()
@@ -769,8 +847,8 @@ class WorldChunk extends PositionComponent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawLine(
-      Offset(startX, topRoadwayY),
-      Offset(startX + trackLength, topRoadwayY),
+      Offset(startX, topRoadwayY1),
+      Offset(startX + trackLength, topRoadwayY2),
       backCurbPaint,
     );
 
@@ -785,39 +863,41 @@ class WorldChunk extends PositionComponent
       ..strokeWidth = 3.0;
 
     canvas.drawLine(
-      Offset(startX, frontCurbY),
-      Offset(startX + trackLength, frontCurbY),
+      Offset(startX, frontCurbY1),
+      Offset(startX + trackLength, frontCurbY2),
       frontGlow,
     );
     canvas.drawLine(
-      Offset(startX, frontCurbY),
-      Offset(startX + trackLength, frontCurbY),
+      Offset(startX, frontCurbY1),
+      Offset(startX + trackLength, frontCurbY2),
       frontEdge,
     );
 
     // B. 3D Front Wall (Vertical Drop Face - Realistic Industrial Girder & Hazard Fascia)
-    final frontWallRect = Rect.fromLTWH(
-      startX,
-      frontCurbY,
-      trackLength,
-      AppConstants.virtualHeight - frontCurbY,
-    );
+    final frontWallPath = Path()
+      ..moveTo(startX, frontCurbY1)
+      ..lineTo(startX + trackLength, frontCurbY2)
+      ..lineTo(startX + trackLength, AppConstants.virtualHeight)
+      ..lineTo(startX, AppConstants.virtualHeight)
+      ..close();
     final frontWallPaint = Paint()
       ..color = const Color(0xFF0C1017)
       ..style = PaintingStyle.fill;
-    canvas.drawRect(frontWallRect, frontWallPaint);
+    canvas.drawPath(frontWallPath, frontWallPaint);
 
     // Continuous Upper Fascia Beam (Steel Girder Plate)
-    final girderFasciaH = 26.0;
-    final girderRect = Rect.fromLTWH(
-      startX,
-      frontCurbY,
-      trackLength,
-      girderFasciaH,
-    );
-    canvas.drawRect(girderRect, Paint()..color = const Color(0xFF161C26));
+    const girderFasciaH = 26.0;
+    final girderPath = Path()
+      ..moveTo(startX, frontCurbY1)
+      ..lineTo(startX + trackLength, frontCurbY2)
+      ..lineTo(startX + trackLength, frontCurbY2 + girderFasciaH)
+      ..lineTo(startX, frontCurbY1 + girderFasciaH)
+      ..close();
+    canvas.drawPath(girderPath, Paint()..color = const Color(0xFF161C26));
 
-    // Sector 2 (Toxic Foundry): Exact Yellow/Black Diagonal Hazard Chevrons & CAUTION Stencil
+    final frontCurbY = avgFront;
+
+    // Sector 2 (Toxic Foundry): Exact Yellow/Black Diagonal Hazard ChevrN & CAUTION Stencil
     if (biome == SectorBiome.toxicFoundry) {
       // Hazard Strip Along Fascia
       final chevronPaint = Paint()
@@ -2175,6 +2255,1312 @@ class WorldChunk extends PositionComponent
         ],
       ).createShader(curtainRect);
     canvas.drawRect(curtainRect, curtainPaint);
+  }
+
+  /// Draws 50m modular segment-specific architectural elements, side props, and pylons
+  void _renderSegmentArchitecture(
+    Canvas canvas,
+    double length,
+    double topRoadwayY1,
+    double topRoadwayY2,
+    double frontCurbY1,
+    double frontCurbY2,
+    double depth,
+  ) {
+    final accent = biome.primaryAccent;
+
+    switch (segmentType) {
+      case TrackSegmentType.straightNeonBoulevard:
+        // Elegant curved Cyberpunk streetlamp posts at x = 120 and x = 380
+        for (final lx in [120.0, 380.0]) {
+          if (lx > length - 20) continue;
+          final t = lx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          final mastPath = Path()
+            ..moveTo(lx, curbY)
+            ..lineTo(lx, curbY - 120.0)
+            ..quadraticBezierTo(lx, curbY - 150.0, lx + 30.0, curbY - 150.0);
+          canvas.drawPath(
+            mastPath,
+            Paint()
+              ..color = const Color(0xFF263238)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3.5,
+          );
+          canvas.drawCircle(
+            Offset(lx + 30.0, curbY - 150.0),
+            4.0,
+            Paint()..color = accent,
+          );
+          final conePath = Path()
+            ..moveTo(lx + 30.0, curbY - 150.0)
+            ..lineTo(lx + 5.0, curbY)
+            ..lineTo(lx + 55.0, curbY)
+            ..close();
+          canvas.drawPath(
+            conePath,
+            Paint()
+              ..color = accent.withValues(alpha: 0.07)
+              ..style = PaintingStyle.fill,
+          );
+        }
+        break;
+
+      case TrackSegmentType.gradualSlopeUp:
+      case TrackSegmentType.steppedTerraceAscent:
+        // Luminous upward incline arrows on roadway + hydraulic pistons on fascia
+        final arrowPaint = Paint()
+          ..color = accent.withValues(alpha: 0.6)
+          ..strokeWidth = 2.5
+          ..style = PaintingStyle.stroke;
+        for (double ax = 80.0; ax < length - 60.0; ax += 100.0) {
+          final t = ax / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          final arrow = Path()
+            ..moveTo(ax, roadY + 6.0)
+            ..lineTo(ax + 16.0, roadY)
+            ..lineTo(ax, roadY - 6.0);
+          canvas.drawPath(arrow, arrowPaint);
+        }
+        for (double px = 100.0; px < length - 80.0; px += 160.0) {
+          final t = px / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawRect(
+            Rect.fromLTWH(px, curbY + 28.0, 14.0, 60.0),
+            Paint()..color = const Color(0xFF37474F),
+          );
+          canvas.drawRect(
+            Rect.fromLTWH(px + 3.0, curbY + 50.0, 8.0, 50.0),
+            Paint()..color = const Color(0xFF78909C),
+          );
+        }
+        break;
+
+      case TrackSegmentType.gradualSlopeDown:
+      case TrackSegmentType.steppedTerraceDescent:
+        // Amber caution descent chevrons on roadway + sway braces
+        final descPaint = Paint()
+          ..color = const Color(0xFFFFB300).withValues(alpha: 0.65)
+          ..strokeWidth = 2.5
+          ..style = PaintingStyle.stroke;
+        for (double ax = 80.0; ax < length - 60.0; ax += 100.0) {
+          final t = ax / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          final arrow = Path()
+            ..moveTo(ax + 16.0, roadY - 6.0)
+            ..lineTo(ax, roadY)
+            ..lineTo(ax + 16.0, roadY + 6.0);
+          canvas.drawPath(arrow, descPaint);
+        }
+        final bracePaint = Paint()
+          ..color = const Color(0xFF212733)
+          ..strokeWidth = 4.0;
+        for (double bx = 60.0; bx < length - 100.0; bx += 140.0) {
+          final t = bx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawLine(
+            Offset(bx, curbY + 26),
+            Offset(bx + 70, curbY + 96),
+            bracePaint,
+          );
+          canvas.drawLine(
+            Offset(bx + 70, curbY + 26),
+            Offset(bx, curbY + 96),
+            bracePaint,
+          );
+        }
+        break;
+
+      case TrackSegmentType.elevatedViaduct:
+        // Giant cylindrical highway viaduct pillars with inspection lights
+        for (final px in [110.0, 360.0]) {
+          if (px > length - 40) continue;
+          final t = px / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          final colRect = Rect.fromLTWH(
+            px,
+            curbY + 26.0,
+            48.0,
+            AppConstants.virtualHeight - (curbY + 26.0),
+          );
+          canvas.drawRect(colRect, Paint()..color = const Color(0xFF131822));
+          canvas.drawRect(
+            colRect,
+            Paint()
+              ..color = const Color(0xFF263238)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2.0,
+          );
+          canvas.drawRect(
+            Rect.fromLTWH(px - 10.0, curbY + 26.0, 68.0, 12.0),
+            Paint()..color = const Color(0xFF37474F),
+          );
+          canvas.drawCircle(
+            Offset(px + 24.0, curbY + 44.0),
+            3.0,
+            Paint()..color = const Color(0xFFFF1744),
+          );
+        }
+        final railPaint = Paint()
+          ..color = accent.withValues(alpha: 0.4)
+          ..strokeWidth = 2.0;
+        canvas.drawLine(
+          Offset(0, topRoadwayY1 - 14),
+          Offset(length, topRoadwayY2 - 14),
+          railPaint,
+        );
+        for (double rx = 20.0; rx < length; rx += 40.0) {
+          final t = rx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          canvas.drawLine(Offset(rx, ty), Offset(rx, ty - 14), railPaint);
+        }
+        break;
+
+      case TrackSegmentType.sunkenExpressway:
+        // Towering blast retaining walls along top edge with floodlights
+        const wallH = 45.0;
+        final wallPath = Path()
+          ..moveTo(0, topRoadwayY1)
+          ..lineTo(0, topRoadwayY1 - wallH)
+          ..lineTo(length, topRoadwayY2 - wallH)
+          ..lineTo(length, topRoadwayY2)
+          ..close();
+        canvas.drawPath(wallPath, Paint()..color = const Color(0xFF141923));
+        canvas.drawPath(
+          wallPath,
+          Paint()
+            ..color = const Color(0xFF2C384A)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
+        );
+        for (double wx = 80.0; wx < length; wx += 120.0) {
+          final t = wx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          canvas.drawLine(
+            Offset(wx, ty),
+            Offset(wx, ty - wallH),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 2.0,
+          );
+          canvas.drawCircle(
+            Offset(wx, ty - wallH + 8),
+            3.5,
+            Paint()..color = const Color(0xFFFFD54F),
+          );
+        }
+        break;
+
+      case TrackSegmentType.splitChasmOverpass:
+        // Under-slung emergency steel bridge suspension framework
+        final trussPaint = Paint()
+          ..color = const Color(0xFF2A364F)
+          ..strokeWidth = 2.5;
+        for (double tx = 40.0; tx < length - 40.0; tx += 60.0) {
+          final t1 = tx / length;
+          final t2 = (tx + 30.0) / length;
+          final cy1 = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t1 + 26.0;
+          final cy2 = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t2 + 26.0;
+          canvas.drawLine(
+            Offset(tx, cy1),
+            Offset(tx + 30.0, cy2 + 40.0),
+            trussPaint,
+          );
+          canvas.drawLine(
+            Offset(tx + 30.0, cy2 + 40.0),
+            Offset(tx + 60.0, cy1),
+            trussPaint,
+          );
+        }
+        break;
+
+      case TrackSegmentType.dualTierCatwalk:
+      case TrackSegmentType.doubleDeckSkyway:
+        // Continuous overhead service deck spanning the entire segment
+        final deckY1 = topRoadwayY1 - 115.0;
+        final deckY2 = topRoadwayY2 - 115.0;
+        final skyDeckPath = Path()
+          ..moveTo(0, deckY1)
+          ..lineTo(length, deckY2)
+          ..lineTo(length, deckY2 + 12.0)
+          ..lineTo(0, deckY1 + 12.0)
+          ..close();
+        canvas.drawPath(skyDeckPath, Paint()..color = const Color(0xFF1E2838));
+        canvas.drawPath(
+          skyDeckPath,
+          Paint()
+            ..color = accent.withValues(alpha: 0.7)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.8,
+        );
+        for (double ix = 60.0; ix < length; ix += 130.0) {
+          final t = ix / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final uy = deckY1 + (deckY2 - deckY1) * t;
+          canvas.drawLine(
+            Offset(ix, ty),
+            Offset(ix, uy + 12.0),
+            Paint()
+              ..color = const Color(0xFF263238)
+              ..strokeWidth = 6.0,
+          );
+          canvas.drawCircle(
+            Offset(ix, uy + 12.0),
+            3.5,
+            Paint()..color = accent,
+          );
+        }
+        break;
+
+      case TrackSegmentType.industrialTrussArchway:
+        // 2 Massive Triangular Overhead Industrial Steel Trusses
+        for (final ax in [110.0, 360.0]) {
+          if (ax > length - 50) continue;
+          final t = ax / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          const archH = 140.0;
+          const archSpan = 70.0;
+          canvas.drawLine(
+            Offset(ax - archSpan / 2, ty),
+            Offset(ax, ty - archH),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 4.0,
+          );
+          canvas.drawLine(
+            Offset(ax + archSpan / 2, ty),
+            Offset(ax, ty - archH),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 4.0,
+          );
+          canvas.drawLine(
+            Offset(ax - archSpan / 3, ty - archH * 0.45),
+            Offset(ax + archSpan / 3, ty - archH * 0.45),
+            Paint()
+              ..color = const Color(0xFF455A64)
+              ..strokeWidth = 2.5,
+          );
+          canvas.drawCircle(
+            Offset(ax, ty - archH),
+            4.5,
+            Paint()..color = const Color(0xFFFFB300),
+          );
+        }
+        break;
+
+      case TrackSegmentType.cantileveredSuspensionBridge:
+        // Giant A-Frame Suspension Tower at mid length with radiating stay cables
+        final midX = length * 0.5;
+        const tMid = 0.5;
+        final midRoadY = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * tMid;
+        final towerApexY = midRoadY - 180.0;
+        final towerPaint = Paint()
+          ..color = const Color(0xFF1E2838)
+          ..strokeWidth = 7.0;
+        canvas.drawLine(
+          Offset(midX - 35.0, midRoadY),
+          Offset(midX, towerApexY),
+          towerPaint,
+        );
+        canvas.drawLine(
+          Offset(midX + 35.0, midRoadY),
+          Offset(midX, towerApexY),
+          towerPaint,
+        );
+        canvas.drawCircle(
+          Offset(midX, towerApexY),
+          5.0,
+          Paint()..color = const Color(0xFFFF1744),
+        );
+        final cablePaint = Paint()
+          ..color = accent.withValues(alpha: 0.55)
+          ..strokeWidth = 1.5;
+        for (final cx in [40.0, 110.0, 180.0, 320.0, 390.0, 460.0]) {
+          final tc = cx / length;
+          final cy = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * tc;
+          canvas.drawLine(
+            Offset(midX, towerApexY + 15.0),
+            Offset(cx, cy),
+            cablePaint,
+          );
+        }
+        break;
+
+      case TrackSegmentType.maglevConduitRun:
+        // Maglev linear induction levitation rails flanking roadway with pulsing coil rings
+        final railP = Paint()
+          ..color = const Color(0xFF7C4DFF).withValues(alpha: 0.8)
+          ..strokeWidth = 3.0;
+        canvas.drawLine(
+          Offset(0, topRoadwayY1 - 6),
+          Offset(length, topRoadwayY2 - 6),
+          railP,
+        );
+        canvas.drawLine(
+          Offset(0, frontCurbY1 + 6),
+          Offset(length, frontCurbY2 + 6),
+          railP,
+        );
+        final coilP = Paint()..color = const Color(0xFF00E5FF);
+        for (double mx = 16.0; mx < length; mx += 32.0) {
+          final t = mx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t - 6;
+          final fy = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t + 6;
+          canvas.drawCircle(Offset(mx, ty), 2.5, coilP);
+          canvas.drawCircle(Offset(mx, fy), 2.5, coilP);
+        }
+        break;
+
+      case TrackSegmentType.laserGateCorridor:
+        // Security Scanner Portals with vertical scanning laser ribbons
+        for (final gx in [140.0, 360.0]) {
+          if (gx > length - 40) continue;
+          final t = gx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final fy = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawLine(
+            Offset(gx, ty),
+            Offset(gx, ty - 130.0),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 4.0,
+          );
+          canvas.drawLine(
+            Offset(gx, ty - 130.0),
+            Offset(gx + 40.0, ty - 130.0),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 4.0,
+          );
+          final laserP = Paint()
+            ..color = const Color(0xFFFF1744).withValues(alpha: 0.35)
+            ..strokeWidth = 2.0;
+          canvas.drawLine(
+            Offset(gx + 20.0, ty - 130.0),
+            Offset(gx + 20.0, fy),
+            laserP,
+          );
+          canvas.drawCircle(
+            Offset(gx + 20.0, ty - 130.0),
+            3.0,
+            Paint()..color = const Color(0xFFFF1744),
+          );
+        }
+        break;
+
+      case TrackSegmentType.cyberShrineColonnade:
+        // Torii Gate Inspired Cyber Colonnade Columns
+        for (final cx in [120.0, 370.0]) {
+          if (cx > length - 50) continue;
+          final t = cx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final pCol = Paint()
+            ..color = const Color(0xFFFF003C)
+            ..strokeWidth = 5.0;
+          canvas.drawLine(Offset(cx - 20, ty), Offset(cx - 20, ty - 120), pCol);
+          canvas.drawLine(Offset(cx + 20, ty), Offset(cx + 20, ty - 120), pCol);
+          canvas.drawLine(
+            Offset(cx - 32, ty - 110),
+            Offset(cx + 32, ty - 110),
+            Paint()
+              ..color = const Color(0xFFFFD700)
+              ..strokeWidth = 3.5,
+          );
+          canvas.drawCircle(
+            Offset(cx, ty - 110),
+            4.0,
+            Paint()..color = const Color(0xFFFFD700),
+          );
+        }
+        break;
+
+      case TrackSegmentType.toxicPipeAqueduct:
+      case TrackSegmentType.cyberSewerCulvert:
+        // Giant Industrial Chemical Delivery Pipes running along fascia
+        const pipe1Y = 35.0;
+        const pipe2Y = 62.0;
+        for (double x = 0; x < length; x += 30.0) {
+          final t = x / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawCircle(
+            Offset(x, curbY + pipe1Y),
+            6.0,
+            Paint()..color = const Color(0xFF76FF03),
+          );
+          canvas.drawCircle(
+            Offset(x, curbY + pipe1Y),
+            3.5,
+            Paint()..color = const Color(0xFF33691E),
+          );
+          canvas.drawCircle(
+            Offset(x, curbY + pipe2Y),
+            8.0,
+            Paint()..color = const Color(0xFF455A64),
+          );
+          canvas.drawCircle(
+            Offset(x, curbY + pipe2Y),
+            5.0,
+            Paint()..color = const Color(0xFF263238),
+          );
+        }
+        for (final vx in [160.0, 340.0]) {
+          final t = vx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawCircle(
+            Offset(vx, curbY + pipe1Y),
+            10.0,
+            Paint()
+              ..color = const Color(0xFFFFB300)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2.0,
+          );
+          canvas.drawLine(
+            Offset(vx - 10, curbY + pipe1Y),
+            Offset(vx + 10, curbY + pipe1Y),
+            Paint()
+              ..color = const Color(0xFFFFB300)
+              ..strokeWidth = 1.5,
+          );
+        }
+        break;
+
+      case TrackSegmentType.wideHighSpeedHighway:
+      case TrackSegmentType.speedBoosterRunway:
+        // Triple Luminous Speed Chevrons Embedded into Roadway Surface
+        final chevPaint = Paint()
+          ..color = accent.withValues(alpha: 0.8)
+          ..strokeWidth = 3.5
+          ..style = PaintingStyle.stroke;
+        for (double cx = 100.0; cx < length - 80.0; cx += 110.0) {
+          final t = cx / length;
+          final my =
+              (topRoadwayY1 +
+                  (topRoadwayY2 - topRoadwayY1) * t +
+                  frontCurbY1 +
+                  (frontCurbY2 - frontCurbY1) * t) *
+              0.5;
+          for (int k = 0; k < 3; k++) {
+            final ox = cx + (k * 14.0);
+            final chev = Path()
+              ..moveTo(ox, my - 9.0)
+              ..lineTo(ox + 10.0, my)
+              ..lineTo(ox, my + 9.0);
+            canvas.drawPath(chev, chevPaint);
+          }
+        }
+        break;
+
+      case TrackSegmentType.narrowPrecisionPass:
+        // High-contrast hazardous safety barrier rails on both sides
+        final barrierPaint = Paint()
+          ..color = const Color(0xFFFF1744).withValues(alpha: 0.75)
+          ..strokeWidth = 3.0;
+        canvas.drawLine(
+          Offset(0, topRoadwayY1 - 8),
+          Offset(length, topRoadwayY2 - 8),
+          barrierPaint,
+        );
+        canvas.drawLine(
+          Offset(0, frontCurbY1 - 2),
+          Offset(length, frontCurbY2 - 2),
+          barrierPaint,
+        );
+        for (double bx = 30.0; bx < length; bx += 60.0) {
+          final t = bx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t - 8;
+          canvas.drawCircle(
+            Offset(bx, ty),
+            3.0,
+            Paint()..color = const Color(0xFFFFD700),
+          );
+        }
+        break;
+
+      case TrackSegmentType.bunkerCheckpoint:
+        // Massive Military Bulkhead Blast Gate Framing
+        final bx = length * 0.5;
+        final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * 0.5;
+        final bunkerP = Paint()
+          ..color = const Color(0xFF212121)
+          ..strokeWidth = 8.0;
+        canvas.drawLine(
+          Offset(bx - 30, ty),
+          Offset(bx - 30, ty - 150),
+          bunkerP,
+        );
+        canvas.drawLine(
+          Offset(bx + 30, ty),
+          Offset(bx + 30, ty - 150),
+          bunkerP,
+        );
+        canvas.drawLine(
+          Offset(bx - 40, ty - 145),
+          Offset(bx + 40, ty - 145),
+          Paint()
+            ..color = const Color(0xFF37474F)
+            ..strokeWidth = 12.0,
+        );
+        canvas.drawRect(
+          Rect.fromLTWH(bx - 36, ty - 142, 72, 6),
+          Paint()..color = const Color(0xFFFFB300),
+        );
+        break;
+
+      case TrackSegmentType.substationPylonGrid:
+        // Electrical Transformer Pylons with High-Voltage Discs
+        for (final px in [140.0, 360.0]) {
+          if (px > length - 40) continue;
+          final t = px / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final pylonP = Paint()
+            ..color = const Color(0xFF455A64)
+            ..strokeWidth = 4.0;
+          canvas.drawLine(Offset(px, ty), Offset(px, ty - 135), pylonP);
+          canvas.drawLine(
+            Offset(px - 25, ty - 110),
+            Offset(px + 25, ty - 110),
+            pylonP,
+          );
+          for (final ix in [px - 20, px + 20]) {
+            canvas.drawCircle(
+              Offset(ix, ty - 100),
+              4.0,
+              Paint()..color = const Color(0xFF00E5FF),
+            );
+          }
+        }
+        break;
+
+      case TrackSegmentType.droneGantryPlatform:
+      case TrackSegmentType.monorailTrackCrossing:
+        // Overhead Monorail / Drone Transit Tube crossing overhead diagonally
+        final railPath = Path()
+          ..moveTo(0, roofY + 30.0)
+          ..lineTo(length, roofY + 60.0);
+        canvas.drawPath(
+          railPath,
+          Paint()
+            ..color = const Color(0xFF00E5FF).withValues(alpha: 0.6)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 5.0,
+        );
+        canvas.drawPath(
+          railPath,
+          Paint()
+            ..color = Colors.white
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
+        );
+        break;
+
+      case TrackSegmentType.holographicBillboardRow:
+        // 2 Floating 3D Holographic Neon Advertisements
+        for (final bx in [130.0, 360.0]) {
+          if (bx > length - 70) continue;
+          final t = bx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final boardRect = Rect.fromLTWH(bx - 40, ty - 130, 80, 42);
+          canvas.drawRect(
+            boardRect,
+            Paint()..color = accent.withValues(alpha: 0.15),
+          );
+          canvas.drawRect(
+            boardRect,
+            Paint()
+              ..color = accent.withValues(alpha: 0.8)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.8,
+          );
+          canvas.drawLine(
+            Offset(bx, ty),
+            Offset(bx, ty - 88),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 2.5,
+          );
+          canvas.drawCircle(Offset(bx, ty - 88), 3.0, Paint()..color = accent);
+        }
+        break;
+
+      case TrackSegmentType.curvedOverpassSlightLeft:
+      case TrackSegmentType.curvedOverpassSlightRight:
+        // Banked Perspective Curve Guide Lines
+        final curveSign =
+            segmentType == TrackSegmentType.curvedOverpassSlightLeft
+            ? -1.0
+            : 1.0;
+        final curvePaint = Paint()
+          ..color = accent.withValues(alpha: 0.3)
+          ..strokeWidth = 1.5;
+        for (double cx = 30.0; cx < length; cx += 50.0) {
+          final t = cx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final fy = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawLine(
+            Offset(cx, ty),
+            Offset(cx + curveSign * 18.0, fy),
+            curvePaint,
+          );
+        }
+        break;
+
+      case TrackSegmentType.meshGrateWalkway:
+        // Diamond Perforated Steel Grate Texture along the track
+        final grateP = Paint()
+          ..color = Colors.white.withValues(alpha: 0.10)
+          ..strokeWidth = 1.0;
+        for (double gx = 10.0; gx < length; gx += 20.0) {
+          final t = gx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final fy = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawLine(Offset(gx, ty), Offset(gx + 12.0, fy), grateP);
+          canvas.drawLine(Offset(gx + 12.0, ty), Offset(gx, fy), grateP);
+        }
+        break;
+
+      case TrackSegmentType.rooftopTurbineExhaust:
+        // 2 Massive Spinning Ventilation Exhaust Fans in Drop Wall
+        for (final fx in [140.0, 360.0]) {
+          if (fx > length - 40) continue;
+          final t = fx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          final fanCenter = Offset(fx, curbY + 54.0);
+          canvas.drawCircle(
+            fanCenter,
+            20.0,
+            Paint()..color = const Color(0xFF10151E),
+          );
+          canvas.drawCircle(
+            fanCenter,
+            20.0,
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2.0,
+          );
+          final bladeP = Paint()
+            ..color = const Color(0xFF78909C)
+            ..strokeWidth = 2.0;
+          canvas.drawLine(
+            Offset(fx - 15, curbY + 54),
+            Offset(fx + 15, curbY + 54),
+            bladeP,
+          );
+          canvas.drawLine(
+            Offset(fx, curbY + 39),
+            Offset(fx, curbY + 69),
+            bladeP,
+          );
+          canvas.drawCircle(
+            fanCenter,
+            4.0,
+            Paint()..color = const Color(0xFFFFB300),
+          );
+        }
+        break;
+
+      case TrackSegmentType.quantumRiftSplit:
+        // Glowing Quantum Energy Fissures on Asphalt
+        final riftPaint = Paint()
+          ..color = const Color(0xFFFF007F).withValues(alpha: 0.75)
+          ..strokeWidth = 2.0;
+        for (double rx = 80.0; rx < length - 60.0; rx += 120.0) {
+          final t = rx / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          final fy = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          final my = (ty + fy) * 0.5;
+          final riftPath = Path()
+            ..moveTo(rx, my)
+            ..lineTo(rx + 15, my - 6)
+            ..lineTo(rx + 30, my + 4)
+            ..lineTo(rx + 45, my - 2);
+          canvas.drawPath(riftPath, riftPaint);
+        }
+        break;
+
+      case TrackSegmentType.reinforcedBarricadeSector:
+        // Concrete Jersey Barriers with Reflective Hazard Tape
+        for (final bx in [80.0, 240.0, 400.0]) {
+          if (bx > length - 50) continue;
+          final t = bx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          final barRect = Rect.fromLTWH(bx, curbY - 14.0, 36.0, 14.0);
+          canvas.drawRect(barRect, Paint()..color = const Color(0xFF37474F));
+          canvas.drawRect(
+            Rect.fromLTWH(bx + 6.0, curbY - 10.0, 24.0, 6.0),
+            Paint()..color = const Color(0xFFFFB300),
+          );
+        }
+        break;
+
+      case TrackSegmentType.titanArenaPlateau:
+        // Milestone Cyber Titan Arena: Heavy Floodlight Arena Beacons
+        for (final ax in [20.0, length - 20.0]) {
+          final t = ax / length;
+          final ty = topRoadwayY1 + (topRoadwayY2 - topRoadwayY1) * t;
+          canvas.drawLine(
+            Offset(ax, ty),
+            Offset(ax, ty - 160.0),
+            Paint()
+              ..color = const Color(0xFF263238)
+              ..strokeWidth = 5.0,
+          );
+          canvas.drawRect(
+            Rect.fromLTWH(ax - 10, ty - 165, 20, 10),
+            Paint()..color = const Color(0xFF37474F),
+          );
+          canvas.drawCircle(
+            Offset(ax, ty - 160),
+            4.0,
+            Paint()..color = const Color(0xFFFFD54F),
+          );
+        }
+        break;
+    }
+  }
+
+  /// Draws Distinctive Cyberpunk Environment Theme Props and Architecture
+  void _renderEnvironmentThemeProps(
+    Canvas canvas,
+    double length,
+    double topRoadwayY1,
+    double topRoadwayY2,
+    double frontCurbY1,
+    double frontCurbY2,
+    double depth,
+  ) {
+    final accent = biome.primaryAccent;
+
+    switch (environmentTheme) {
+      case CyberEnvironmentTheme.cyberAlley:
+        // 1. Cyber Vending Machine at x = 85
+        if (length > 130) {
+          const vx = 85.0;
+          final t = vx / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          const vWidth = 26.0;
+          const vHeight = 44.0;
+          final vendRect = Rect.fromLTWH(
+            vx - vWidth / 2,
+            roadY - vHeight,
+            vWidth,
+            vHeight,
+          );
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(vendRect, const Radius.circular(3.0)),
+            Paint()..color = const Color(0xFF101720),
+          );
+          // Neon display panels & buttons
+          final buttonPaint = Paint()
+            ..color = const Color(0xFF00E5FF).withValues(alpha: 0.8);
+          for (double by = roadY - vHeight + 6; by < roadY - 14; by += 8) {
+            canvas.drawRect(Rect.fromLTWH(vx - 9, by, 18, 4), buttonPaint);
+          }
+          // Dispensing slot with neon glow
+          canvas.drawRect(
+            Rect.fromLTWH(vx - 8, roadY - 8, 16, 5),
+            Paint()..color = const Color(0xFFFF007F),
+          );
+        }
+
+        // 2. Hanging Draped Power Cables
+        final cablePath = Path()
+          ..moveTo(10, roofY + 12)
+          ..quadraticBezierTo(
+            length * 0.5,
+            roofY + 55,
+            length - 10,
+            roofY + 16,
+          );
+        canvas.drawPath(
+          cablePath,
+          Paint()
+            ..color = const Color(0xFF1C2430)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.2,
+        );
+
+        // 3. Vertical Neon Shop Sign "ネオ BAR" at x = 360
+        if (length > 400) {
+          const sx = 360.0;
+          final t = sx / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          final signRect = Rect.fromLTWH(sx - 12, roadY - 110, 24, 60);
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(signRect, const Radius.circular(4.0)),
+            Paint()..color = const Color(0xFF160A1C),
+          );
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(signRect, const Radius.circular(4.0)),
+            Paint()
+              ..color = const Color(0xFFFF007F).withValues(alpha: 0.75)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.5,
+          );
+          // Vertical neon bar glyphs
+          final neonPaint = Paint()..color = const Color(0xFFFF007F);
+          canvas.drawLine(
+            Offset(sx, roadY - 100),
+            Offset(sx, roadY - 90),
+            neonPaint,
+          );
+          canvas.drawCircle(Offset(sx, roadY - 82), 3, neonPaint);
+          canvas.drawLine(
+            Offset(sx, roadY - 74),
+            Offset(sx, roadY - 60),
+            neonPaint,
+          );
+        }
+        break;
+
+      case CyberEnvironmentTheme.rooftop:
+        // 1. Industrial HVAC Air Conditioner with 4-Blade Fan at x = 80
+        if (length > 120) {
+          const acX = 80.0;
+          final t = acX / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          final acRect = Rect.fromLTWH(acX - 18, roadY - 32, 36, 32);
+          canvas.drawRect(acRect, Paint()..color = const Color(0xFF263238));
+          canvas.drawCircle(
+            Offset(acX, roadY - 16),
+            11,
+            Paint()..color = const Color(0xFF10171D),
+          );
+          final bladeP = Paint()
+            ..color = const Color(0xFF78909C)
+            ..strokeWidth = 2.0;
+          canvas.drawLine(
+            Offset(acX - 9, roadY - 16),
+            Offset(acX + 9, roadY - 16),
+            bladeP,
+          );
+          canvas.drawLine(
+            Offset(acX, roadY - 25),
+            Offset(acX, roadY - 7),
+            bladeP,
+          );
+        }
+
+        // 2. Parabolic Satellite Communication Dish at x = 270
+        if (length > 310) {
+          const satX = 270.0;
+          final t = satX / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          // Mast pole
+          canvas.drawLine(
+            Offset(satX, roadY),
+            Offset(satX, roadY - 50),
+            Paint()
+              ..color = const Color(0xFF37474F)
+              ..strokeWidth = 3.0,
+          );
+          // Dish arc
+          final dishPath = Path()
+            ..moveTo(satX - 18, roadY - 62)
+            ..quadraticBezierTo(satX, roadY - 46, satX + 18, roadY - 62);
+          canvas.drawPath(
+            dishPath,
+            Paint()
+              ..color = const Color(0xFFCFD8DC)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3.5,
+          );
+          // Pulsing transmitter node
+          canvas.drawCircle(
+            Offset(satX, roadY - 60),
+            3.5,
+            Paint()..color = const Color(0xFFFF1744),
+          );
+        }
+
+        // 3. Rooftop Water Reservoir Tank on Stilts at x = 410
+        if (length > 440) {
+          const wx = 410.0;
+          final t = wx / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          // Stilt legs
+          final legP = Paint()
+            ..color = const Color(0xFF263238)
+            ..strokeWidth = 2.2;
+          canvas.drawLine(
+            Offset(wx - 14, roadY),
+            Offset(wx - 10, roadY - 35),
+            legP,
+          );
+          canvas.drawLine(
+            Offset(wx + 14, roadY),
+            Offset(wx + 10, roadY - 35),
+            legP,
+          );
+          // Wood/metal tank cylinder
+          final tankRect = Rect.fromLTWH(wx - 16, roadY - 75, 32, 40);
+          canvas.drawRect(tankRect, Paint()..color = const Color(0xFF3E2723));
+          // Conical roof
+          final roofP = Path()
+            ..moveTo(wx - 18, roadY - 75)
+            ..lineTo(wx, roadY - 90)
+            ..lineTo(wx + 18, roadY - 75)
+            ..close();
+          canvas.drawPath(roofP, Paint()..color = const Color(0xFF212121));
+        }
+        break;
+
+      case CyberEnvironmentTheme.undergroundTunnel:
+        // 1. Heavy Dual Conduit Pipe Bundles Under Roof
+        final pipe1Y = roofY + 6.0;
+        final pipe2Y = roofY + 14.0;
+        canvas.drawLine(
+          Offset(0, pipe1Y),
+          Offset(length, pipe1Y),
+          Paint()
+            ..color = const Color(0xFF37474F)
+            ..strokeWidth = 4.5,
+        );
+        canvas.drawLine(
+          Offset(0, pipe2Y),
+          Offset(length, pipe2Y),
+          Paint()
+            ..color = const Color(0xFF263238)
+            ..strokeWidth = 3.5,
+        );
+
+        // 2. Yellow Industrial Tunnel Bulkhead Light Fixtures
+        for (double lx = 60.0; lx < length; lx += 140.0) {
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromLTWH(lx - 8, roofY + 16, 16, 8),
+              const Radius.circular(2),
+            ),
+            Paint()..color = const Color(0xFFFFB300),
+          );
+          // Downward ambient light cone
+          final cone = Path()
+            ..moveTo(lx - 6, roofY + 24)
+            ..lineTo(lx - 35, roofY + 110)
+            ..lineTo(lx + 35, roofY + 110)
+            ..lineTo(lx + 6, roofY + 24)
+            ..close();
+          canvas.drawPath(
+            cone,
+            Paint()
+              ..color = const Color(0xFFFFB300).withValues(alpha: 0.05)
+              ..style = PaintingStyle.fill,
+          );
+        }
+
+        // 3. Steam vent grating along curb
+        for (double vx = 160.0; vx < length; vx += 240.0) {
+          final t = vx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawRect(
+            Rect.fromLTWH(vx - 12, curbY + 4, 24, 6),
+            Paint()..color = const Color(0xFF10171D),
+          );
+          canvas.drawCircle(
+            Offset(vx, curbY - 10),
+            8.0,
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.12)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+          );
+        }
+        break;
+
+      case CyberEnvironmentTheme.hologramDistrict:
+        // 1. Giant Floating Holographic Billboard Cube at x = 230
+        if (length > 280) {
+          const hx = 230.0;
+          final t = hx / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          final hRect = Rect.fromCenter(
+            center: Offset(hx, roadY - 120),
+            width: 90,
+            height: 50,
+          );
+          // Hologram translucent glow
+          canvas.drawRect(
+            hRect,
+            Paint()..color = accent.withValues(alpha: 0.12),
+          );
+          canvas.drawRect(
+            hRect,
+            Paint()
+              ..color = accent.withValues(alpha: 0.7)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.5,
+          );
+          // Wireframe diamond inside
+          final dia = Path()
+            ..moveTo(hx, roadY - 140)
+            ..lineTo(hx + 28, roadY - 120)
+            ..lineTo(hx, roadY - 100)
+            ..lineTo(hx - 28, roadY - 120)
+            ..close();
+          canvas.drawPath(
+            dia,
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.65)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.2,
+          );
+        }
+
+        // 2. Floating Matrix Data Glyphs / Digital Particles
+        final dotPaint = Paint()..color = accent.withValues(alpha: 0.4);
+        for (double dx = 40.0; dx < length; dx += 70.0) {
+          final t = dx / length;
+          final roadY =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          canvas.drawCircle(Offset(dx, roadY - 65), 2.2, dotPaint);
+          canvas.drawCircle(Offset(dx + 20, roadY - 85), 1.6, dotPaint);
+          canvas.drawCircle(Offset(dx - 15, roadY - 105), 2.0, dotPaint);
+        }
+        break;
+
+      case CyberEnvironmentTheme.skyBridge:
+        // 1. Towering Suspension Bridge Pylon at Mid-Span
+        final midX = length * 0.5;
+        const tMid = 0.5;
+        final midRoadY =
+            (frontCurbY1 + (frontCurbY2 - frontCurbY1) * tMid) - depth * 0.5;
+        final mastApexY = roofY - 20;
+        final mastP = Paint()
+          ..color = const Color(0xFF1A2332)
+          ..strokeWidth = 8.0;
+        canvas.drawLine(Offset(midX, midRoadY), Offset(midX, mastApexY), mastP);
+
+        // Radiant Stay Cables
+        final cableP = Paint()
+          ..color = accent.withValues(alpha: 0.45)
+          ..strokeWidth = 1.5;
+        for (double cx = 30.0; cx < length; cx += 50.0) {
+          final t = cx / length;
+          final ry =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          canvas.drawLine(Offset(midX, mastApexY + 25), Offset(cx, ry), cableP);
+        }
+
+        // Distant city traffic far below
+        final trafficP = Paint()
+          ..color = const Color(0xFFFFD54F).withValues(alpha: 0.35);
+        for (double tx = 20.0; tx < length; tx += 65.0) {
+          canvas.drawCircle(
+            Offset(tx, AppConstants.virtualHeight - 12),
+            2.0,
+            trafficP,
+          );
+        }
+        break;
+
+      case CyberEnvironmentTheme.darkSector:
+        // 1. Atmospheric Deep Shadow Vignette
+        final darkVignette = Rect.fromLTWH(
+          0,
+          roofY,
+          length,
+          AppConstants.virtualHeight - roofY,
+        );
+        canvas.drawRect(darkVignette, Paint()..color = const Color(0x66020408));
+
+        // 2. Flashing Red/Blue Emergency Beacons atop Junction Boxes
+        for (final bx in [110.0, 350.0]) {
+          if (bx > length - 40) continue;
+          final t = bx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawRect(
+            Rect.fromLTWH(bx - 8, curbY + 6, 16, 22),
+            Paint()..color = const Color(0xFF1A212B),
+          );
+          canvas.drawCircle(
+            Offset(bx, curbY + 2),
+            5.0,
+            Paint()
+              ..color = const Color(0xFFFF003C)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+          );
+        }
+
+        // 3. Electric Sparks on Broken Signs
+        if (length > 250) {
+          const sx = 240.0;
+          final t = sx / length;
+          final ry =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          final sparkP = Paint()
+            ..color = const Color(0xFFFFD600)
+            ..strokeWidth = 1.5;
+          canvas.drawLine(
+            Offset(sx - 4, ry - 60),
+            Offset(sx + 2, ry - 66),
+            sparkP,
+          );
+          canvas.drawLine(
+            Offset(sx + 2, ry - 66),
+            Offset(sx - 1, ry - 72),
+            sparkP,
+          );
+        }
+        break;
+
+      case CyberEnvironmentTheme.industrialDistrict:
+        // 1. Stacked Shipping Cargo Containers at x = 75 and x = 390
+        for (final cx in [75.0, 390.0]) {
+          if (cx > length - 45) continue;
+          final t = cx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          final boxRect = Rect.fromLTWH(cx - 24, curbY + 8, 48, 32);
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(boxRect, const Radius.circular(2)),
+            Paint()..color = const Color(0xFF263238),
+          );
+          // Yellow stencil stripes
+          final sP = Paint()
+            ..color = const Color(0xFFFFB300)
+            ..strokeWidth = 2.0;
+          canvas.drawLine(
+            Offset(cx - 18, curbY + 12),
+            Offset(cx - 18, curbY + 36),
+            sP,
+          );
+          canvas.drawLine(
+            Offset(cx + 18, curbY + 12),
+            Offset(cx + 18, curbY + 36),
+            sP,
+          );
+        }
+
+        // 2. Heavy Factory Exhaust Chimney at x = 220
+        if (length > 260) {
+          const fx = 220.0;
+          final t = fx / length;
+          final curbY = frontCurbY1 + (frontCurbY2 - frontCurbY1) * t;
+          canvas.drawRect(
+            Rect.fromLTWH(fx - 10, curbY + 28, 20, 80),
+            Paint()..color = const Color(0xFF1E2832),
+          );
+          // Rungs
+          final rungP = Paint()
+            ..color = const Color(0xFF546E7A)
+            ..strokeWidth = 1.8;
+          for (double ry = curbY + 35; ry < curbY + 95; ry += 12) {
+            canvas.drawLine(Offset(fx - 8, ry), Offset(fx + 8, ry), rungP);
+          }
+        }
+        break;
+
+      case CyberEnvironmentTheme.neonMarket:
+        // 1. Hanging Cyber Lanterns with Glowing Vermilion/Magenta Cores
+        for (final lx in [80.0, 240.0, 400.0]) {
+          if (lx > length - 25) continue;
+          final lanternP = Paint()..color = const Color(0xFFFF0055);
+          canvas.drawLine(
+            Offset(lx, roofY),
+            Offset(lx, roofY + 35),
+            Paint()
+              ..color = const Color(0xFF263238)
+              ..strokeWidth = 1.5,
+          );
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromCenter(
+                center: Offset(lx, roofY + 44),
+                width: 14,
+                height: 18,
+              ),
+              const Radius.circular(4),
+            ),
+            lanternP,
+          );
+          canvas.drawCircle(
+            Offset(lx, roofY + 44),
+            9.0,
+            Paint()
+              ..color = const Color(0xFFFF0055).withValues(alpha: 0.35)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+          );
+        }
+
+        // 2. Street Food Stall Counter at x = 160
+        if (length > 200) {
+          const fx = 160.0;
+          final t = fx / length;
+          final ry =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          // Counter base
+          canvas.drawRect(
+            Rect.fromLTWH(fx - 18, ry - 24, 36, 24),
+            Paint()..color = const Color(0xFF1C1322),
+          );
+          // Awning tarp
+          final tarp = Path()
+            ..moveTo(fx - 22, ry - 34)
+            ..lineTo(fx + 22, ry - 34)
+            ..lineTo(fx + 18, ry - 24)
+            ..lineTo(fx - 18, ry - 24)
+            ..close();
+          canvas.drawPath(tarp, Paint()..color = const Color(0xFFFF3D00));
+        }
+        break;
+
+      case CyberEnvironmentTheme.futuristicHighway:
+        // 1. Triple Glowing Neon Expressway Lane Markings
+        final lane1P = Paint()
+          ..color = accent.withValues(alpha: 0.4)
+          ..strokeWidth = 2.0;
+        final lane2P = Paint()
+          ..color = Colors.white.withValues(alpha: 0.25)
+          ..strokeWidth = 1.5;
+        for (double lx = 20.0; lx < length; lx += 55.0) {
+          final t = lx / length;
+          final ry =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          canvas.drawLine(Offset(lx, ry - 4), Offset(lx + 24, ry - 4), lane1P);
+          canvas.drawLine(
+            Offset(lx + 10, ry + 4),
+            Offset(lx + 34, ry + 4),
+            lane2P,
+          );
+        }
+
+        // 2. Overhead Cantilevered Electronic Highway Sign Gantry at x = 250
+        if (length > 300) {
+          const gx = 250.0;
+          final t = gx / length;
+          final ry =
+              (frontCurbY1 + (frontCurbY2 - frontCurbY1) * t) - depth * 0.5;
+          // Vertical mast
+          canvas.drawLine(
+            Offset(gx, ry),
+            Offset(gx, ry - 145),
+            Paint()
+              ..color = const Color(0xFF263238)
+              ..strokeWidth = 4.5,
+          );
+          // Overhead sign box
+          final signRect = Rect.fromLTWH(gx - 45, ry - 140, 90, 26);
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(signRect, const Radius.circular(3)),
+            Paint()..color = const Color(0xFF0F1722),
+          );
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(signRect, const Radius.circular(3)),
+            Paint()
+              ..color = const Color(0xFF00E5FF).withValues(alpha: 0.7)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.5,
+          );
+        }
+        break;
+    }
   }
 
   /// Draws Realistic 3D Industrial Overhead Roof Girder with Cross-Trusses & Dangling Chains

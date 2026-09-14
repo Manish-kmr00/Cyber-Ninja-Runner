@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
+import '../../core/monetization/monetization_manager.dart';
 import '../../core/services/daily_crate_service.dart';
 import '../../core/storage/save_service.dart';
 
@@ -37,6 +38,7 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
   int _remainingMs = 0;
   bool _streakBroken = false;
   int _tapCount = 0;
+  bool _isWatchingAd = false;
 
   @override
   void initState() {
@@ -142,6 +144,59 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
       AudioService().playCollect();
     }
     Navigator.of(context).pop();
+  }
+
+  Future<void> _claimEnhancedWithAd() async {
+    if (_isWatchingAd) return;
+    setState(() => _isWatchingAd = true);
+
+    try {
+      final success = await MonetizationManager().showRewarded(
+        rewardType: RewardType.dailyCrateBonus,
+      );
+
+      if (!mounted) return;
+      setState(() => _isWatchingAd = false);
+
+      if (success && _generatedReward != null) {
+        final saveService = context.read<SaveService>();
+        // 1. Claim standard rewards
+        _crateService.claimReward(saveService, _generatedReward!);
+
+        // 2. Grant 2X duplicate CP and boosters
+        for (final item in _generatedReward!.items) {
+          if (item.iconType == 'cp' || item.iconType == 'jackpot') {
+            saveService.addCyberPoints(item.count);
+          } else if (item.boosterType != null) {
+            saveService.addBooster(item.boosterType!, item.count);
+          }
+        }
+
+        AudioService().playCollect();
+        MonetizationManager().playRewardCelebration(
+          context,
+          RewardAnimationType.treasureCrate,
+          customTitle: 'CRATE LOOT MULTIPLIED 2X!',
+          customSubtitle: 'Bonus CP and boosters credited to inventory',
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '// AD CANCELLED OR UNAVAILABLE. STANDARD REWARDS REMAIN AVAILABLE.',
+              style: TextStyle(fontFamily: 'monospace', fontSize: 11),
+            ),
+            backgroundColor: Color(0xFF141926),
+            duration: Duration(milliseconds: 1800),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isWatchingAd = false);
+      }
+    }
   }
 
   void _restoreStreak() {
@@ -917,28 +972,89 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
 
   Widget _buildBottomAction() {
     if (_stage == _CrateStage.opened) {
-      return SizedBox(
-        width: 240,
-        height: 48,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConstants.coinGold,
-            foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Normal Standard Claim (Unchanged, free)
+          SizedBox(
+            height: 46,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white70,
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  width: 1.2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onPressed: _isWatchingAd ? null : _claimAndClose,
+              child: const Text(
+                'CLAIM STANDARD',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  letterSpacing: 1.0,
+                ),
+              ),
             ),
-            elevation: 8,
           ),
-          onPressed: _claimAndClose,
-          child: const Text(
-            'CLAIM ALL SUPPLIES',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              letterSpacing: 1.5,
+          const SizedBox(width: 12),
+
+          // 2X Enhanced Claim with Rewarded Ad
+          Container(
+            height: 46,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF00E5FF), AppConstants.coinGold],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppConstants.coinGold.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onPressed: _isWatchingAd ? null : _claimEnhancedWithAd,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.play_circle_fill_rounded,
+                    color: Colors.black,
+                    size: 17,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _isWatchingAd
+                        ? 'LOADING AD...'
+                        : 'WATCH AD → 2X ALL SUPPLIES',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      letterSpacing: 1.0,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       );
     }
 

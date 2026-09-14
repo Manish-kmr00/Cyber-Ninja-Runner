@@ -6,15 +6,26 @@ import '../hazards/bug_crawler.dart';
 import '../hazards/cyber_cannon.dart';
 import '../hazards/cyber_titan.dart';
 import '../hazards/dark_box.dart';
-import '../hazards/death_column.dart';
+import '../hazards/hover_drone_hazard.dart';
+import '../hazards/laser_gate_hazard.dart';
+import '../hazards/low_pipe_hazard.dart';
 import '../hazards/stakes.dart';
+import '../hazards/traffic_barrier_hazard.dart';
 import 'chunk_models.dart';
+import 'track_segment_models.dart';
 
 class ProceduralGenerator {
   final Random random;
   final GameMode gameMode;
   final List<WorldChunk> activeChunks = [];
   double currentEndCoordinateX = 0.0;
+  double currentElevation = 0.0;
+  final List<TrackSegmentType> recentSegmentTypes = [];
+
+  CyberEnvironmentTheme currentTheme = CyberEnvironmentTheme.cyberAlley;
+  int currentThemeSegmentCount = 0;
+  int maxThemeSegments = 3;
+  final List<CyberEnvironmentTheme> recentThemes = [];
 
   ProceduralGenerator({this.gameMode = GameMode.run, int? seed})
     : random = Random(seed ?? DateTime.now().millisecondsSinceEpoch);
@@ -22,6 +33,12 @@ class ProceduralGenerator {
   void reset() {
     activeChunks.clear();
     currentEndCoordinateX = 0.0;
+    currentElevation = 0.0;
+    recentSegmentTypes.clear();
+    currentTheme = CyberEnvironmentTheme.cyberAlley;
+    currentThemeSegmentCount = 0;
+    maxThemeSegments = 3;
+    recentThemes.clear();
   }
 
   /// Calculates which dynamic sector biome should be rendered at the given distance.
@@ -99,7 +116,7 @@ class ProceduralGenerator {
     });
 
     // 2. Spawn new chunks ahead
-    while (currentEndCoordinateX < playerX + (AppConstants.chunkLength * 2.5)) {
+    while (currentEndCoordinateX < playerX + (AppConstants.chunkLength * 5.0)) {
       final distanceMeters = (currentEndCoordinateX / 10).round();
       final tier = _calculateDifficultyTier(distanceMeters);
 
@@ -118,21 +135,27 @@ class ProceduralGenerator {
 
   int _calculateDifficultyTier(int distanceMeters) {
     if (distanceMeters < 300) {
-      return 0; // Gentle intro (Sector 1 start)
+      return 0; // Gentle intro (Sector 1 start, tutorial single obstacles)
     }
     if (distanceMeters < 1000) {
-      return 1; // Basic sentries, stakes, & single Droid (Sector 1)
-    }
-    if (distanceMeters < 2000) {
-      return 2; // Sector 2: Industrial Foundry (1000 - 2000m)
+      return 1; // Sector 1: Basic obstacles (single droid, stakes, traffic barrier)
     }
     if (distanceMeters < 3000) {
-      return 3; // Sector 3: Maglev Tunnel (2000 - 3000m)
+      return 2; // Sector 2-3: 2-step sequences (e.g. Ramp Jump -> Low Pipe Slide)
     }
-    if (distanceMeters < 4000) {
-      return 4; // Sector 4: Orbital Skyway (3000 - 4000m)
+    if (distanceMeters < 5000) {
+      return 3; // Sector 3-5: Moving drones, laser gates, elevated catwalks
     }
-    return 5; // Sector 5: Quantum Nexus (4000m+)
+    if (distanceMeters < 10000) {
+      return 4; // Multi-stage obstacle sequences (Jump -> Slide -> Slash)
+    }
+    if (distanceMeters < 20000) {
+      return 5; // Reaction speed gauntlets
+    }
+    if (distanceMeters < 30000) {
+      return 6; // High-intensity combinations
+    }
+    return 7; // 30,000m - 50,000m: Master cyberpunk agility challenges
   }
 
   WorldChunk _createChunk({
@@ -161,14 +184,48 @@ class ProceduralGenerator {
         !isSafeHaven &&
         !isTitanArena &&
         difficultyTier > 0 &&
-        random.nextDouble() < 0.38;
-    final pitWidth = hasPit ? 130.0 + random.nextDouble() * 90.0 : 0.0;
-    final pitStartX = hasPit
-        ? 320.0 + random.nextDouble() * (length - 320 - pitWidth)
-        : 0.0;
+        random.nextDouble() < 0.35;
+    final pitWidth = hasPit ? 110.0 + random.nextDouble() * 40.0 : 0.0;
+    final pitStartX = hasPit ? 170.0 + random.nextDouble() * 80.0 : 0.0;
 
     final distanceMeters = (startX / 10).round();
     final biome = getBiomeForDistance(distanceMeters, mode: gameMode);
+
+    // Select Environment Theme & Mini Gameplay Event
+    final theme = _selectEnvironmentTheme(chunkStartM);
+
+    // Procedural Modular Track Segment Selection (Every 50m / 500px):
+    final segmentType = _selectSegmentType(
+      chunkStartM: chunkStartM,
+      isSafeHaven: isSafeHaven,
+      isTitanArena: isTitanArena,
+      hasPit: hasPit,
+      biome: biome,
+    );
+
+    final event = _selectGameplayEvent(
+      theme: theme,
+      segmentType: segmentType,
+      hasPit: hasPit,
+      difficultyTier: difficultyTier,
+    );
+
+    final entryElevation = currentElevation;
+    double exitElevation = entryElevation;
+
+    if (segmentType == TrackSegmentType.gradualSlopeUp) {
+      exitElevation = (entryElevation - 30.0).clamp(-80.0, 25.0);
+    } else if (segmentType == TrackSegmentType.steppedTerraceAscent) {
+      exitElevation = (entryElevation - 40.0).clamp(-80.0, 25.0);
+    } else if (segmentType == TrackSegmentType.gradualSlopeDown) {
+      exitElevation = (entryElevation + 30.0).clamp(-80.0, 25.0);
+    } else if (segmentType == TrackSegmentType.steppedTerraceDescent) {
+      exitElevation = (entryElevation + 40.0).clamp(-80.0, 25.0);
+    } else {
+      exitElevation = entryElevation;
+    }
+
+    currentElevation = exitElevation;
 
     final chunk = WorldChunk(
       startX: startX,
@@ -179,93 +236,84 @@ class ProceduralGenerator {
       pitStartX: pitStartX,
       pitWidth: pitWidth,
       biome: biome,
+      segmentType: segmentType,
+      environmentTheme: theme,
+      gameplayEvent: event,
+      entryElevation: entryElevation,
+      exitElevation: exitElevation,
     );
 
-    // 1. Dynamic Multi-Tier Layout Architectures (Prevents repetitive linear boring layouts!)
+    // 1. Dynamic Multi-Tier Layout Catwalks
     if (!isSafeHaven && !isTitanArena && difficultyTier >= 1) {
-      final layoutType = random.nextInt(
-        4,
-      ); // 4 distinct structural chunk archetypes!
+      final layoutType = random.nextInt(4);
 
       if (layoutType == 0) {
-        // Archetype A: Cascading Stepped Dual Catwalks (Low step -> High step)
-        final plat1X = 180.0 + random.nextDouble() * 80.0;
-        final plat1W = 180.0 + random.nextDouble() * 60.0;
+        final plat1X = 140.0 + random.nextDouble() * 40.0;
+        final plat1W = 160.0 + random.nextDouble() * 40.0;
+        final platSurfaceY = chunk.getSurfaceY(startX + plat1X + plat1W / 2);
         chunk.elevatedPlatforms.add(
           ElevatedPlatform(
-            position: Vector2(plat1X, groundY - 75.0),
+            position: Vector2(plat1X, platSurfaceY - 80.0),
             size: Vector2(plat1W, 18.0),
-            biome: biome,
-          ),
-        );
-        final plat2X = plat1X + plat1W + 40.0;
-        final plat2W = 200.0 + random.nextDouble() * 80.0;
-        chunk.elevatedPlatforms.add(
-          ElevatedPlatform(
-            position: Vector2(plat2X, groundY - 145.0),
-            size: Vector2(plat2W, 18.0),
             biome: biome,
           ),
         );
         chunk.collectibles.add(
           CollectibleCP(
-            position: Vector2(plat2X + plat2W / 2, groundY - 180),
+            position: Vector2(plat1X + plat1W / 2, platSurfaceY - 115.0),
             biome: biome,
           ),
         );
       } else if (layoutType == 1) {
-        // Archetype B: Long High Skyway Bridge (Allows player to sprint above ground hazards)
-        final bridgeX = 140.0;
-        final bridgeW = length - 280.0;
+        final bridgeX = 120.0;
+        final bridgeW = length - 240.0;
+        final bridgeSurfaceY = chunk.getSurfaceY(startX + length / 2);
         chunk.elevatedPlatforms.add(
           ElevatedPlatform(
-            position: Vector2(bridgeX, groundY - 110.0),
+            position: Vector2(bridgeX, bridgeSurfaceY - 90.0),
             size: Vector2(bridgeW, 18.0),
             biome: biome,
           ),
         );
-        // Aerial collectible arc over the high bridge
-        for (int c = 0; c < 3; c++) {
-          chunk.collectibles.add(
-            CollectibleCP(
-              position: Vector2(bridgeX + 80.0 + c * 120.0, groundY - 145.0),
-              biome: biome,
-            ),
-          );
-        }
-      } else if (layoutType == 2) {
-        // Archetype C: Split Chasm Overpass (Catwalk suspended directly across a deep chasm)
-        if (hasPit) {
-          final bridgeX = pitStartX - 60.0;
-          final bridgeW = pitWidth + 120.0;
-          chunk.elevatedPlatforms.add(
-            ElevatedPlatform(
-              position: Vector2(bridgeX, groundY - 95.0),
-              size: Vector2(bridgeW, 18.0),
-              biome: biome,
-            ),
-          );
-          chunk.collectibles.add(
-            CollectibleCP(
-              position: Vector2(pitStartX + pitWidth / 2, groundY - 130),
-              biome: biome,
-            ),
-          );
-        }
-      } else {
-        // Archetype D: Mid-Air High Platform Island with Floating Crystal Cache
-        final platX = 350.0 + random.nextDouble() * 200.0;
-        final platW = 240.0 + random.nextDouble() * 100.0;
+        chunk.collectibles.add(
+          CollectibleCP(
+            position: Vector2(bridgeX + bridgeW / 2, bridgeSurfaceY - 125.0),
+            biome: biome,
+          ),
+        );
+      } else if (layoutType == 2 && hasPit) {
+        final bridgeX = pitStartX - 30.0;
+        final bridgeW = pitWidth + 60.0;
+        final chasmSurfaceY = chunk.getSurfaceY(
+          startX + pitStartX + pitWidth / 2,
+        );
         chunk.elevatedPlatforms.add(
           ElevatedPlatform(
-            position: Vector2(platX, groundY - 120.0),
+            position: Vector2(bridgeX, chasmSurfaceY - 80.0),
+            size: Vector2(bridgeW, 18.0),
+            biome: biome,
+          ),
+        );
+        chunk.collectibles.add(
+          CollectibleCP(
+            position: Vector2(pitStartX + pitWidth / 2, chasmSurfaceY - 115.0),
+            biome: biome,
+          ),
+        );
+      } else if (layoutType == 3) {
+        final platX = 180.0 + random.nextDouble() * 80.0;
+        const platW = 160.0;
+        final islandSurfaceY = chunk.getSurfaceY(startX + platX + platW / 2);
+        chunk.elevatedPlatforms.add(
+          ElevatedPlatform(
+            position: Vector2(platX, islandSurfaceY - 85.0),
             size: Vector2(platW, 18.0),
             biome: biome,
           ),
         );
         chunk.collectibles.add(
           CollectibleCP(
-            position: Vector2(platX + platW / 2, groundY - 155),
+            position: Vector2(platX + platW / 2, islandSurfaceY - 120.0),
             biome: biome,
           ),
         );
@@ -273,24 +321,26 @@ class ProceduralGenerator {
     }
 
     // 2. Spawn Safe Shadow Havens
-    if (isSafeHaven || random.nextDouble() < 0.55) {
-      final havenX = isSafeHaven ? 450.0 : 250.0 + random.nextDouble() * 350.0;
+    if (isSafeHaven || random.nextDouble() < 0.45) {
+      final havenX = isSafeHaven ? 220.0 : 160.0 + random.nextDouble() * 160.0;
+      final havenY = chunk.getSurfaceY(startX + havenX);
       chunk.shadowHavens.add(
         ShadowHaven(
-          position: Vector2(havenX, groundY),
-          size: Vector2(160, 80),
+          position: Vector2(havenX, havenY),
+          size: Vector2(120, 70),
           biome: biome,
         ),
       );
     }
 
     // 3. Spawn Collectible Cyber Ninja Points (CP) along ground
-    for (int i = 0; i < 3; i++) {
-      final cpX = 150.0 + (i * 250.0) + random.nextDouble() * 50.0;
+    for (int i = 0; i < 2; i++) {
+      final cpX = 120.0 + (i * 220.0) + random.nextDouble() * 40.0;
       if (!hasPit || (cpX < pitStartX || cpX > pitStartX + pitWidth)) {
+        final surfaceY = chunk.getSurfaceY(startX + cpX);
         chunk.collectibles.add(
           CollectibleCP(
-            position: Vector2(cpX, groundY - 45 - (i % 2 == 0 ? 0 : 40)),
+            position: Vector2(cpX, surfaceY - 45 - (i % 2 == 0 ? 0 : 35)),
             biome: biome,
           ),
         );
@@ -300,15 +350,16 @@ class ProceduralGenerator {
     // If safe haven requested, don't inject hazards
     if (isSafeHaven) return chunk;
 
-    // Titan Encounter Arena: Cyber Titan Mech every 200m! (Every 800m is the Grand Boss)
+    // Titan Encounter Arena: Cyber Titan Mech
     if (isTitanArena) {
-      final titanX = length * 0.52;
+      final titanX = length * 0.5;
+      final titanGroundY = chunk.getSurfaceY(startX + titanX);
       chunk.hazards.add(
         _createTrackTitan(
           chunk,
           titanX,
-          groundY,
-          patrolDist: 210.0,
+          titanGroundY,
+          patrolDist: 150.0,
           speed: isBossArena
               ? (95.0 + min(50.0, (chunkStartM / 800) * 12.0))
               : (75.0 + min(40.0, (chunkStartM / 200) * 6.0)),
@@ -325,22 +376,220 @@ class ProceduralGenerator {
     return chunk;
   }
 
+  TrackSegmentType _selectSegmentType({
+    required int chunkStartM,
+    required bool isSafeHaven,
+    required bool isTitanArena,
+    required bool hasPit,
+    required SectorBiome biome,
+  }) {
+    if (chunkStartM == 0 || isSafeHaven) {
+      return TrackSegmentType.straightNeonBoulevard;
+    }
+    if (isTitanArena) {
+      return TrackSegmentType.titanArenaPlateau;
+    }
+
+    final candidatePool = TrackSegmentType.values.where((t) {
+      if (t == TrackSegmentType.titanArenaPlateau) return false;
+      if (recentSegmentTypes.contains(t)) return false;
+
+      // Incline / Decline balancing
+      if (currentElevation <= -60.0) {
+        if (t == TrackSegmentType.gradualSlopeUp ||
+            t == TrackSegmentType.steppedTerraceAscent) {
+          return false;
+        }
+      }
+      if (currentElevation >= 20.0) {
+        if (t == TrackSegmentType.gradualSlopeDown ||
+            t == TrackSegmentType.steppedTerraceDescent) {
+          return false;
+        }
+      }
+
+      if (hasPit) {
+        if (t == TrackSegmentType.speedBoosterRunway ||
+            t == TrackSegmentType.reinforcedBarricadeSector ||
+            t == TrackSegmentType.cyberSewerCulvert) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+
+    final chosen = candidatePool.isNotEmpty
+        ? candidatePool[random.nextInt(candidatePool.length)]
+        : TrackSegmentType.straightNeonBoulevard;
+
+    recentSegmentTypes.add(chosen);
+    if (recentSegmentTypes.length > 5) {
+      recentSegmentTypes.removeAt(0);
+    }
+    return chosen;
+  }
+
+  CyberEnvironmentTheme _selectEnvironmentTheme(int chunkStartM) {
+    if (chunkStartM == 0) {
+      currentTheme = CyberEnvironmentTheme.cyberAlley;
+      currentThemeSegmentCount = 0;
+      maxThemeSegments = 3;
+      return currentTheme;
+    }
+
+    currentThemeSegmentCount++;
+    if (currentThemeSegmentCount < maxThemeSegments) {
+      return currentTheme;
+    }
+
+    // Coherent transition logic based on current theme
+    List<CyberEnvironmentTheme> candidates;
+    switch (currentTheme) {
+      case CyberEnvironmentTheme.cyberAlley:
+        candidates = [
+          CyberEnvironmentTheme.neonMarket,
+          CyberEnvironmentTheme.industrialDistrict,
+          CyberEnvironmentTheme.undergroundTunnel,
+        ];
+        break;
+      case CyberEnvironmentTheme.neonMarket:
+        candidates = [
+          CyberEnvironmentTheme.cyberAlley,
+          CyberEnvironmentTheme.hologramDistrict,
+          CyberEnvironmentTheme.futuristicHighway,
+        ];
+        break;
+      case CyberEnvironmentTheme.hologramDistrict:
+        candidates = [
+          CyberEnvironmentTheme.futuristicHighway,
+          CyberEnvironmentTheme.skyBridge,
+          CyberEnvironmentTheme.neonMarket,
+        ];
+        break;
+      case CyberEnvironmentTheme.futuristicHighway:
+        candidates = [
+          CyberEnvironmentTheme.skyBridge,
+          CyberEnvironmentTheme.cyberAlley,
+          CyberEnvironmentTheme.industrialDistrict,
+        ];
+        break;
+      case CyberEnvironmentTheme.skyBridge:
+        candidates = [
+          CyberEnvironmentTheme.rooftop,
+          CyberEnvironmentTheme.futuristicHighway,
+          CyberEnvironmentTheme.hologramDistrict,
+        ];
+        break;
+      case CyberEnvironmentTheme.rooftop:
+        candidates = [
+          CyberEnvironmentTheme.skyBridge,
+          CyberEnvironmentTheme.cyberAlley,
+          CyberEnvironmentTheme.darkSector,
+        ];
+        break;
+      case CyberEnvironmentTheme.undergroundTunnel:
+        candidates = [
+          CyberEnvironmentTheme.darkSector,
+          CyberEnvironmentTheme.industrialDistrict,
+          CyberEnvironmentTheme.cyberAlley,
+        ];
+        break;
+      case CyberEnvironmentTheme.darkSector:
+        candidates = [
+          CyberEnvironmentTheme.industrialDistrict,
+          CyberEnvironmentTheme.undergroundTunnel,
+          CyberEnvironmentTheme.hologramDistrict,
+        ];
+        break;
+      case CyberEnvironmentTheme.industrialDistrict:
+        candidates = [
+          CyberEnvironmentTheme.undergroundTunnel,
+          CyberEnvironmentTheme.darkSector,
+          CyberEnvironmentTheme.futuristicHighway,
+        ];
+        break;
+    }
+
+    // Filter out recently visited themes
+    final validCandidates = candidates
+        .where((c) => !recentThemes.contains(c))
+        .toList();
+    final chosen = validCandidates.isNotEmpty
+        ? validCandidates[random.nextInt(validCandidates.length)]
+        : candidates[random.nextInt(candidates.length)];
+
+    recentThemes.add(currentTheme);
+    if (recentThemes.length > 4) {
+      recentThemes.removeAt(0);
+    }
+
+    currentTheme = chosen;
+    currentThemeSegmentCount = 0;
+    maxThemeSegments = 2 + random.nextInt(3); // 2 to 4 segments (100m to 200m)
+    return currentTheme;
+  }
+
+  SegmentGameplayEvent _selectGameplayEvent({
+    required CyberEnvironmentTheme theme,
+    required TrackSegmentType segmentType,
+    required bool hasPit,
+    required int difficultyTier,
+  }) {
+    if (hasPit) {
+      if (theme == CyberEnvironmentTheme.rooftop) {
+        return SegmentGameplayEvent.rooftopGapJump;
+      }
+      if (theme == CyberEnvironmentTheme.skyBridge) {
+        return SegmentGameplayEvent.skyBridgeGapJump;
+      }
+    }
+
+    if (segmentType == TrackSegmentType.gradualSlopeUp ||
+        segmentType == TrackSegmentType.steppedTerraceAscent) {
+      return SegmentGameplayEvent.rampJump;
+    }
+
+    if (segmentType == TrackSegmentType.dualTierCatwalk ||
+        segmentType == TrackSegmentType.doubleDeckSkyway) {
+      return SegmentGameplayEvent.catwalkMultiJumpChain;
+    }
+
+    switch (theme) {
+      case CyberEnvironmentTheme.undergroundTunnel:
+        return SegmentGameplayEvent.tunnelLowSlide;
+      case CyberEnvironmentTheme.cyberAlley:
+        return SegmentGameplayEvent.alleyDroneEncounter;
+      case CyberEnvironmentTheme.industrialDistrict:
+        return SegmentGameplayEvent.industrialContainerVault;
+      case CyberEnvironmentTheme.hologramDistrict:
+        return SegmentGameplayEvent.hologramLaserGateTiming;
+      case CyberEnvironmentTheme.darkSector:
+        return SegmentGameplayEvent.darkReactionGauntlet;
+      case CyberEnvironmentTheme.rooftop:
+        return SegmentGameplayEvent.rooftopGapJump;
+      case CyberEnvironmentTheme.skyBridge:
+        return SegmentGameplayEvent.skyBridgeGapJump;
+      case CyberEnvironmentTheme.neonMarket:
+        return SegmentGameplayEvent.runPacing;
+      case CyberEnvironmentTheme.futuristicHighway:
+        return SegmentGameplayEvent.rampJump;
+    }
+  }
+
   DarkBox _createTrackDroid(
     WorldChunk chunk,
     double preferredX,
     double groundY, {
-    double patrolDist = 140.0,
+    double patrolDist = 120.0,
     double speed = 85.0,
   }) {
-    // Droid feet walk squarely on the front track curb line
-    final trackDeckY = groundY;
-
     // 30% chance to put patrol droid on elevated catwalk if platform is spacious
     if (chunk.elevatedPlatforms.isNotEmpty && random.nextDouble() < 0.35) {
       for (final plat in chunk.elevatedPlatforms) {
-        if (plat.size.x >= 140.0) {
-          final platMin = plat.position.x + 30.0;
-          final platMax = plat.position.x + plat.size.x - 30.0;
+        if (plat.size.x >= 120.0) {
+          final platMin = plat.position.x + 25.0;
+          final platMax = plat.position.x + plat.size.x - 25.0;
           final platMid = (platMin + platMax) / 2;
           return DarkBox(
             position: Vector2(platMid, plat.position.y),
@@ -354,38 +603,32 @@ class ProceduralGenerator {
       }
     }
 
-    // Ground patrol: safely place on solid track deck away from any chasm pits
     double targetX = preferredX;
-    double safeMinX = 50.0;
-    double safeMaxX = chunk.length - 50.0;
+    const safeMinX = 40.0;
+    final safeMaxX = chunk.length - 40.0;
 
     if (chunk.hasPit) {
       final pitLeft = chunk.pitStartX;
       final pitRight = chunk.pitStartX + chunk.pitWidth;
 
-      final zone1Len = (pitLeft - 40.0) - 50.0;
-      final zone2Len = (chunk.length - 50.0) - (pitRight + 40.0);
+      final zone1Len = (pitLeft - 30.0) - 40.0;
+      final zone2Len = (chunk.length - 40.0) - (pitRight + 30.0);
 
-      if (preferredX < pitLeft - 20 && zone1Len >= 120.0) {
-        safeMinX = 50.0;
-        safeMaxX = pitLeft - 40.0;
-        targetX = preferredX.clamp(safeMinX + 25.0, safeMaxX - 25.0);
-      } else if (zone2Len >= 120.0) {
-        safeMinX = pitRight + 40.0;
-        safeMaxX = chunk.length - 50.0;
-        targetX = preferredX.clamp(safeMinX + 25.0, safeMaxX - 25.0);
+      if (preferredX < pitLeft - 20 && zone1Len >= 80.0) {
+        targetX = preferredX.clamp(safeMinX + 15.0, pitLeft - 30.0);
+      } else if (zone2Len >= 80.0) {
+        targetX = preferredX.clamp(pitRight + 30.0, safeMaxX - 15.0);
       } else {
-        safeMinX = 50.0;
-        safeMaxX = (pitLeft - 40.0).clamp(50.0, chunk.length);
-        targetX = (safeMinX + safeMaxX) / 2;
+        targetX = preferredX.clamp(safeMinX + 15.0, safeMaxX - 15.0);
       }
     } else {
-      targetX = preferredX.clamp(safeMinX + 30.0, safeMaxX - 30.0);
+      targetX = preferredX.clamp(safeMinX + 20.0, safeMaxX - 20.0);
     }
 
+    final surfaceY = chunk.getSurfaceY(chunk.startX + targetX);
     final effectiveDist = min(patrolDist, (safeMaxX - safeMinX) / 2);
     return DarkBox(
-      position: Vector2(targetX, trackDeckY),
+      position: Vector2(targetX, surfaceY),
       patrolDistance: effectiveDist,
       patrolSpeed: speed,
       biome: chunk.biome,
@@ -398,43 +641,20 @@ class ProceduralGenerator {
     WorldChunk chunk,
     double preferredX,
     double trackDeckY, {
-    double patrolDist = 180.0,
+    double patrolDist = 150.0,
     double speed = 65.0,
     bool isBoss = true,
     int maxHp = 1,
   }) {
-    double targetX = preferredX;
-    double safeMinX = 60.0;
-    double safeMaxX = chunk.length - 60.0;
-
-    if (chunk.hasPit) {
-      final pitLeft = chunk.pitStartX;
-      final pitRight = chunk.pitStartX + chunk.pitWidth;
-
-      final zone1Len = (pitLeft - 60.0) - 60.0;
-      final zone2Len = (chunk.length - 60.0) - (pitRight + 60.0);
-
-      if (preferredX < pitLeft - 30 && zone1Len >= 160.0) {
-        safeMinX = 60.0;
-        safeMaxX = pitLeft - 50.0;
-        targetX = preferredX.clamp(safeMinX + 45.0, safeMaxX - 45.0);
-      } else if (zone2Len >= 160.0) {
-        safeMinX = pitRight + 50.0;
-        safeMaxX = chunk.length - 60.0;
-        targetX = preferredX.clamp(safeMinX + 45.0, safeMaxX - 45.0);
-      } else {
-        safeMinX = 60.0;
-        safeMaxX = (pitLeft - 50.0).clamp(60.0, chunk.length);
-        targetX = (safeMinX + safeMaxX) / 2;
-      }
-    } else {
-      targetX = preferredX.clamp(safeMinX + 45.0, safeMaxX - 45.0);
-    }
+    const safeMinX = 50.0;
+    final safeMaxX = chunk.length - 50.0;
+    final targetX = preferredX.clamp(safeMinX + 30.0, safeMaxX - 30.0);
+    final surfaceY = chunk.getSurfaceY(chunk.startX + targetX);
 
     final effectiveDist = min(patrolDist, (safeMaxX - safeMinX) / 2);
     final worldDistMeters = ((chunk.startX + targetX) / 10).round();
     return CyberTitan(
-      position: Vector2(targetX, trackDeckY),
+      position: Vector2(targetX, surfaceY),
       patrolDistance: effectiveDist,
       patrolSpeed: speed,
       biome: chunk.biome,
@@ -454,20 +674,18 @@ class ProceduralGenerator {
     double groundY, {
     int spikeCount = 3,
   }) {
-    final trackDeckY = groundY - 8.0;
     final spikeTotalWidth = spikeCount * Stakes.spikeWidth;
 
     double targetX = preferredX;
-    double safeMinX = 50.0;
-    double safeMaxX = chunk.length - spikeTotalWidth - 50.0;
+    const safeMinX = 40.0;
+    final safeMaxX = chunk.length - spikeTotalWidth - 40.0;
 
     if (chunk.hasPit) {
       final pitLeft = chunk.pitStartX;
       final pitRight = chunk.pitStartX + chunk.pitWidth;
 
-      // Safe buffer of 80px from pit edge so jump trajectory clears smoothly
-      final zone1Max = pitLeft - 80.0 - spikeTotalWidth;
-      final zone2Min = pitRight + 80.0;
+      final zone1Max = pitLeft - 60.0 - spikeTotalWidth;
+      final zone2Min = pitRight + 60.0;
 
       final zone1Valid = zone1Max >= safeMinX;
       final zone2Valid =
@@ -477,14 +695,14 @@ class ProceduralGenerator {
         targetX = preferredX.clamp(safeMinX, zone1Max);
       } else if (zone2Valid) {
         targetX = preferredX.clamp(zone2Min, safeMaxX);
-      } else if (zone1Valid) {
-        targetX = (safeMinX + zone1Max) / 2;
       } else {
         targetX = preferredX.clamp(safeMinX, safeMaxX);
       }
     } else {
       targetX = preferredX.clamp(safeMinX, safeMaxX);
     }
+
+    final trackDeckY = chunk.getSurfaceY(chunk.startX + targetX) - 8.0;
 
     return Stakes(
       position: Vector2(targetX, trackDeckY),
@@ -497,90 +715,243 @@ class ProceduralGenerator {
   void _injectHazards(
     WorldChunk chunk,
     int tier,
-    double groundY,
+    double baseGroundY,
     double roofY,
   ) {
     final b = chunk.biome;
-    if (tier == 0) {
-      // Tier 0 (Game Start: 0-300m): Spikes + Cannon + Patrol Droid
-      chunk.hazards.add(_createTrackStakes(chunk, 220, groundY, spikeCount: 3));
-      chunk.hazards.add(
-        CyberCannon(position: Vector2(460, roofY + 45), biome: b),
-      );
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 720, groundY, patrolDist: 140.0, speed: 85.0),
-      );
-      return;
+    final sx = chunk.startX;
+    final length = chunk.length;
+    final hasPit = chunk.hasPit;
+    final pitLeft = chunk.pitStartX;
+    final pitRight = chunk.pitStartX + chunk.pitWidth;
+
+    bool isInPit(double x, double margin) {
+      return hasPit && x >= (pitLeft - margin) && x <= (pitRight + margin);
     }
 
-    if (tier == 1) {
-      // Tier 1 (Early Run: 300-1000m): Spikes + Cannon + Patrol Droid + Spikes + Bug Crawler
-      chunk.hazards.add(_createTrackStakes(chunk, 200, groundY, spikeCount: 3));
-      chunk.hazards.add(
-        CyberCannon(position: Vector2(400, roofY + 45), biome: b),
-      );
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 620, groundY, patrolDist: 140.0, speed: 95.0),
-      );
-      chunk.hazards.add(_createTrackStakes(chunk, 800, groundY, spikeCount: 3));
-      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY), biome: b));
-      return;
-    }
+    switch (chunk.gameplayEvent) {
+      case SegmentGameplayEvent.tunnelLowSlide:
+        // 1. Low overhead pipe requiring ninja to SLIDE
+        const x1 = 200.0;
+        if (!isInPit(x1, 35.0)) {
+          final y1 = chunk.getSurfaceY(sx + x1) - 58.0;
+          chunk.hazards.add(LowPipeHazard(position: Vector2(x1, y1), biome: b));
+        }
+        // If tier >= 2: follow-up obstacle with 180px gap: Traffic barrier to jump over!
+        if (tier >= 2) {
+          const x2 = 380.0;
+          if (!isInPit(x2, 35.0)) {
+            chunk.hazards.add(
+              TrafficBarrierHazard(
+                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
+                biome: b,
+              ),
+            );
+          }
+        }
+        break;
 
-    if (tier == 2) {
-      // Tier 2 (1000-2000m): Spikes + Dual Droids + Cannon + Spikes
-      chunk.hazards.add(_createTrackStakes(chunk, 180, groundY, spikeCount: 4));
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 450, groundY, patrolDist: 130.0, speed: 100.0),
-      );
-      chunk.hazards.add(
-        CyberCannon(position: Vector2(340, roofY + 45), biome: b),
-      );
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 720, groundY, patrolDist: 130.0, speed: 105.0),
-      );
-      chunk.hazards.add(_createTrackStakes(chunk, 880, groundY, spikeCount: 3));
-      return;
-    }
+      case SegmentGameplayEvent.rampJump:
+        // Road barrier or stakes positioned along/after the ramp
+        const x1 = 280.0;
+        if (!isInPit(x1, 35.0)) {
+          chunk.hazards.add(
+            TrafficBarrierHazard(
+              position: Vector2(x1, chunk.getSurfaceY(sx + x1)),
+              barrierWidth: 44.0,
+              barrierHeight: 38.0,
+              biome: b,
+            ),
+          );
+        }
+        // If high tier (>= 3): add a flying security drone overhead
+        if (tier >= 3) {
+          const x2 = 110.0;
+          if (!isInPit(x2, 35.0)) {
+            chunk.hazards.add(
+              HoverDroneHazard(
+                position: Vector2(x2, chunk.getSurfaceY(sx + x2) - 75.0),
+                biome: b,
+                patrolDistance: 35.0,
+                patrolSpeed: 70.0 + tier * 5.0,
+              ),
+            );
+          }
+        }
+        break;
 
-    if (tier == 3) {
-      // Tier 3 (2000-3000m): Death Column + Spikes + Patrol Droid + Bug Crawler
-      chunk.hazards.add(
-        DeathColumn(position: Vector2(260, roofY), maxHeight: 220, biome: b),
-      );
-      chunk.hazards.add(_createTrackStakes(chunk, 460, groundY, spikeCount: 4));
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 660, groundY, patrolDist: 150.0, speed: 110.0),
-      );
-      chunk.hazards.add(BugCrawler(position: Vector2(850, groundY), biome: b));
-      return;
-    }
+      case SegmentGameplayEvent.alleyDroneEncounter:
+        // Security drone patrolling in the alley
+        const x1 = 250.0;
+        if (!isInPit(x1, 35.0)) {
+          chunk.hazards.add(
+            HoverDroneHazard(
+              position: Vector2(x1, chunk.getSurfaceY(sx + x1) - 72.0),
+              biome: b,
+              patrolDistance: 65.0,
+              patrolSpeed: 75.0 + tier * 6.0,
+            ),
+          );
+        }
+        // If tier >= 3: ground bug crawler
+        if (tier >= 3) {
+          const x2 = 410.0;
+          if (!isInPit(x2, 35.0)) {
+            chunk.hazards.add(
+              BugCrawler(
+                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
+                speed: 170.0 + tier * 8.0,
+                biome: b,
+              ),
+            );
+          }
+        }
+        break;
 
-    if (tier == 4) {
-      // Tier 4 (3000-4000m): Spikes + Cannon + Fast Patrol Droid + Spikes + Bug Crawler
-      chunk.hazards.add(_createTrackStakes(chunk, 180, groundY, spikeCount: 4));
-      chunk.hazards.add(
-        CyberCannon(position: Vector2(320, roofY + 45), biome: b),
-      );
-      chunk.hazards.add(
-        _createTrackDroid(chunk, 580, groundY, patrolDist: 160.0, speed: 120.0),
-      );
-      chunk.hazards.add(_createTrackStakes(chunk, 780, groundY, spikeCount: 4));
-      chunk.hazards.add(BugCrawler(position: Vector2(920, groundY), biome: b));
-      return;
-    }
+      case SegmentGameplayEvent.industrialContainerVault:
+        // Cargo container requiring JUMP or slash
+        const x1 = 220.0;
+        if (!isInPit(x1, 35.0)) {
+          chunk.hazards.add(
+            TrafficBarrierHazard(
+              position: Vector2(x1, chunk.getSurfaceY(sx + x1)),
+              barrierWidth: 50.0,
+              barrierHeight: 42.0,
+              isCargoContainer: true,
+              biome: b,
+            ),
+          );
+        }
+        if (tier >= 3) {
+          const x2 = 390.0;
+          if (!isInPit(x2, 35.0)) {
+            final y2 = chunk.getSurfaceY(sx + x2) - 58.0;
+            chunk.hazards.add(
+              LowPipeHazard(position: Vector2(x2, y2), biome: b),
+            );
+          }
+        }
+        break;
 
-    // Tier 5: Extreme Gauntlet (Death Column + Spikes + Patrol Droid + Cannon + Spikes)
-    chunk.hazards.add(
-      DeathColumn(position: Vector2(240, roofY), maxHeight: 230, biome: b),
-    );
-    chunk.hazards.add(_createTrackStakes(chunk, 420, groundY, spikeCount: 4));
-    chunk.hazards.add(
-      _createTrackDroid(chunk, 620, groundY, patrolDist: 160.0, speed: 125.0),
-    );
-    chunk.hazards.add(
-      CyberCannon(position: Vector2(760, roofY + 45), biome: b),
-    );
-    chunk.hazards.add(_createTrackStakes(chunk, 900, groundY, spikeCount: 5));
+      case SegmentGameplayEvent.hologramLaserGateTiming:
+        // Pulsing security laser gate (high beam: slide under)
+        const x1 = 240.0;
+        if (!isInPit(x1, 35.0)) {
+          chunk.hazards.add(
+            LaserGateHazard(
+              position: Vector2(x1, chunk.getSurfaceY(sx + x1)),
+              isHighBeam: true,
+              biome: b,
+            ),
+          );
+        }
+        if (tier >= 4) {
+          // Additional ground laser gate or droid with safe 180px separation
+          const x2 = 420.0;
+          if (!isInPit(x2, 35.0)) {
+            chunk.hazards.add(
+              LaserGateHazard(
+                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
+                isHighBeam: false,
+                biome: b,
+              ),
+            );
+          }
+        }
+        break;
+
+      case SegmentGameplayEvent.darkReactionGauntlet:
+        // Fast reaction: Spikes at x = 160 followed by BugCrawler at x = 360
+        const x1 = 160.0;
+        if (!isInPit(x1, 35.0)) {
+          chunk.hazards.add(
+            _createTrackStakes(
+              chunk,
+              x1,
+              chunk.getSurfaceY(sx + x1),
+              spikeCount: 3,
+            ),
+          );
+        }
+        if (tier >= 2) {
+          const x2 = 360.0;
+          if (!isInPit(x2, 35.0)) {
+            chunk.hazards.add(
+              BugCrawler(
+                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
+                speed: 180.0 + tier * 8.0,
+                biome: b,
+              ),
+            );
+          }
+        }
+        break;
+
+      case SegmentGameplayEvent.rooftopGapJump:
+      case SegmentGameplayEvent.skyBridgeGapJump:
+        // Gap jump across rooftop or bridge
+        if (!hasPit) {
+          const x1 = 250.0;
+          chunk.hazards.add(
+            _createTrackStakes(
+              chunk,
+              x1,
+              chunk.getSurfaceY(sx + x1),
+              spikeCount: 3,
+            ),
+          );
+        } else if (tier >= 3) {
+          // Overhead roof cannon guarding the chasm
+          chunk.hazards.add(
+            CyberCannon(position: Vector2(length * 0.5, roofY + 45), biome: b),
+          );
+        }
+        break;
+
+      case SegmentGameplayEvent.catwalkMultiJumpChain:
+        // Elevated platform already spawned. Ground hazard underneath
+        const x1 = 280.0;
+        if (!isInPit(x1, 35.0)) {
+          chunk.hazards.add(
+            _createTrackDroid(
+              chunk,
+              x1,
+              chunk.getSurfaceY(sx + x1),
+              patrolDist: 60.0,
+              speed: 80.0 + tier * 7.0,
+            ),
+          );
+        }
+        break;
+
+      case SegmentGameplayEvent.runPacing:
+        // Clean high-speed runway. Add single hazard if tier >= 1
+        if (tier >= 1) {
+          const x1 = 260.0;
+          if (!isInPit(x1, 35.0)) {
+            if (tier % 2 == 0) {
+              chunk.hazards.add(
+                _createTrackDroid(
+                  chunk,
+                  x1,
+                  chunk.getSurfaceY(sx + x1),
+                  patrolDist: 60.0,
+                  speed: 85.0 + tier * 5.0,
+                ),
+              );
+            } else {
+              chunk.hazards.add(
+                _createTrackStakes(
+                  chunk,
+                  x1,
+                  chunk.getSurfaceY(sx + x1),
+                  spikeCount: 3,
+                ),
+              );
+            }
+          }
+        }
+        break;
+    }
   }
 }

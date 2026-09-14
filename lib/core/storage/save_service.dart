@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../audio/audio_service.dart';
 import '../constants/game_enums.dart';
+import '../security/safe_types.dart';
 import 'save_models.dart';
 
 class SaveService extends ChangeNotifier {
@@ -63,7 +64,44 @@ class SaveService extends ChangeNotifier {
     AudioService().hapticsEnabled = settings.hapticsEnabled;
 
     _isLoaded = true;
+    if (settings.godModeEnabled) {
+      unlockAllContent();
+    }
     notifyListeners();
+  }
+
+  bool get isTenXUnlocked => settings.godModeEnabled || player.isTenXUnlocked;
+  bool get isFlightUnlocked =>
+      settings.godModeEnabled || player.isFlightUnlocked;
+  bool isSkinUnlocked(PlayerSkin skin) =>
+      settings.godModeEnabled || player.unlockedSkins.contains(skin);
+
+  int getBoosterCount(BoosterType type) => settings.godModeEnabled
+      ? (player.boosters[type]?.value ?? 0).clamp(99, 999999)
+      : (player.boosters[type]?.value ?? 0);
+
+  /// Unlocks all locked content across the game (skins, maps, boosters, cyber points)
+  void unlockAllContent() {
+    player.unlockedSkins.addAll(PlayerSkin.values);
+    player.isTenXUnlocked = true;
+    player.isFlightUnlocked = true;
+    for (final b in BoosterType.values) {
+      if ((player.boosters[b]?.value ?? 0) < 99) {
+        player.boosters[b] = SafeInt(99);
+      }
+    }
+    if (player.cyberPoints.value < 99999) {
+      player.cyberPoints.value = 99999;
+    }
+  }
+
+  /// Toggles immortal mode. If enabled, immediately unlocks all game content.
+  void setGodMode(bool enabled) {
+    settings.godModeEnabled = enabled;
+    if (enabled) {
+      unlockAllContent();
+    }
+    saveAll();
   }
 
   Future<void> saveAll() async {
@@ -123,7 +161,8 @@ class SaveService extends ChangeNotifier {
   }
 
   void equipSkin(PlayerSkin skin) {
-    if (player.unlockedSkins.contains(skin)) {
+    if (isSkinUnlocked(skin)) {
+      player.unlockedSkins.add(skin);
       player.equippedSkin = skin;
       saveAll();
     }
@@ -162,6 +201,9 @@ class SaveService extends ChangeNotifier {
   }
 
   bool useBooster(BoosterType type) {
+    if (settings.godModeEnabled) {
+      return true;
+    }
     final current = player.boosters[type]?.value ?? 0;
     if (current > 0) {
       player.boosters[type]?.subtract(1);

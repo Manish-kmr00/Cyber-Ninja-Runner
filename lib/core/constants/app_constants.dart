@@ -39,9 +39,9 @@ class AppConstants {
   static const double virtualWidth = 1280.0;
   static const double virtualHeight = 720.0;
 
-  // Chunk Generation Parameters
-  static const double chunkLength = 1000.0;
-  static const int activeChunkCount = 4;
+  // Chunk Generation Parameters (500.0 virtual pixels = 50 meters)
+  static const double chunkLength = 500.0;
+  static const int activeChunkCount = 7;
 
   // Developer / Testing Configuration
   // When true: Player is immortal (cannot die from any hazard, cannon bullet, or pit).

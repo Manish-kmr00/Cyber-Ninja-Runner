@@ -460,7 +460,7 @@ class _ShopScreenState extends State<ShopScreen> {
     required int price,
     required SaveService saveService,
   }) {
-    final isUnlocked = saveService.player.unlockedSkins.contains(skin);
+    final isUnlocked = saveService.isSkinUnlocked(skin);
     final isEquipped = saveService.player.equippedSkin == skin;
 
     void onCardTap() {

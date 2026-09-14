@@ -25,7 +25,11 @@ enum ObstacleType {
   stakesStatic,
   stakesAutoHide,
   roofStake,
-  movingPlatform;
+  movingPlatform,
+  lowPipe,
+  trafficBarrier,
+  laserGate,
+  hoverDrone;
 
   static const ObstacleType darkEye = ObstacleType.roofCannon;
 }
@@ -41,6 +45,8 @@ enum DeathType {
   hitByTitan,
   hitByBug,
   fallInPit,
+  hitByLaser,
+  hitByBarrier,
 }
 
 /// Control Scheme options

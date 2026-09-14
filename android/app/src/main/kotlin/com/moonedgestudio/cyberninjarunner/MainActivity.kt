@@ -39,9 +39,14 @@ class MainActivity : FlutterActivity() {
     }
 
     private var channel: MethodChannel? = null
+    private var monetizationBridge: MonetizationBridge? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Register dedicated monetization bridge
+        monetizationBridge = MonetizationBridge.registerWith(this, flutterEngine.dartExecutor.binaryMessenger)
+
+        // Existing FMOD Studio Channel - PRESERVED 100%
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).apply {
             setMethodCallHandler { call, result ->
                 when (call.method) {

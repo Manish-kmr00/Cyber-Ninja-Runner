@@ -44,6 +44,20 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+
+    // TopOn (AnyThink) Mediation Core & Formats
+    implementation("com.anythink.sdk:core:6.4.88")
+    implementation("com.anythink.sdk:rewardedvideo:6.4.88")
+    implementation("com.anythink.sdk:interstitial:6.4.88")
+
+    // TopOn Mintegral Adapter
+    implementation("com.anythink.sdk:adapter-tpn-mintegral:6.4.88")
+
+    // Mintegral SDK
+    implementation("com.mbridge.msdk.oversea:reward:16.8.61")
+    implementation("com.mbridge.msdk.oversea:newinterstitial:16.8.61")
+    implementation("com.mbridge.msdk.oversea:mbbid:16.8.61")
+    implementation("com.mbridge.msdk.oversea:videocommon:16.8.61")
 }
 
 kotlin {

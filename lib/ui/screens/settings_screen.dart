@@ -1096,17 +1096,54 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       title: 'Immortal Protocol (Test Mode)',
                                       subtitle:
                                           saveService.settings.godModeEnabled
-                                          ? 'ENABLED: Ninja deflects all hazard lethal damage'
-                                          : 'OFF: Real survival mode (death triggers Game Over)',
+                                          ? 'ENABLED: All skins, maps & boosters unlocked! Invincible running.'
+                                          : 'OFF: Standard survival mode (death triggers Game Over)',
                                       icon: Icons.shield_rounded,
                                       accentColor: const Color(0xFFD500F9),
                                       value:
                                           saveService.settings.godModeEnabled,
                                       onChanged: (active) {
                                         AudioService().playClick();
-                                        saveService.settings.godModeEnabled =
-                                            active;
-                                        saveService.saveAll();
+                                        saveService.setGodMode(active);
+                                        if (active && context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).hideCurrentSnackBar();
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              backgroundColor: Color(
+                                                0xFF1E293B,
+                                              ),
+                                              duration: Duration(seconds: 3),
+                                              content: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.lock_open_rounded,
+                                                    color: Color(0xFF00FF88),
+                                                    size: 20,
+                                                  ),
+                                                  SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'IMMORTAL OVERRIDE // ALL SKINS, MAPS & MODULES UNLOCKED!',
+                                                      style: TextStyle(
+                                                        color: Color(
+                                                          0xFF00FF88,
+                                                        ),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 11.5,
+                                                        letterSpacing: 0.4,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }
                                       },
                                     ),
                                     const Divider(

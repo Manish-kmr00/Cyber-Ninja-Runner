@@ -12,6 +12,8 @@ import 'boosters/booster_manager.dart';
 import 'hazards/base_hazard.dart';
 import 'hazards/cyber_titan.dart';
 import 'hazards/dark_box.dart';
+import 'hazards/hover_drone_hazard.dart';
+import 'hazards/traffic_barrier_hazard.dart';
 import 'player/cyber_ninja_player.dart';
 import 'player/runner_player.dart';
 import 'world/parallax_background.dart';
@@ -212,14 +214,15 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
       // 2. Pit / Ground Collision Check (if not landed on an elevated catwalk)
       if (!landedOnPlatform) {
+        final targetGroundY = chunk.getSurfaceY(player.position.x) - 8.0;
         if (chunk.hasPit &&
             player.position.x >= chunk.startX + chunk.pitStartX &&
             player.position.x <=
                 chunk.startX + chunk.pitStartX + chunk.pitWidth) {
           if (godMode || boosterManager.isSafeGroundActive) {
             // Safe Ground Pack / GodMode: Hard-light safe bridge over pit so player never falls
-            if (player.position.y >= groundLevelY) {
-              player.onLand(groundLevelY);
+            if (player.position.y >= targetGroundY) {
+              player.onLand(targetGroundY);
             }
           } else {
             // Over a pit! Player falls
@@ -230,9 +233,12 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
             }
           }
         } else {
-          // Solid ground check
-          if (player.position.y >= groundLevelY) {
-            player.onLand(groundLevelY);
+          // Solid ground check (handles flat ground, incline slopes, and decline slopes)
+          if (player.position.y >= targetGroundY ||
+              (player.isGrounded &&
+                  player.velocity.y >= 0 &&
+                  (player.position.y - targetGroundY).abs() <= 18.0)) {
+            player.onLand(targetGroundY);
           }
         }
       }
@@ -305,12 +311,26 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
             hazardsToDestroy.add(hazard);
             continue;
           }
+          if (hazard is HoverDroneHazard &&
+              hazard.isSliced &&
+              hazard.sliceTimer <= 0.0) {
+            hazardsToDestroy.add(hazard);
+            continue;
+          }
+          if (hazard is TrafficBarrierHazard &&
+              hazard.isShattered &&
+              hazard.shatterTimer <= 0.0) {
+            hazardsToDestroy.add(hazard);
+            continue;
+          }
 
           // Dual Katana Slash extended strike zone check (sword blade reach in front of ninja)
           if (player.isSlashing &&
               (hazard.obstacleType == ObstacleType.darkBox ||
                   hazard.obstacleType == ObstacleType.cyberTitan ||
-                  hazard.obstacleType == ObstacleType.bugCrawler)) {
+                  hazard.obstacleType == ObstacleType.bugCrawler ||
+                  hazard.obstacleType == ObstacleType.hoverDrone ||
+                  hazard.obstacleType == ObstacleType.trafficBarrier)) {
             final hPos = hazard.worldPosition;
             final inStrikeX =
                 (hPos.x - player.position.x) > -45.0 &&
@@ -340,6 +360,26 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                     saveService.addCyberPoints(cpBonus);
                   }
                 }
+              } else if (hazard is HoverDroneHazard) {
+                if (!hazard.isSliced) {
+                  hazard.sliceAndDestroy();
+                  shakeCamera(0.55);
+                  AudioService().playSlash();
+                  AudioService().playEnemyDestroy();
+                  final cpBonus = mode == GameMode.tenXChallenge ? 60 : 30;
+                  collectedCP += cpBonus;
+                  saveService.addCyberPoints(cpBonus);
+                }
+              } else if (hazard is TrafficBarrierHazard) {
+                if (!hazard.isShattered) {
+                  hazard.shatter();
+                  shakeCamera(0.50);
+                  AudioService().playSlash();
+                  AudioService().playEnemyDestroy();
+                  final cpBonus = mode == GameMode.tenXChallenge ? 40 : 20;
+                  collectedCP += cpBonus;
+                  saveService.addCyberPoints(cpBonus);
+                }
               } else {
                 hazardsToDestroy.add(hazard);
                 shakeCamera(0.45);
@@ -354,11 +394,13 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
           }
 
           if (hazard.checkCollision(player)) {
-            // Dual Katana Slash destroys patrol robots, cyber titans & bug crawlers on contact!
+            // Dual Katana Slash destroys sliceable hazards on contact!
             if (player.isSlashing &&
                 (hazard.obstacleType == ObstacleType.darkBox ||
                     hazard.obstacleType == ObstacleType.cyberTitan ||
-                    hazard.obstacleType == ObstacleType.bugCrawler)) {
+                    hazard.obstacleType == ObstacleType.bugCrawler ||
+                    hazard.obstacleType == ObstacleType.hoverDrone ||
+                    hazard.obstacleType == ObstacleType.trafficBarrier)) {
               if (hazard is DarkBox) {
                 if (!hazard.isSliced) {
                   hazard.sliceAndDestroy();
@@ -380,6 +422,26 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                     collectedCP += cpBonus;
                     saveService.addCyberPoints(cpBonus);
                   }
+                }
+              } else if (hazard is HoverDroneHazard) {
+                if (!hazard.isSliced) {
+                  hazard.sliceAndDestroy();
+                  shakeCamera(0.55);
+                  AudioService().playSlash();
+                  AudioService().playEnemyDestroy();
+                  final cpBonus = mode == GameMode.tenXChallenge ? 60 : 30;
+                  collectedCP += cpBonus;
+                  saveService.addCyberPoints(cpBonus);
+                }
+              } else if (hazard is TrafficBarrierHazard) {
+                if (!hazard.isShattered) {
+                  hazard.shatter();
+                  shakeCamera(0.50);
+                  AudioService().playSlash();
+                  AudioService().playEnemyDestroy();
+                  final cpBonus = mode == GameMode.tenXChallenge ? 40 : 20;
+                  collectedCP += cpBonus;
+                  saveService.addCyberPoints(cpBonus);
                 }
               } else {
                 hazardsToDestroy.add(hazard);

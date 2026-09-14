@@ -1,15 +1,99 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/monetization/monetization_manager.dart';
 import '../../core/storage/save_service.dart';
 import '../../game/cyber_ninja_game.dart';
 
-class DeathOverlay extends StatelessWidget {
+class DeathOverlay extends StatefulWidget {
   final CyberNinjaRunnerGame game;
 
   const DeathOverlay({super.key, required this.game});
+
+  @override
+  State<DeathOverlay> createState() => _DeathOverlayState();
+}
+
+class _DeathOverlayState extends State<DeathOverlay> {
+  bool _isWatchingReviveAd = false;
+  bool _isWatchingDoubleAd = false;
+  bool _doubleCpClaimed = false;
+
+  CyberNinjaRunnerGame get game => widget.game;
+
+  Future<void> _watchAdToRevive() async {
+    if (_isWatchingReviveAd) return;
+    setState(() => _isWatchingReviveAd = true);
+
+    try {
+      final success = await MonetizationManager().showRewarded(
+        rewardType: RewardType.revive,
+      );
+
+      if (!mounted) return;
+      setState(() => _isWatchingReviveAd = false);
+
+      if (success) {
+        AudioService().playCollect();
+        AudioService().playBooster();
+        game.revivePlayer();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF141926),
+            duration: Duration(milliseconds: 1800),
+            content: Text(
+              '// AD UNAVAILABLE OR CANCELLED. YOU CAN STILL REVIVE WITH 2,000 CP.',
+              style: TextStyle(
+                color: AppConstants.stealthBlue,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'monospace',
+                fontSize: 11,
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isWatchingReviveAd = false);
+      }
+    }
+  }
+
+  Future<void> _watchAdForDoubleCP(SaveService saveService) async {
+    if (_isWatchingDoubleAd || _doubleCpClaimed) return;
+    setState(() => _isWatchingDoubleAd = true);
+
+    try {
+      final success = await MonetizationManager().showRewarded(
+        rewardType: RewardType.doubleCyberPoints,
+      );
+
+      if (!mounted) return;
+      setState(() => _isWatchingDoubleAd = false);
+
+      if (success) {
+        setState(() => _doubleCpClaimed = true);
+        saveService.addCyberPoints(game.collectedCP);
+        AudioService().playCollect();
+        MonetizationManager().playRewardCelebration(
+          context,
+          RewardAnimationType.doubleReward,
+          customTitle: 'LOOT MULTIPLIED 2X!',
+          customSubtitle: '+${game.collectedCP} CP Credited to Cyber Vault',
+          count: game.collectedCP * 2,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isWatchingDoubleAd = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,24 +309,109 @@ class DeathOverlay extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      Row(
+                                      const SizedBox(height: 4),
+                                      Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(
-                                            Icons.diamond_rounded,
-                                            color: AppConstants.coinGold,
-                                            size: 16,
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.diamond_rounded,
+                                                color: AppConstants.coinGold,
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '+${game.collectedCP} CP',
+                                                style: const TextStyle(
+                                                  color: AppConstants.coinGold,
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 18,
+                                                  letterSpacing: 1.0,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '+${game.collectedCP} CP',
-                                            style: const TextStyle(
-                                              color: AppConstants.coinGold,
-                                              fontWeight: FontWeight.w900,
-                                              fontSize: 18,
-                                              letterSpacing: 1.0,
+                                          if (game.collectedCP > 0) ...[
+                                            const SizedBox(height: 4),
+                                            GestureDetector(
+                                              onTap:
+                                                  (_isWatchingDoubleAd ||
+                                                      _doubleCpClaimed)
+                                                  ? null
+                                                  : () => _watchAdForDoubleCP(
+                                                      saveService,
+                                                    ),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 3,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: _doubleCpClaimed
+                                                      ? const Color(
+                                                          0xFF00E676,
+                                                        ).withValues(alpha: 0.2)
+                                                      : AppConstants.coinGold
+                                                            .withValues(
+                                                              alpha: 0.15,
+                                                            ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                  border: Border.all(
+                                                    color: _doubleCpClaimed
+                                                        ? const Color(
+                                                            0xFF00E676,
+                                                          )
+                                                        : AppConstants.coinGold,
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      _doubleCpClaimed
+                                                          ? Icons
+                                                                .check_circle_rounded
+                                                          : Icons
+                                                                .play_circle_filled_rounded,
+                                                      size: 11,
+                                                      color: _doubleCpClaimed
+                                                          ? const Color(
+                                                              0xFF00E676,
+                                                            )
+                                                          : AppConstants
+                                                                .coinGold,
+                                                    ),
+                                                    const SizedBox(width: 3),
+                                                    Text(
+                                                      _doubleCpClaimed
+                                                          ? '2X CLAIMED'
+                                                          : _isWatchingDoubleAd
+                                                          ? 'LOADING...'
+                                                          : 'WATCH AD: 2X CP',
+                                                      style: TextStyle(
+                                                        color: _doubleCpClaimed
+                                                            ? const Color(
+                                                                0xFF00E676,
+                                                              )
+                                                            : AppConstants
+                                                                  .coinGold,
+                                                        fontSize: 8.5,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        letterSpacing: 0.5,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                          ],
                                         ],
                                       ),
                                     ],
@@ -313,6 +482,69 @@ class DeathOverlay extends StatelessWidget {
                             return Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Free Ad Revive Option
+                                Container(
+                                  width: double.infinity,
+                                  height: 40,
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF00E5FF),
+                                        Color(0xFF0052D4),
+                                      ],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFF00E5FF,
+                                        ).withValues(alpha: 0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      foregroundColor: Colors.black,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    onPressed: _isWatchingReviveAd
+                                        ? null
+                                        : _watchAdToRevive,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.videocam_rounded,
+                                          size: 16,
+                                          color: Colors.black,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _isWatchingReviveAd
+                                              ? 'CONNECTING AD FEED...'
+                                              : 'WATCH AD → FREE REVIVE',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 0.8,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
@@ -425,7 +657,13 @@ class DeathOverlay extends StatelessWidget {
                                         ),
                                         onPressed: () {
                                           AudioService().playClick();
+                                          MonetizationManager()
+                                              .recordRunCompleted();
                                           Navigator.of(context).pop();
+                                          unawaited(
+                                            MonetizationManager()
+                                                .showInterstitialIfEligible(),
+                                          );
                                         },
                                         child: Row(
                                           mainAxisAlignment:

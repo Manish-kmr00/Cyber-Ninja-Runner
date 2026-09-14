@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,6 +7,8 @@ import '../../core/constants/game_enums.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/services/daily_crate_service.dart';
 import '../../core/storage/save_service.dart';
+import '../../core/monetization/cp_boost_service.dart';
+import '../widgets/cp_boost_dialog.dart';
 import '../widgets/daily_crate_dialog.dart';
 import 'game_screen.dart';
 import 'leaderboard_screen.dart';
@@ -56,6 +57,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
       context: context,
       barrierDismissible: true,
       builder: (_) => const DailyCrateDialog(),
+    );
+  }
+
+  void _openCpBoostDialog(BuildContext context) {
+    AudioService().playClick();
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => const CpBoostDialog(),
     );
   }
 
@@ -739,8 +749,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     SaveService saveService, {
     bool isCompact = false,
   }) {
-    final isTenXUnlocked = saveService.player.isTenXUnlocked;
-    final isFlightUnlocked = saveService.player.isFlightUnlocked;
+    final isTenXUnlocked = saveService.isTenXUnlocked;
+    final isFlightUnlocked = saveService.isFlightUnlocked;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -1606,7 +1616,10 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           onTap: () => _claimDailyGift(context),
         ),
 
-        // 2. Skins & Arsenal Button
+        // 2. CP Boost Button (Watch & Earn)
+        _buildCpBoostDockButton(context, isCompact: isCompact),
+
+        // 3. Skins & Arsenal Button
         _buildDockButton(
           title: context.l10n.tr('arsenal_hangar'),
           icon: Icons.shopping_bag_rounded,
@@ -1621,9 +1634,131 @@ class _StartMenuScreenState extends State<StartMenuScreen>
           },
         ),
 
-        // 3. Moon Edge Studio Developer Page
+        // 4. Moon Edge Studio Developer Page
         _buildStudioDockButton(context, isCompact: isCompact),
       ],
+    );
+  }
+
+  Widget _buildCpBoostDockButton(
+    BuildContext context, {
+    bool isCompact = false,
+  }) {
+    final boostService = CpBoostService();
+    final remaining = boostService.remainingAdsToday;
+    final onCooldown = boostService.isCooldownActive;
+
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        final glowAlpha = 0.18 + 0.16 * _pulseController.value;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _openCpBoostDialog(context),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 9 : 13,
+              vertical: isCompact ? 5.5 : 7.5,
+            ),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0D253A), Color(0xFF131722)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
+              border: Border.all(
+                color: Color.lerp(
+                  AppConstants.stealthBlue,
+                  const Color(0xFF00E5FF),
+                  _pulseController.value,
+                )!,
+                width: isCompact ? 1.2 : 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppConstants.stealthBlue.withValues(alpha: glowAlpha),
+                  blurRadius: isCompact ? 6 : 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isCompact ? 3.5 : 4.5),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0072FF), Color(0xFF00C6FF)],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppConstants.stealthBlue.withValues(alpha: 0.5),
+                        blurRadius: isCompact ? 4 : 6,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.bolt_rounded,
+                    color: Colors.white,
+                    size: isCompact ? 11 : 14,
+                  ),
+                ),
+                SizedBox(width: isCompact ? 5 : 7),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'CP BOOST',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: isCompact ? 8.5 : 10.0,
+                            letterSpacing: 0.8,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (remaining > 0 && !onCooldown) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF00E676),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      onCooldown
+                          ? 'COOLDOWN'
+                          : (remaining > 0 ? 'WATCH & EARN' : 'LIMIT REACHED'),
+                      style: TextStyle(
+                        fontSize: isCompact ? 6.0 : 7.0,
+                        fontWeight: FontWeight.w800,
+                        color: onCooldown
+                            ? const Color(0xFFFF9800)
+                            : (remaining > 0
+                                  ? const Color(0xFF00E5FF)
+                                  : Colors.white38),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
