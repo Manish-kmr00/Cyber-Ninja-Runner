@@ -287,68 +287,10 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // Center: Test Mode Immortal Badge & Active Booster Timers
+                      // Center: Active Booster Timers
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (widget.game.godMode)
-                            CustomPaint(
-                              painter: _HexagonBadgeBorderPainter(
-                                borderColor: const Color(0xFF00E5FF),
-                                glowColor: const Color(
-                                  0xFF00E5FF,
-                                ).withValues(alpha: 0.45),
-                                cut: (9.0 * scale).clamp(6.0, 12.0),
-                              ),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: (10.0 * scale).clamp(8.0, 14.0),
-                                  vertical: (5.0 * scale).clamp(4.0, 8.0),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Hex Shield Icon Badge
-                                    Container(
-                                      padding: EdgeInsets.all(
-                                        (4.0 * scale).clamp(3.0, 6.0),
-                                      ),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: const Color(
-                                          0xFF00E5FF,
-                                        ).withValues(alpha: 0.2),
-                                        border: Border.all(
-                                          color: const Color(0xFF00E5FF),
-                                          width: 1.2,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.shield_rounded,
-                                        color: const Color(0xFF00E5FF),
-                                        size: (13.0 * scale).clamp(11.0, 16.0),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: (8.0 * scale).clamp(5.0, 10.0),
-                                    ),
-                                    Text(
-                                      'TEST MODE: IMMORTAL',
-                                      style: TextStyle(
-                                        color: const Color(0xFF00E5FF),
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: (11.0 * scale).clamp(
-                                          9.0,
-                                          13.0,
-                                        ),
-                                        letterSpacing: 1.2,
-                                        fontFamily: 'monospace',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                           ListenableBuilder(
                             listenable: widget.game.boosterManager,
                             builder: (context, _) {
@@ -1142,53 +1084,6 @@ class _SciFiPillBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SciFiPillBorderPainter oldDelegate) =>
       oldDelegate.color != color || oldDelegate.cut != cut;
-}
-
-/// Hexagonal Badge Border Painter (for Test Mode)
-class _HexagonBadgeBorderPainter extends CustomPainter {
-  final Color borderColor;
-  final Color glowColor;
-  final double cut;
-
-  _HexagonBadgeBorderPainter({
-    required this.borderColor,
-    required this.glowColor,
-    this.cut = 12.0,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final effectiveCut = cut.clamp(4.0, size.height * 0.4);
-    final path = Path()
-      ..moveTo(effectiveCut, 0)
-      ..lineTo(size.width - effectiveCut, 0)
-      ..lineTo(size.width, size.height / 2)
-      ..lineTo(size.width - effectiveCut, size.height)
-      ..lineTo(effectiveCut, size.height)
-      ..lineTo(0, size.height / 2)
-      ..close();
-
-    final bgPaint = Paint()
-      ..color = const Color(0xFF06141D).withValues(alpha: 0.92)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(path, bgPaint);
-
-    final glowPaint = Paint()
-      ..color = glowColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-    canvas.drawPath(path, glowPaint);
-
-    final strokePaint = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6;
-    canvas.drawPath(path, strokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _HexagonBadgeBorderPainter oldDelegate) => false;
 }
 
 /// Hexagonal Booster Pill

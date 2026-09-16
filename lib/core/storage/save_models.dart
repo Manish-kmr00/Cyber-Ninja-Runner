@@ -152,7 +152,6 @@ class SettingsData {
   double sfxVolume = 1.0;
   bool isMuted = false;
   bool hapticsEnabled = true;
-  bool godModeEnabled = false;
   bool invertedControls = false;
   double buttonOpacity = 1.0;
   bool highQualityEffects = true;
@@ -166,7 +165,6 @@ class SettingsData {
     'sfxVolume': sfxVolume,
     'isMuted': isMuted,
     'hapticsEnabled': hapticsEnabled,
-    'godModeEnabled': godModeEnabled,
     'invertedControls': invertedControls,
     'buttonOpacity': buttonOpacity,
     'highQualityEffects': highQualityEffects,
@@ -181,7 +179,6 @@ class SettingsData {
     sfxVolume = (json['sfxVolume'] as num?)?.toDouble() ?? 1.0;
     isMuted = json['isMuted'] ?? false;
     hapticsEnabled = json['hapticsEnabled'] ?? true;
-    godModeEnabled = json['godModeEnabled'] ?? false;
     invertedControls = json['invertedControls'] ?? false;
     buttonOpacity = (json['buttonOpacity'] as num?)?.toDouble() ?? 1.0;
     highQualityEffects = json['highQualityEffects'] ?? true;

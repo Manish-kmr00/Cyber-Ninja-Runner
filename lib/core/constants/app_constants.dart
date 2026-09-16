@@ -43,10 +43,6 @@ class AppConstants {
   static const double chunkLength = 500.0;
   static const int activeChunkCount = 7;
 
-  // Developer / Testing Configuration
-  // When true: Player is immortal (cannot die from any hazard, cannon bullet, or pit).
-  static const bool testGodMode = true;
-
   // Feedback & Transmission Configuration (Google Apps Script Web App)
   // Direct Web App webhook configured for moonedgestudio@gmail.com
   static const String feedbackScriptUrl =

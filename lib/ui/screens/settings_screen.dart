@@ -1091,66 +1091,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 icon: Icons.developer_mode_rounded,
                                 child: Column(
                                   children: [
-                                    // God Mode / Immortal Protocol Toggle
-                                    _buildCyberSwitchTile(
-                                      title: 'Immortal Protocol (Test Mode)',
-                                      subtitle:
-                                          saveService.settings.godModeEnabled
-                                          ? 'ENABLED: All skins, maps & boosters unlocked! Invincible running.'
-                                          : 'OFF: Standard survival mode (death triggers Game Over)',
-                                      icon: Icons.shield_rounded,
-                                      accentColor: const Color(0xFFD500F9),
-                                      value:
-                                          saveService.settings.godModeEnabled,
-                                      onChanged: (active) {
-                                        AudioService().playClick();
-                                        saveService.setGodMode(active);
-                                        if (active && context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).hideCurrentSnackBar();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              backgroundColor: Color(
-                                                0xFF1E293B,
-                                              ),
-                                              duration: Duration(seconds: 3),
-                                              content: Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.lock_open_rounded,
-                                                    color: Color(0xFF00FF88),
-                                                    size: 20,
-                                                  ),
-                                                  SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Text(
-                                                      'IMMORTAL OVERRIDE // ALL SKINS, MAPS & MODULES UNLOCKED!',
-                                                      style: TextStyle(
-                                                        color: Color(
-                                                          0xFF00FF88,
-                                                        ),
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 11.5,
-                                                        letterSpacing: 0.4,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                    const Divider(
-                                      color: Colors.white10,
-                                      height: 16,
-                                    ),
-
                                     // Screen Glow / Visual FX Toggle
                                     _buildCyberSwitchTile(
                                       title: 'Ultra Neon Bloom & FX',

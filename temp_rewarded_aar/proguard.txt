@@ -1,0 +1,67 @@
+-keep class com.anythink.** { *; }
+-keepclassmembers class com.anythink.** {
+   *;
+}
+
+-keep public class com.anythink.network.**
+-keepclassmembers class com.anythink.network.** {
+   public *;
+}
+
+-dontwarn com.anythink.**
+-dontwarn com.adjust.**
+-dontwarn com.appsflyer.**
+
+-keep class com.anythink.pd.**{ *;}
+-keep class com.anythink.dlpd.**{ *;}
+-keep class com.anythink.odpd.**{ *;}
+
+-keep class com.anythink.basead.ui.**{ *;}
+-keepclassmembers public class com.anythink.basead.ui.** {
+   public *;
+}
+-keep class com.anythink.core.basead.ui.**{ *;}
+-keepclassmembers public class com.anythink.core.basead.ui.** {
+   public *;
+}
+-keep class com.anythink.basead.handler.**{
+    public *;
+}
+
+-keep class com.anythink.expressad.** {*; }
+-keep interface com.anythink.expressad.** {*; }
+
+-keep class com.anythink.core.common.ui.**{ *;}
+-keepclassmembers public class com.anythink.core.common.ui.** {
+   public *;
+}
+
+-keep public class com.anythink.banner.unitgroup.api.**
+-keepclassmembers class com.anythink.network.** {
+   public *;
+}
+
+-keep public class * extends com.anythink.banner.unitgroup.api.CustomBannerAdapter
+-keepclassmembers public class * extends com.anythink.banner.unitgroup.api.CustomBannerAdapter {
+    public <methods>;
+}
+
+-keep public class * extends com.anythink.nativead.unitgroup.api.CustomNativeAdapter
+-keepclassmembers public class * extends com.anythink.nativead.unitgroup.api.CustomNativeAdapter {
+    public <methods>;
+}
+
+-keep public class * extends com.anythink.interstitial.unitgroup.api.CustomInterstitialAdapter
+-keepclassmembers public class * extends com.anythink.interstitial.unitgroup.api.CustomInterstitialAdapter {
+    public <methods>;
+}
+
+-keep public class * extends com.anythink.rewardvideo.unitgroup.api.CustomRewardVideoAdapter
+-keepclassmembers public class * extends com.anythink.rewardvideo.unitgroup.api.CustomRewardVideoAdapter {
+    public <methods>;
+}
+
+-keep public class * extends com.anythink.splashad.unitgroup.api.CustomSplashAdapter
+-keepclassmembers public class * extends com.anythink.splashad.unitgroup.api.CustomSplashAdapter {
+    public <methods>;
+}

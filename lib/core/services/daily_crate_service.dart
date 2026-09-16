@@ -48,7 +48,6 @@ class DailyCrateService {
 
   /// Checks whether crate is currently available to claim.
   bool isCrateReady(SaveService saveService) {
-    if (saveService.settings.godModeEnabled) return true;
     final now = DateTime.now().millisecondsSinceEpoch;
     final lastClaim = saveService.player.lastDailyClaimEpoch;
     if (lastClaim == 0) return true;
@@ -57,7 +56,6 @@ class DailyCrateService {
 
   /// Returns remaining milliseconds until crate becomes available.
   int getRemainingCooldownMs(SaveService saveService) {
-    if (saveService.settings.godModeEnabled) return 0;
     final now = DateTime.now().millisecondsSinceEpoch;
     final lastClaim = saveService.player.lastDailyClaimEpoch;
     if (lastClaim == 0) return 0;

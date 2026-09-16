@@ -40,23 +40,20 @@ class MonetizationConfig {
     );
   }
 
-  // --- Official Test Identifiers (TopOn, Mintegral, Google AdMob) ---
-  // Official TopOn test App ID and Placement IDs (Global test mode)
-  static const String testTopOnAppId = 'a5b0e8549d3911';
-  static const String testTopOnAppKey = '9f63b16be457319c3606dc3137931b1b';
-  static const String testRewardedPlacementId = 'b5b0e8573fc523';
-  static const String testInterstitialPlacementId = 'b5b0e8568e6e58';
+  // --- Real Cyber Ninja Runner TopOn Credentials ---
+  // App ID and Placement IDs generated from the Cyber Ninja Runner TopOn dashboard.
+  // DO NOT log the App Key. Use CONFIGURED/MATCHED in any report.
+  static const String testTopOnAppId = 'h6aa91bb8dc11b';
+  static const String testTopOnAppKey = 'ac9da0a61c59ab2bdf3cdc28e66c92b27';
+  static const String testRewardedPlacementId = 'n6aa91d84caf8e';
+  static const String testInterstitialPlacementId = 'n6aa925b616e0b';
 
   // Google AdMob official test units for demand validation
+  // These are the Google-published universal test ad units — safe for all test devices.
   static const String testGoogleRewardedUnitId =
       'ca-app-pub-3940256099942544/5224354917';
   static const String testGoogleInterstitialUnitId =
       'ca-app-pub-3940256099942544/1033173712';
-
-  // Mintegral official test configuration
-  static const String testMintegralAppId = '118690';
-  static const String testMintegralAppKey = '7c22942b749fe6a6e361b675714b3ff8';
-  static const String testMintegralRewardedUnitId = '293224';
 
   // --- Production placeholders (Supplied only at runtime via setProductionEnvironment) ---
   static String? _prodTopOnAppId;

@@ -8,28 +8,20 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
-// Official TopOn (AnyThink) SDK Imports
-import com.anythink.core.api.ATSDK
-import com.anythink.core.api.ATAdInfo
-import com.anythink.core.api.AdError
-import com.anythink.rewardvideo.api.ATRewardVideoAd
-import com.anythink.rewardvideo.api.ATRewardVideoListener
-import com.anythink.interstitial.api.ATInterstitial
-import com.anythink.interstitial.api.ATInterstitialListener
-
-// Official Mintegral (MBridge) SDK Imports
-import com.mbridge.msdk.out.MBridgeSDKFactory
-
-// Official IAB Open Measurement (OMID) Library Import
-import com.iab.omid.library.mmadbridge.Omid
+// Official TopOn (New Platform) SDK Imports (v6.6.22)
+import com.secmtp.sdk.core.api.ATSDK
+import com.secmtp.sdk.core.api.ATAdInfo
+import com.secmtp.sdk.core.api.AdError
+import com.secmtp.sdk.rewardvideo.api.ATRewardVideoAd
+import com.secmtp.sdk.rewardvideo.api.ATRewardVideoListener
+import com.secmtp.sdk.interstitial.api.ATInterstitial
+import com.secmtp.sdk.interstitial.api.ATInterstitialListener
 
 /**
  * Android Monetization Bridge for Cyber Ninja Runner.
  *
  * Provides genuine native integration with:
- * 1. TopOn (AnyThink) Mediation Core & Format Modules (v6.4.88)
- * 2. Mintegral (MBridge) Oversea SDK (v16.8.61) & TopOn-Mintegral Adapter (v6.4.88)
- * 3. IAB Open Measurement (OMID) SDK (bundled via Mintegral / mmadbridge)
+ * 1. TopOn New Platform Mediation Core & Format Modules (v6.6.22)
  *
  * Operates strictly on the dedicated MethodChannel 'com.moonedgestudio.cyberninjarunner/monetization'
  * completely isolated from FMOD audio channels.
@@ -42,10 +34,6 @@ class MonetizationBridge private constructor(
     companion object {
         private const val TAG = "MonetizationBridge"
         const val CHANNEL_NAME = "com.moonedgestudio.cyberninjarunner/monetization"
-
-        // Official Mintegral Sandbox Test Credentials
-        const val TEST_MINTEGRAL_APP_ID = "118690"
-        const val TEST_MINTEGRAL_APP_KEY = "7c22942b749fe6a6e361b675714b3ff8"
 
         fun registerWith(activity: Activity, messenger: BinaryMessenger): MonetizationBridge {
             val channel = MethodChannel(messenger, CHANNEL_NAME)
@@ -83,13 +71,15 @@ class MonetizationBridge private constructor(
             }
             "loadRewarded" -> {
                 val placementId = call.argument<String>("placementId") ?: ""
-                loadRewarded(placementId, result)
+                val scenarioId = call.argument<String>("scenarioId")
+                loadRewarded(placementId, scenarioId, result)
             }
             "showRewarded" -> {
                 val placementId = call.argument<String>("placementId") ?: ""
                 val transactionId = call.argument<String>("transactionId") ?: ""
                 val rewardContext = call.argument<String>("rewardContext") ?: "reward"
-                showRewarded(placementId, transactionId, rewardContext, result)
+                val scenarioId = call.argument<String>("scenarioId")
+                showRewarded(placementId, transactionId, rewardContext, scenarioId, result)
             }
             "isInterstitialReady" -> {
                 val placementId = call.argument<String>("placementId") ?: ""
@@ -122,10 +112,10 @@ class MonetizationBridge private constructor(
         activeAppId = appId
         isTestMode = testMode
 
-        Log.i(TAG, "Initializing Real Monetization SDKs: TopOn AppId=$appId, TestMode=$testMode")
+        Log.i(TAG, "Initializing TopOn Monetization SDK: AppId=$appId, TestMode=$testMode")
 
         try {
-            // 1. Initialize TopOn (AnyThink) Native SDK
+            // Initialize TopOn (AnyThink) Native SDK
             ATSDK.setNetworkLogDebug(testMode)
             try {
                 ATSDK.integrationChecking(activity.applicationContext)
@@ -135,34 +125,16 @@ class MonetizationBridge private constructor(
             ATSDK.init(activity.applicationContext, appId, appKey)
             Log.i(TAG, "TopOn ATSDK initialized successfully. Version: ${ATSDK.getSDKVersionName()}")
 
-            // 2. Initialize Mintegral SDK directly for runtime verification & adapter binding
-            try {
-                val mBridgeSDK = MBridgeSDKFactory.getMBridgeSDK()
-                val configMap = mBridgeSDK.getMBConfigurationMap(TEST_MINTEGRAL_APP_ID, TEST_MINTEGRAL_APP_KEY)
-                mBridgeSDK.init(configMap, activity.applicationContext)
-                Log.i(TAG, "Mintegral MBridgeSDK initialized successfully.")
-            } catch (e: Throwable) {
-                Log.w(TAG, "Mintegral MBridgeSDK direct init note: ${e.message}")
-            }
-
-            // 3. Initialize IAB Open Measurement (OMID)
-            try {
-                Omid.activate(activity.applicationContext)
-                Log.i(TAG, "IAB OMID activated. Version: ${Omid.getVersion()}, isActive: ${Omid.isActive()}")
-            } catch (e: Throwable) {
-                Log.w(TAG, "IAB OMID activation note: ${e.message}")
-            }
-
             isInitialized = true
             result.success(true)
         } catch (e: Throwable) {
-            Log.e(TAG, "Real SDK Init error: ${e.message}", e)
+            Log.e(TAG, "TopOn SDK Init error: ${e.message}", e)
             isInitialized = false
             result.success(false)
         }
     }
 
-    private fun loadRewarded(placementId: String, result: MethodChannel.Result) {
+    private fun loadRewarded(placementId: String, scenarioId: String?, result: MethodChannel.Result) {
         Log.i(TAG, "loadRewarded requested for real placement: $placementId")
         result.success(null)
 
@@ -170,10 +142,14 @@ class MonetizationBridge private constructor(
             try {
                 var rewardVideoAd = rewardedAdMap[placementId]
                 if (rewardVideoAd == null) {
+                    // Create new rewarded video ad instance
                     rewardVideoAd = ATRewardVideoAd(activity, placementId)
                     rewardedAdMap[placementId] = rewardVideoAd
                 }
-
+                // Register scenario if provided
+                if (scenarioId != null) {
+                    rewardVideoAd.entryAdScenario(scenarioId)
+                }
                 rewardVideoAd.setAdListener(object : ATRewardVideoListener {
                     override fun onRewardedVideoAdLoaded() {
                         Log.i(TAG, "[Real SDK Callback] onRewardedVideoAdLoaded: $placementId")
@@ -249,10 +225,10 @@ class MonetizationBridge private constructor(
                         )
                     }
                 })
-
-                // Issue REAL SDK network ad load request
                 Log.i(TAG, "Calling real ATRewardVideoAd.load() for placement: $placementId")
                 rewardVideoAd.load()
+
+
             } catch (e: Throwable) {
                 Log.e(TAG, "Error executing real ATRewardVideoAd.load(): ${e.message}", e)
                 channel.invokeMethod(
@@ -270,6 +246,7 @@ class MonetizationBridge private constructor(
         placementId: String,
         transactionId: String,
         rewardContext: String,
+        scenarioId: String?,
         result: MethodChannel.Result
     ) {
         val rewardVideoAd = rewardedAdMap[placementId]
@@ -282,12 +259,16 @@ class MonetizationBridge private constructor(
 
         activeRewardedTransactionId = transactionId
         activeRewardedContext = rewardContext
-        Log.i(TAG, "Showing Real Rewarded Video: placement=$placementId, tx=$transactionId, context=$rewardContext")
+        Log.i(TAG, "Showing Real Rewarded Video: placement=$placementId, tx=$transactionId, context=$rewardContext, scenario=${scenarioId ?: "none"}")
         result.success(true)
 
         mainHandler.post {
             try {
-                rewardVideoAd.show(activity)
+                if (scenarioId != null) {
+                    rewardVideoAd.show(activity, scenarioId)
+                } else {
+                    rewardVideoAd.show(activity)
+                }
             } catch (e: Throwable) {
                 Log.e(TAG, "Error showing real rewarded ad: ${e.message}", e)
             }
@@ -395,28 +376,16 @@ class MonetizationBridge private constructor(
             "Not Initialized"
         }
 
-        val isOmidActive = try {
-            Omid.isActive()
-        } catch (_: Throwable) {
-            false
-        }
-
-        val omidVersion = try {
-            Omid.getVersion() ?: "Unknown"
-        } catch (_: Throwable) {
-            "Unavailable"
-        }
-
         return mapOf(
             "isInitialized" to isInitialized,
             "isTestMode" to isTestMode,
             "appId" to activeAppId,
             "topOnSdkDetected" to true,
             "topOnSdkVersion" to topOnVersion,
-            "mintegralSdkDetected" to true,
-            "omidPresent" to true,
-            "omidVersion" to omidVersion,
-            "omidActive" to isOmidActive,
+            "mintegralSdkDetected" to false,
+            "omidPresent" to false,
+            "omidVersion" to "N/A",
+            "omidActive" to false,
             "omidSessionCreated" to false,
             "rewardedReadyPlacements" to rewardedAdMap.filter { it.value.isAdReady }.keys.toList(),
             "interstitialReadyPlacements" to interstitialAdMap.filter { it.value.isAdReady }.keys.toList()

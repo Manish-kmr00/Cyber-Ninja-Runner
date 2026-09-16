@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -52,24 +53,30 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   // Dynamic Sector Biome Tracker
   late SectorBiome currentSector;
 
-  // Developer Test Mode (Player Immortality / God Mode)
-  bool get godMode => saveService.settings.godModeEnabled;
-
   CyberNinjaRunnerGame({required this.mode, required this.saveService})
     : currentSector = ProceduralGenerator.getBiomeForDistance(0, mode: mode),
-      super(
-        camera: CameraComponent.withFixedResolution(
-          width: AppConstants.virtualWidth,
-          height: AppConstants.virtualHeight,
-        ),
-      );
+      super(camera: CameraComponent(viewport: MaxViewport()));
 
   @override
   Color backgroundColor() => AppConstants.backgroundDark;
 
   @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    if (isLoaded) {
+      camera.viewfinder.visibleGameSize = Vector2(
+        0,
+        AppConstants.virtualHeight,
+      );
+    }
+  }
+
+  @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    // Responsive full-screen edge-to-edge camera: fixed height (720 game units), responsive width
+    camera.viewfinder.visibleGameSize = Vector2(0, AppConstants.virtualHeight);
 
     // 1. Initialize Player (Cyber Ninja / Shadow Shinobi)
     final spawnPosition = Vector2(
@@ -219,8 +226,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
             player.position.x >= chunk.startX + chunk.pitStartX &&
             player.position.x <=
                 chunk.startX + chunk.pitStartX + chunk.pitWidth) {
-          if (godMode || boosterManager.isSafeGroundActive) {
-            // Safe Ground Pack / GodMode: Hard-light safe bridge over pit so player never falls
+          if (boosterManager.isSafeGroundActive) {
+            // Safe Ground Pack: Hard-light safe bridge over pit so player never falls
             if (player.position.y >= targetGroundY) {
               player.onLand(targetGroundY);
             }
@@ -454,8 +461,7 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
               }
               continue;
             }
-            if (!godMode &&
-                !boosterManager.isInvisibilityActive &&
+            if (!boosterManager.isInvisibilityActive &&
                 !boosterManager.isSafeGroundActive) {
               triggerGameOver(hazard.deathType);
               return;
@@ -469,9 +475,8 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       }
     }
 
-    // Safety ground check during test mode or active Safe Ground booster
-    if ((godMode || boosterManager.isSafeGroundActive) &&
-        player.position.y > groundLevelY) {
+    // Safety ground check during active Safe Ground booster
+    if (boosterManager.isSafeGroundActive && player.position.y > groundLevelY) {
       player.onLand(groundLevelY);
       player.position.y = groundLevelY;
       player.velocity.y = 0;
@@ -482,9 +487,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   }
 
   void triggerGameOver(DeathType cause) {
-    if (godMode) {
-      return; // IMMORTAL: Player cannot die while game testing is active!
-    }
     // Safe Ground Protection: Kinetic shield prevents any fatal damage or falling death!
     if (boosterManager.isSafeGroundActive) {
       return;

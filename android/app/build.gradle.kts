@@ -45,19 +45,14 @@ android {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-    // TopOn (AnyThink) Mediation Core & Formats
-    implementation("com.anythink.sdk:core:6.4.88")
-    implementation("com.anythink.sdk:rewardedvideo:6.4.88")
-    implementation("com.anythink.sdk:interstitial:6.4.88")
+    // TopOn (AnyThink) New-Platform SDK v6.6.22 Core (Consolidated Formats: Rewarded, Interstitial, Banner, Splash)
+    implementation("com.anythink.sdk:core-tpn:6.6.22")
 
-    // TopOn Mintegral Adapter
-    implementation("com.anythink.sdk:adapter-tpn-mintegral:6.4.88")
+    // TopOn New-Platform AdMob Adapter
+    implementation("com.anythink.sdk:adapter-tpn-admob:25.4.0.1.0")
 
-    // Mintegral SDK
-    implementation("com.mbridge.msdk.oversea:reward:16.8.61")
-    implementation("com.mbridge.msdk.oversea:newinterstitial:16.8.61")
-    implementation("com.mbridge.msdk.oversea:mbbid:16.8.61")
-    implementation("com.mbridge.msdk.oversea:videocommon:16.8.61")
+    // Google Mobile Ads SDK (AdMob) v25.4.0
+    implementation("com.google.android.gms:play-services-ads:25.4.0")
 }
 
 kotlin {

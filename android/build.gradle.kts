@@ -5,9 +5,6 @@ allprojects {
         maven {
             url = uri("https://jfrog.anythinktech.com/artifactory/overseas_sdk")
         }
-        maven {
-            url = uri("https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea")
-        }
     }
 }
 

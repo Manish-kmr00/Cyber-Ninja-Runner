@@ -154,9 +154,12 @@ class MonetizationPlatform {
   }
 
   /// Requests preloading of a rewarded video ad.
-  Future<void> loadRewarded(String placementId) async {
+  Future<void> loadRewarded(String placementId, {String? scenarioId}) async {
     try {
-      await _channel.invokeMethod('loadRewarded', {'placementId': placementId});
+      await _channel.invokeMethod('loadRewarded', {
+        'placementId': placementId,
+        if (scenarioId != null) 'scenarioId': scenarioId,
+      });
     } catch (e) {
       debugPrint('[MonetizationPlatform] loadRewarded error: $e');
     }
@@ -167,12 +170,14 @@ class MonetizationPlatform {
     String placementId,
     String transactionId, {
     String rewardContext = 'reward',
+    String? scenarioId,
   }) async {
     try {
       final res = await _channel.invokeMethod<bool>('showRewarded', {
         'placementId': placementId,
         'transactionId': transactionId,
         'rewardContext': rewardContext,
+        if (scenarioId != null) 'scenarioId': scenarioId,
       });
       return res ?? false;
     } catch (e) {

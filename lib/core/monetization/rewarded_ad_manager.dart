@@ -91,16 +91,34 @@ class RewardedAdManager {
     };
   }
 
-  /// Requests preloading of a rewarded video ad.
-  Future<void> loadRewarded() async {
+  /// Requests preloading of a rewarded video ad with optional scenario ID.
+  Future<void> loadRewarded({String? scenarioId}) async {
     if (_isLoading) return;
     _isLoading = true;
 
     MonetizationAnalytics.trackEvent(AdEventType.rewardedLoadStarted, {
       'placement_id': MonetizationConfig.rewardedPlacementId,
+      'scenario_id': scenarioId ?? 'none',
     });
 
-    await _platform.loadRewarded(MonetizationConfig.rewardedPlacementId);
+    await _platform.loadRewarded(
+      MonetizationConfig.rewardedPlacementId,
+      scenarioId: scenarioId,
+    );
+  }
+
+  /// Helper to map RewardType to TopOn scenario IDs.
+  String? _scenarioIdForReward(RewardType rewardType) {
+    switch (rewardType) {
+      case RewardType.revive:
+        return 'f6aa93d000c34b';
+      case RewardType.doubleCyberPoints:
+        return 'f6aa93d2b791fc';
+      case RewardType.dailyCrateBonus:
+        return 'f6aa93d397ef4c';
+      default:
+        return null; // Default unused.
+    }
   }
 
   /// Refreshes and returns whether an ad is ready to show right now.
@@ -128,28 +146,33 @@ class RewardedAdManager {
       return false;
     }
 
-    // 2. Check if ad is cached
+    // 2. Determine scenario ID.
+    final scenarioId = _scenarioIdForReward(rewardType);
+
+    // 3. Check if ad is cached.
     final ready = await checkReadiness();
     if (!ready) {
       debugPrint(
         '[RewardedAdManager] Rewarded ad not ready in cache for ${rewardType.name}. Attempting load.',
       );
-      loadRewarded();
+      // Load with scenario ID for proper tracking.
+      await loadRewarded(scenarioId: scenarioId);
       return false;
     }
 
-    // 3. Create unique transaction for idempotency
+    // 4. Create unique transaction for idempotency
     final tx = _validator.createTransaction(rewardType);
     _activeTransactionId = tx.transactionId;
     _activeRewardType = rewardType;
     _rewardCompleter = Completer<bool>();
 
-    // 4. Present via native TopOn bridge
+    // 5. Present via native TopOn bridge
     final contextStr = rewardContext ?? rewardType.name;
     final shown = await _platform.showRewarded(
       MonetizationConfig.rewardedPlacementId,
       tx.transactionId,
       rewardContext: contextStr,
+      scenarioId: scenarioId,
     );
 
     if (!shown) {
@@ -160,7 +183,7 @@ class RewardedAdManager {
       return false;
     }
 
-    // 5. Await validated reward callback (with 45s safety timeout)
+    // 6. Await validated reward callback (with 45s safety timeout)
     return _rewardCompleter!.future.timeout(
       const Duration(seconds: 45),
       onTimeout: () {
