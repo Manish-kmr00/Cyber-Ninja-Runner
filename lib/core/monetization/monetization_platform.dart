@@ -142,10 +142,12 @@ class MonetizationPlatform {
   }
 
   /// Queries whether a rewarded video ad is ready in native cache.
-  Future<bool> isRewardedReady(String placementId) async {
+  Future<bool> isRewardedReady(String placementId, {String? scenarioId}) async {
     try {
       final res = await _channel.invokeMethod<bool>('isRewardedReady', {
         'placementId': placementId,
+        // ignore: use_null_aware_elements
+        if (scenarioId != null) 'scenarioId': scenarioId,
       });
       return res ?? false;
     } catch (e) {
@@ -158,6 +160,7 @@ class MonetizationPlatform {
     try {
       await _channel.invokeMethod('loadRewarded', {
         'placementId': placementId,
+        // ignore: use_null_aware_elements
         if (scenarioId != null) 'scenarioId': scenarioId,
       });
     } catch (e) {
@@ -177,6 +180,7 @@ class MonetizationPlatform {
         'placementId': placementId,
         'transactionId': transactionId,
         'rewardContext': rewardContext,
+        // ignore: use_null_aware_elements
         if (scenarioId != null) 'scenarioId': scenarioId,
       });
       return res ?? false;

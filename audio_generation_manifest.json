@@ -15,34 +15,14 @@
       "negative_prompt": "vocals, singing, speech, lyrics, pop melodies, acoustic guitar, piano, brass, retro 8-bit chiptune, aggressive metal guitars, loud snares, drop beats, dubstep growls, distortion, clipping."
     },
     {
-      "filename": "music_gameplay_base.wav",
+      "filename": "music_gameplay_loop.wav",
       "category": "Music",
       "fmod_event": "event:/Music/Gameplay",
-      "duration": 27.83,
+      "duration": 44.0,
       "channels": "Stereo",
       "variation_number": 1,
-      "prompt": "Isolated base layer stem for adaptive cyberpunk runner game music, locked at exactly 138 BPM in D minor, 16 bars seamless loop. Rhythmic foundation only: punchy 4-on-the-floor electro-cyber kick drum with tight transient, driving sidechained 16th-note rolling synth bassline (cutoff around 600 Hz), minimalist metallic hi-hat tick every 8th note, subtle dystopian synth drone in background. Clean frequency pocket carved between 1 kHz and 5 kHz for SFX headroom. No melodic leads, no snares, no cymbals, no vocals, seamless loop boundary.",
-      "negative_prompt": "melody, synth leads, snare drums, claps, guitar solos, brass, vocals, speech, loud crash cymbals, distorted screech, muddy bass, 8-bit sounds, sudden tempo changes."
-    },
-    {
-      "filename": "music_gameplay_intensity.wav",
-      "category": "Music",
-      "fmod_event": "event:/Music/Gameplay",
-      "duration": 27.83,
-      "channels": "Stereo",
-      "variation_number": 1,
-      "prompt": "Isolated rhythmic intensity and percussion stem for cyberpunk action runner, locked at exactly 138 BPM in D minor, 16 bars seamless loop, harmonically matching D minor baseline. Energetic elements: crisp electronic snare with layered metallic clap on beats 2 and 4, driving running 16th-note shaker and closed cyber hi-hat patterns, fast rising syncopated pluck synth arpeggio bouncing between left and right stereo channels. High energy, breathless parkour momentum. No kick drum, no heavy sub-bass (empty under 150 Hz), no vocals, seamless loop.",
-      "negative_prompt": "kick drum, sub-bass, 808 boom, vocals, distorted guitars, orchestral brass, erratic rhythms, swing timing, jazz chords, ambient pads."
-    },
-    {
-      "filename": "music_gameplay_danger.wav",
-      "category": "Music",
-      "fmod_event": "event:/Music/Gameplay",
-      "duration": 27.83,
-      "channels": "Stereo",
-      "variation_number": 1,
-      "prompt": "Isolated danger and tension stem for adaptive cyberpunk music, locked at exactly 138 BPM in D minor, 16 bars seamless loop. Aggressive elements: distorted saw-tooth alarm pulse synths, cutting acid bass resonance sweep, distorted industrial percussion accents on off-beats, tense rising pitch risers terminating every 4 bars into heavy downbeats, gritty overdrive texture. Pure adrenaline threat. No primary kick drum, no clean melodic leads, zero vocal chants, mathematically aligned loop.",
-      "negative_prompt": "melodic pop leads, clean acoustic piano, soft pads, romantic chords, vocals, words, silence, kick drum, slow tempo, disjointed rhythm."
+      "prompt": "138 BPM driving electronic cyberpunk action runner background music groove in D Minor, energetic continuous synthwave arpeggios, punchy four-on-the-floor kick drum, rolling sub-bassline, clean futuristic synthesizer lead, endless looping rhythm, no vocals, no crashes, no dramatic ending, smooth repeating mobile game soundtrack.",
+      "negative_prompt": "vocals, singing, speech, lyrics, pop melodies, acoustic guitar, piano, brass, retro 8-bit chiptune, aggressive metal guitars, loud snares, drop beats, dubstep growls, distortion, clipping."
     },
     {
       "filename": "music_danger.wav",

@@ -5,6 +5,15 @@ import 'package:cyber_ninja_runner/core/storage/save_service.dart';
 import 'package:cyber_ninja_runner/core/constants/game_enums.dart';
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SaveService().player.boosters[BoosterType.safeGround]!.value = 3;
+    SaveService().player.isTenXUnlocked = false;
+    SaveService().player.isFlightUnlocked = false;
+    SaveService().player.unlockedSkins.clear();
+    SaveService().player.unlockedSkins.add(PlayerSkin.classicWhite);
+  });
+
   test('SafeInt XOR memory obfuscation integrity test', () {
     final safeInt = SafeInt(1500);
     expect(safeInt.value, 1500);

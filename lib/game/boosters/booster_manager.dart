@@ -15,6 +15,19 @@ class BoosterManager extends ChangeNotifier {
 
   double get timeDilationFactor => isMatrixActive ? 0.45 : 1.0;
 
+  double getTimeRemaining(BoosterType type) {
+    switch (type) {
+      case BoosterType.safeGround:
+        return safeGroundTimeRemaining;
+      case BoosterType.matrixSlowMo:
+        return matrixTimeRemaining;
+      case BoosterType.invisibility:
+        return invisibilityTimeRemaining;
+      case BoosterType.killEyes:
+        return empShockwaveTimer;
+    }
+  }
+
   void activateBooster(BoosterType type) {
     switch (type) {
       case BoosterType.matrixSlowMo:
@@ -35,27 +48,30 @@ class BoosterManager extends ChangeNotifier {
   }
 
   void update(double dt) {
+    if (dt <= 0) return;
+    // Defensive clamping to prevent huge dt spikes after ad display or app resume
+    final safeDt = dt.clamp(0.0, 0.1);
     bool changed = false;
     if (matrixTimeRemaining > 0) {
-      matrixTimeRemaining = (matrixTimeRemaining - dt).clamp(0.0, 100.0);
+      matrixTimeRemaining = (matrixTimeRemaining - safeDt).clamp(0.0, 100.0);
       changed = true;
     }
     if (invisibilityTimeRemaining > 0) {
-      invisibilityTimeRemaining = (invisibilityTimeRemaining - dt).clamp(
+      invisibilityTimeRemaining = (invisibilityTimeRemaining - safeDt).clamp(
         0.0,
         100.0,
       );
       changed = true;
     }
     if (safeGroundTimeRemaining > 0) {
-      safeGroundTimeRemaining = (safeGroundTimeRemaining - dt).clamp(
+      safeGroundTimeRemaining = (safeGroundTimeRemaining - safeDt).clamp(
         0.0,
         100.0,
       );
       changed = true;
     }
     if (empShockwaveTimer > 0) {
-      empShockwaveTimer = (empShockwaveTimer - dt).clamp(0.0, 100.0);
+      empShockwaveTimer = (empShockwaveTimer - safeDt).clamp(0.0, 100.0);
       changed = true;
     }
     if (changed) notifyListeners();

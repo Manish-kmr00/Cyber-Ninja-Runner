@@ -3,18 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/monetization/cp_boost_config.dart';
 import '../../core/monetization/cp_boost_service.dart';
 import '../../core/monetization/monetization_analytics.dart';
 import '../../core/monetization/monetization_manager.dart';
+import '../../core/services/iap_service.dart';
 import '../../core/storage/save_service.dart';
 
-/// Modal dialog for the CP Boost / CP Vault feature.
+/// Active tab within the CP Boost & Data Vault Dialog
+enum CpBoostTab { rewardedAds, dataVault }
+
+/// Modal dialog for CP Boost & Data Vault CP Recharge.
 ///
-/// Presents player with real rewarded ad opportunities to earn Cyber Points,
-/// displaying live cooldown timers, daily caps, and reward tiers.
+/// Supports two operational modes:
+/// 1. [CpBoostTab.rewardedAds]: Free rewarded ad opportunities to earn Cyber Points.
+/// 2. [CpBoostTab.dataVault]: Direct Google Play In-App Purchase packages for instant CP replenishment.
 class CpBoostDialog extends StatefulWidget {
-  const CpBoostDialog({super.key});
+  final CpBoostTab initialTab;
+
+  const CpBoostDialog({super.key, this.initialTab = CpBoostTab.rewardedAds});
 
   @override
   State<CpBoostDialog> createState() => _CpBoostDialogState();
@@ -23,9 +31,14 @@ class CpBoostDialog extends StatefulWidget {
 class _CpBoostDialogState extends State<CpBoostDialog>
     with SingleTickerProviderStateMixin {
   final CpBoostService _boostService = CpBoostService();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _adsSectionKey = GlobalKey();
   Timer? _tickerTimer;
   bool _isAdReady = false;
   late AnimationController _pulseController;
+  String? _statusMessage;
+  bool _isStatusError = false;
+  Timer? _statusMessageTimer;
 
   @override
   void initState() {
@@ -50,6 +63,37 @@ class _CpBoostDialogState extends State<CpBoostDialog>
         }
       }
     });
+
+    if (widget.initialTab == CpBoostTab.rewardedAds) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _adsSectionKey.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
+  }
+
+  void _showInDialogMessage(String msg, {required bool isError}) {
+    _statusMessageTimer?.cancel();
+    if (isError) {
+      AudioService().playAlert();
+    }
+    setState(() {
+      _statusMessage = msg;
+      _isStatusError = isError;
+    });
+    _statusMessageTimer = Timer(const Duration(milliseconds: 3800), () {
+      if (mounted) {
+        setState(() {
+          _statusMessage = null;
+        });
+      }
+    });
   }
 
   Future<void> _checkAdReadiness() async {
@@ -66,6 +110,8 @@ class _CpBoostDialogState extends State<CpBoostDialog>
 
   @override
   void dispose() {
+    _scrollController.dispose();
+    _statusMessageTimer?.cancel();
     _tickerTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
@@ -93,27 +139,53 @@ class _CpBoostDialogState extends State<CpBoostDialog>
   @override
   Widget build(BuildContext context) {
     final saveService = context.watch<SaveService>();
+    final iapService = context.watch<IAPService>();
     final player = saveService.player;
     final remainingAds = _boostService.remainingAdsToday;
     final earnedToday = _boostService.totalCpEarnedToday;
     final cooldownRemaining = _boostService.cooldownRemainingSeconds;
 
+    if (iapService.successMessage != null) {
+      final msg = iapService.successMessage!;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          AudioService().playCollect();
+          _showInDialogMessage(msg, isError: false);
+          iapService.clearMessages();
+        }
+      });
+    } else if (iapService.errorMessage != null) {
+      final msg = iapService.errorMessage!;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showInDialogMessage(msg, isError: true);
+          iapService.clearMessages();
+        }
+      });
+    }
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Container(
-        width: 620,
-        constraints: const BoxConstraints(maxHeight: 380),
+        width: 640,
+        constraints: const BoxConstraints(maxHeight: 410),
         decoration: BoxDecoration(
           color: const Color(0xFF0C101A),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: AppConstants.stealthBlue.withValues(alpha: 0.65),
+            color: _isStatusError && _statusMessage != null
+                ? AppConstants.hazardRed.withValues(alpha: 0.8)
+                : AppConstants.stealthBlue.withValues(alpha: 0.65),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppConstants.stealthBlue.withValues(alpha: 0.25),
+              color:
+                  (_isStatusError && _statusMessage != null
+                          ? AppConstants.hazardRed
+                          : AppConstants.stealthBlue)
+                      .withValues(alpha: 0.25),
               blurRadius: 24,
               spreadRadius: 2,
             ),
@@ -123,32 +195,122 @@ class _CpBoostDialogState extends State<CpBoostDialog>
             ),
           ],
         ),
-        child: Column(
-          children: [
-            // 1. Header Bar
-            _buildHeader(context),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  // 1. Header Bar
+                  _buildHeader(context),
 
-            // 2. Metrics Bar (Current CP, Earned Today, Daily Remaining)
-            _buildMetricsBar(
-              currentCp: player.cyberPoints.value,
-              earnedToday: earnedToday,
-              remainingAds: remainingAds,
-              cooldownRemaining: cooldownRemaining,
-            ),
+                  // 2. Metrics Bar (Current CP, Earned Today, Daily Remaining)
+                  _buildMetricsBar(
+                    currentCp: player.cyberPoints.value,
+                    earnedToday: earnedToday,
+                    remainingAds: remainingAds,
+                    cooldownRemaining: cooldownRemaining,
+                  ),
 
-            // 3. Tiers List
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-                itemCount: CpBoostConfig.tiers.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final tier = CpBoostConfig.tiers[index];
-                  return _buildTierCard(tier, cooldownRemaining);
-                },
+                  // 3. Merged Scrollable Content: Data Vault Recharge + Free Rewarded Ads
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Section 1: Data Vault (Instant Google Play CP Recharge)
+                          _buildSectionHeader(
+                            badge: context.l10n.tr('section_vault'),
+                            title: context.l10n.tr('vault_title'),
+                            subtitle: context.l10n.tr('vault_desc'),
+                            color: AppConstants.coinGold,
+                            icon: Icons.diamond_rounded,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _buildDataVaultCard(
+                                context: context,
+                                label: '+5,000 CP',
+                                sublabel: 'STARTER PACK',
+                                priceTag: iapService.getPrice(
+                                  IAPService.idCP1000,
+                                ),
+                                productId: IAPService.idCP1000,
+                                iapService: iapService,
+                              ),
+                              const SizedBox(width: 10),
+                              _buildDataVaultCard(
+                                context: context,
+                                label: '+10,000 CP',
+                                sublabel: 'OPERATIVE PACK',
+                                priceTag: iapService.getPrice(
+                                  IAPService.idCP5000,
+                                ),
+                                productId: IAPService.idCP5000,
+                                iapService: iapService,
+                                isBestValue: true,
+                              ),
+                              const SizedBox(width: 10),
+                              _buildDataVaultCard(
+                                context: context,
+                                label: '+20,000 CP',
+                                sublabel: 'CYBER OVERLORD',
+                                priceTag: iapService.getPrice(
+                                  IAPService.idCP10000,
+                                ),
+                                productId: IAPService.idCP10000,
+                                iapService: iapService,
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Section 2: Free Rewarded Ads
+                          KeyedSubtree(
+                            key: _adsSectionKey,
+                            child: _buildSectionHeader(
+                              badge: 'FREE BOOST',
+                              title: 'WATCH SHORT REWARDS',
+                              subtitle:
+                                  'Watch short holo-transmissions to earn free CP',
+                              color: AppConstants.stealthBlue,
+                              icon: Icons.movie_filter_rounded,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          for (
+                            int i = 0;
+                            i < CpBoostConfig.tiers.length;
+                            i++
+                          ) ...[
+                            if (i > 0) const SizedBox(height: 8),
+                            _buildTierCard(
+                              CpBoostConfig.tiers[i],
+                              cooldownRemaining,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+
+              // Floating In-Dialog Toast Banner (Renders in front of dialog)
+              if (_statusMessage != null)
+                Positioned(
+                  left: 18,
+                  right: 18,
+                  bottom: 12,
+                  child: _buildFloatingToast(),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -177,7 +339,7 @@ class _CpBoostDialogState extends State<CpBoostDialog>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF00C6FF), Color(0xFF0072FF)],
+                    colors: [Color(0xFF00C6FF), Color(0xFFFFD700)],
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -199,8 +361,8 @@ class _CpBoostDialogState extends State<CpBoostDialog>
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        'CP BOOST',
+                      Text(
+                        context.l10n.tr('cp_boost_dialog_title'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
@@ -235,8 +397,8 @@ class _CpBoostDialogState extends State<CpBoostDialog>
                     ],
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    'Watch short rewards and earn Cyber Points.',
+                  Text(
+                    context.l10n.tr('cp_boost_dialog_sub'),
                     style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w600,
@@ -260,6 +422,338 @@ class _CpBoostDialogState extends State<CpBoostDialog>
               AudioService().playClick();
               Navigator.of(context).pop();
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required String badge,
+    required String title,
+    String? subtitle,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.5),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: color, size: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    badge,
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: color,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ],
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.45),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDataVaultCard({
+    required BuildContext context,
+    required String label,
+    required String sublabel,
+    required String priceTag,
+    required String productId,
+    required IAPService iapService,
+    bool isBestValue = false,
+  }) {
+    final isLoading = iapService.isLoading;
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF131828),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isBestValue
+                ? AppConstants.coinGold
+                : Colors.white.withValues(alpha: 0.15),
+            width: isBestValue ? 1.8 : 1.0,
+          ),
+          boxShadow: isBestValue
+              ? [
+                  BoxShadow(
+                    color: AppConstants.coinGold.withValues(alpha: 0.18),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Top Badge
+            if (isBestValue)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFD700), Color(0xFFFF9100)],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  context.l10n.tr('best_value'),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 8.5,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  sublabel,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 8,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 6),
+
+            // Icon Lockup
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isBestValue
+                    ? AppConstants.coinGold.withValues(alpha: 0.18)
+                    : const Color(0xFF00E5FF).withValues(alpha: 0.12),
+                border: Border.all(
+                  color: isBestValue
+                      ? AppConstants.coinGold.withValues(alpha: 0.7)
+                      : const Color(0xFF00E5FF).withValues(alpha: 0.4),
+                  width: 1.2,
+                ),
+              ),
+              child: Icon(
+                Icons.diamond_rounded,
+                color: isBestValue
+                    ? AppConstants.coinGold
+                    : const Color(0xFF00E5FF),
+                size: 24,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            // CP Amount Text
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.8,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Buy Button
+            SizedBox(
+              width: double.infinity,
+              height: 34,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isBestValue
+                      ? AppConstants.coinGold
+                      : const Color(0xFF1E283E),
+                  foregroundColor: isBestValue
+                      ? Colors.black
+                      : AppConstants.coinGold,
+                  elevation: isBestValue ? 4 : 0,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(
+                      color: isBestValue
+                          ? AppConstants.coinGold
+                          : AppConstants.coinGold.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        AudioService().playClick();
+                        await iapService.buyCP(productId);
+                      },
+                child: isLoading
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppConstants.coinGold,
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 13,
+                            color: isBestValue
+                                ? Colors.black
+                                : AppConstants.coinGold,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            priceTag,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              color: isBestValue
+                                  ? Colors.black
+                                  : AppConstants.coinGold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingToast() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: _isStatusError
+            ? const Color(0xFF220D12)
+            : const Color(0xFF0D2216),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _isStatusError
+              ? AppConstants.hazardRed
+              : const Color(0xFF00E676),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.85),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color:
+                (_isStatusError
+                        ? AppConstants.hazardRed
+                        : const Color(0xFF00E676))
+                    .withValues(alpha: 0.35),
+            blurRadius: 14,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _isStatusError
+                ? Icons.warning_amber_rounded
+                : Icons.check_circle_outline_rounded,
+            color: _isStatusError
+                ? AppConstants.hazardRed
+                : const Color(0xFF00E676),
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _statusMessage ?? '',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                color: _isStatusError ? Colors.white : const Color(0xFFE0FFE8),
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              setState(() {
+                _statusMessage = null;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.close_rounded,
+                size: 14,
+                color: Colors.white70,
+              ),
+            ),
           ),
         ],
       ),
@@ -520,10 +1014,10 @@ class _CpBoostDialogState extends State<CpBoostDialog>
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.white12),
           ),
-          child: const Center(
+          child: Center(
             child: Text(
-              'LIMIT REACHED',
-              style: TextStyle(
+              context.l10n.tr('limit_reached'),
+              style: const TextStyle(
                 fontSize: 9.5,
                 fontWeight: FontWeight.w800,
                 color: Colors.white30,
@@ -553,7 +1047,7 @@ class _CpBoostDialogState extends State<CpBoostDialog>
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'READY IN ${cooldownRemaining}s',
+                  '${context.l10n.tr('ready_in')} ${cooldownRemaining}s',
                   style: const TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w800,
@@ -584,19 +1078,19 @@ class _CpBoostDialogState extends State<CpBoostDialog>
                 width: 1.0,
               ),
             ),
-            child: const Center(
+            child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.refresh_rounded,
                     size: 13,
                     color: Color(0xFFFF9800),
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
-                    'AD NOT READY',
-                    style: TextStyle(
+                    context.l10n.tr('ad_not_ready'),
+                    style: const TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFFFF9800),
@@ -637,19 +1131,19 @@ class _CpBoostDialogState extends State<CpBoostDialog>
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.play_arrow_rounded,
                         color: Colors.white,
                         size: 16,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
-                        'WATCH AD',
-                        style: TextStyle(
+                        context.l10n.tr('watch_ad'),
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,

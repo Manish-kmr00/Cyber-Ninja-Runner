@@ -8,7 +8,7 @@ import '../../core/constants/game_enums.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
 import '../dialogs/feedback_dialog.dart';
-import 'shop_screen.dart';
+import '../widgets/cp_boost_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -99,8 +99,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                           ),
                         ),
                         const SizedBox(width: 10),
-                        const Text(
-                          'GLOBAL LOCALIZATION MATRIX',
+                        Text(
+                          context.l10n.tr('global_matrix_dialog'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -256,8 +256,8 @@ class _SettingsScreenState extends State<SettingsScreen>
           children: [
             const Icon(Icons.analytics_outlined, color: AppConstants.hazardRed),
             const SizedBox(width: 10),
-            const Text(
-              'RESET MISSION TELEMETRY',
+            Text(
+              context.l10n.tr('reset_stats_dialog_title'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w900,
@@ -268,9 +268,13 @@ class _SettingsScreenState extends State<SettingsScreen>
             ),
           ],
         ),
-        content: const Text(
-          'This will reset your Sector High Scores and Run Records to 0 M. Your Cyber Points and unlocked Chassis skins will NOT be lost.',
-          style: TextStyle(color: Colors.white70, fontSize: 12.5, height: 1.4),
+        content: Text(
+          context.l10n.tr('reset_stats_dialog_desc'),
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 12.5,
+            height: 1.4,
+          ),
         ),
         actions: [
           TextButton(
@@ -278,9 +282,9 @@ class _SettingsScreenState extends State<SettingsScreen>
               AudioService().playClick();
               Navigator.of(dialogCtx).pop();
             },
-            child: const Text(
-              'CANCEL',
-              style: TextStyle(color: Colors.white60),
+            child: Text(
+              context.l10n.tr('cancel_btn'),
+              style: const TextStyle(color: Colors.white60),
             ),
           ),
           ElevatedButton(
@@ -293,11 +297,11 @@ class _SettingsScreenState extends State<SettingsScreen>
               saveService.resetStatsOnly();
               Navigator.of(dialogCtx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: Color(0xFF141926),
+                SnackBar(
+                  backgroundColor: const Color(0xFF141926),
                   content: Text(
-                    '// MISSION TELEMETRY RESET COMPLETED',
-                    style: TextStyle(
+                    context.l10n.tr('telemetry_reset_toast'),
+                    style: const TextStyle(
                       color: Color(0xFF00E5FF),
                       fontFamily: 'monospace',
                     ),
@@ -305,9 +309,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
               );
             },
-            child: const Text(
-              'RESET RECORDS',
-              style: TextStyle(fontWeight: FontWeight.w900),
+            child: Text(
+              context.l10n.tr('reset_records_btn'),
+              style: const TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -336,8 +340,8 @@ class _SettingsScreenState extends State<SettingsScreen>
               size: 24,
             ),
             const SizedBox(width: 10),
-            const Text(
-              'FACTORY DATA WIPE',
+            Text(
+              context.l10n.tr('factory_wipe_dialog_title'),
               style: TextStyle(
                 color: AppConstants.hazardRed,
                 fontWeight: FontWeight.w900,
@@ -348,9 +352,13 @@ class _SettingsScreenState extends State<SettingsScreen>
             ),
           ],
         ),
-        content: const Text(
-          'WARNING: This will permanently wipe all Cyber Points, unlocked skins, game modes, and all records back to fresh install defaults. This action CANNOT be undone.',
-          style: TextStyle(color: Colors.white70, fontSize: 12.5, height: 1.4),
+        content: Text(
+          context.l10n.tr('factory_wipe_dialog_desc'),
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 12.5,
+            height: 1.4,
+          ),
         ),
         actions: [
           TextButton(
@@ -358,7 +366,10 @@ class _SettingsScreenState extends State<SettingsScreen>
               AudioService().playClick();
               Navigator.of(dialogCtx).pop();
             },
-            child: const Text('ABORT', style: TextStyle(color: Colors.white60)),
+            child: Text(
+              context.l10n.tr('abort_btn'),
+              style: const TextStyle(color: Colors.white60),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -370,11 +381,11 @@ class _SettingsScreenState extends State<SettingsScreen>
               saveService.resetAllProgress();
               Navigator.of(dialogCtx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: Color(0xFF141926),
+                SnackBar(
+                  backgroundColor: const Color(0xFF141926),
                   content: Text(
-                    '// FULL FACTORY DATA RESET COMPLETED',
-                    style: TextStyle(
+                    context.l10n.tr('factory_reset_toast'),
+                    style: const TextStyle(
                       color: AppConstants.hazardRed,
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
@@ -383,9 +394,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
               );
             },
-            child: const Text(
-              'CONFIRM WIPE',
-              style: TextStyle(fontWeight: FontWeight.w900),
+            child: Text(
+              context.l10n.tr('confirm_wipe_btn'),
+              style: const TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -396,6 +407,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     final saveService = context.watch<SaveService>();
+    final l10n = context.l10n;
 
     final currentLang = AppLocalizations.supportedLanguages.firstWhere(
       (l) => l.code == saveService.settings.languageCode,
@@ -486,8 +498,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Text(
-                                'SYSTEM CONFIGURATION',
+                              Text(
+                                l10n.tr('settings_sys_config'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 17,
@@ -500,7 +512,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '// CYBER MATRIX KERNEL V2.5 // CORE PREFERENCES & PROTOCOLS',
+                            l10n.tr('settings_sys_subtitle'),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.50),
                               fontSize: 9.5,
@@ -560,9 +572,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ),
                                 ),
                                 const SizedBox(width: 6),
-                                const Text(
-                                  'SYS: OPTIMAL',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.tr('sys_optimal'),
+                                  style: const TextStyle(
                                     color: Color(0xFF00E676),
                                     fontSize: 10,
                                     fontWeight: FontWeight.w900,
@@ -577,7 +589,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                       const SizedBox(width: 12),
 
-                      // CP Vault Balance (Tap to open Arsenal & Hangar Store)
+                      // CP Vault Balance (Tap to open CP Recharge Data Vault)
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -587,11 +599,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                           ),
                           onTap: () {
                             AudioService().playClick();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const ShopScreen(
-                                  initialScrollToVault: true,
-                                ),
+                            showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (_) => const CpBoostDialog(
+                                initialTab: CpBoostTab.dataVault,
                               ),
                             );
                           },
@@ -684,19 +696,18 @@ class _SettingsScreenState extends State<SettingsScreen>
                             children: [
                               // Card 1: Audio & Haptics Matrix
                               _buildCyberCard(
-                                title: 'AUDIO & SENSORY MATRIX',
-                                subtitle:
-                                    '// ACOUSTIC ENGINE & HAPTIC FEEDBACK',
+                                title: l10n.tr('audio_sensory_matrix'),
+                                subtitle: l10n.tr('audio_sensory_sub'),
                                 accentColor: const Color(0xFF00E5FF),
                                 icon: Icons.headphones_rounded,
                                 child: Column(
                                   children: [
                                     // Master Mute Toggle
                                     _buildCyberSwitchTile(
-                                      title: 'Master Audio Output',
+                                      title: l10n.tr('master_audio_output'),
                                       subtitle: saveService.settings.isMuted
-                                          ? 'ALL AUDIO SILENCED'
-                                          : 'AUDIO OUTPUT ACTIVE',
+                                          ? l10n.tr('audio_silenced')
+                                          : l10n.tr('audio_active'),
                                       icon: saveService.settings.isMuted
                                           ? Icons.volume_off_rounded
                                           : Icons.volume_up_rounded,
@@ -723,7 +734,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                                     // BGM Volume Slider
                                     _buildCyberSliderTile(
-                                      title: 'BGM / Cyber Synthwave Volume',
+                                      title: l10n.tr('bgm_volume_title'),
                                       percent:
                                           (saveService.settings.musicVolume *
                                                   100)
@@ -747,7 +758,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                                     // SFX Volume Slider
                                     _buildCyberSliderTile(
-                                      title: 'SFX & Weapon Blade Volume',
+                                      title: l10n.tr('sfx_volume_title'),
                                       percent:
                                           (saveService.settings.sfxVolume * 100)
                                               .toInt(),
@@ -777,9 +788,8 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                                     // Haptics Toggle
                                     _buildCyberSwitchTile(
-                                      title: 'Cyber Haptic Vibration',
-                                      subtitle:
-                                          'Tactile pulses on Jump, Katana Slash & Impact',
+                                      title: l10n.tr('cyber_haptics_title'),
+                                      subtitle: l10n.tr('cyber_haptics_sub'),
                                       icon: Icons.vibration_rounded,
                                       accentColor: const Color(0xFF00E5FF),
                                       value:
@@ -801,12 +811,12 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                               // Card 2: Controls & HUD Customization
                               _buildCyberCard(
-                                title: 'CONTROLS & HUD DOCK',
+                                title: l10n.tr('controls_hud_dock'),
                                 subtitle:
                                     saveService.settings.controlScheme ==
                                         ControlScheme.swipe
-                                    ? '// GESTURE SWIPE & SENSITIVITY CONFIG'
-                                    : '// ACTION PEDALS GLOW & OPACITY DOCK',
+                                    ? l10n.tr('swipe_config_sub')
+                                    : l10n.tr('buttons_config_sub'),
                                 accentColor: const Color(0xFFFFB300),
                                 icon: Icons.sports_esports_rounded,
                                 child: Column(
@@ -816,8 +826,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     Row(
                                       children: [
                                         _buildControlModeCard(
-                                          title: 'SWIPE',
-                                          subtitle: 'Left: Jump • Right: Slash',
+                                          title: l10n.tr('swipe_title'),
+                                          subtitle: l10n.tr('swipe_sub'),
                                           accentColor: const Color(0xFF00E5FF),
                                           isSelected:
                                               saveService
@@ -845,7 +855,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                                     ),
                                                     const SizedBox(height: 2),
                                                     Text(
-                                                      'LEFT: JUMP',
+                                                      l10n.tr('left_jump'),
                                                       style: TextStyle(
                                                         color:
                                                             const Color(
@@ -879,7 +889,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                                     ),
                                                     const SizedBox(height: 2),
                                                     Text(
-                                                      'RIGHT: SLASH',
+                                                      l10n.tr('right_slash'),
                                                       style: TextStyle(
                                                         color:
                                                             const Color(
@@ -901,8 +911,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                         ),
                                         const SizedBox(width: 10),
                                         _buildControlModeCard(
-                                          title: 'BUTTONS',
-                                          subtitle: 'Pedals: Jump • Slash',
+                                          title: l10n.tr('buttons_title'),
+                                          subtitle: l10n.tr('buttons_sub'),
                                           accentColor: const Color(0xFFFFB300),
                                           isSelected:
                                               saveService
@@ -954,7 +964,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                                     ),
                                                     const SizedBox(height: 2),
                                                     Text(
-                                                      'JUMP',
+                                                      l10n.tr('action_jump'),
                                                       style: TextStyle(
                                                         color:
                                                             const Color(
@@ -1012,7 +1022,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                                     ),
                                                     const SizedBox(height: 2),
                                                     Text(
-                                                      'SLASH',
+                                                      l10n.tr('action_slash'),
                                                       style: TextStyle(
                                                         color:
                                                             const Color(
@@ -1050,7 +1060,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     ] else ...[
                                       // Button Opacity Slider
                                       _buildCyberSliderTile(
-                                        title: 'HUD Pedal Opacity / Glow',
+                                        title: l10n.tr('button_opacity_title'),
                                         percent:
                                             (saveService
                                                         .settings
@@ -1084,22 +1094,21 @@ class _SettingsScreenState extends State<SettingsScreen>
                             children: [
                               // Card 3: Game Protocols & Localization
                               _buildCyberCard(
-                                title: 'PROTOCOLS & INTERFACE',
-                                subtitle:
-                                    '// SYSTEM OVERRIDES & LOCALIZATION MATRIX',
+                                title: l10n.tr('protocols_interface'),
+                                subtitle: l10n.tr('protocols_interface_sub'),
                                 accentColor: const Color(0xFFD500F9),
                                 icon: Icons.developer_mode_rounded,
                                 child: Column(
                                   children: [
                                     // Screen Glow / Visual FX Toggle
                                     _buildCyberSwitchTile(
-                                      title: 'Ultra Neon Bloom & FX',
+                                      title: l10n.tr('neon_bloom_title'),
                                       subtitle:
                                           saveService
                                               .settings
                                               .highQualityEffects
-                                          ? 'ENABLED: Full particle trails & neon bloom'
-                                          : 'BATTERY SAVER: Minimal shader footprint',
+                                          ? l10n.tr('fx_enabled_sub')
+                                          : l10n.tr('fx_battery_sub'),
                                       icon: Icons.auto_awesome_rounded,
                                       accentColor: const Color(0xFFD500F9),
                                       value: saveService
@@ -1149,8 +1158,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    const Text(
-                                                      'Interface Language',
+                                                    Text(
+                                                      l10n.tr(
+                                                        'interface_language',
+                                                      ),
                                                       style: TextStyle(
                                                         color: Colors.white,
                                                         fontWeight:
@@ -1242,9 +1253,8 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                               // Card 4: Data Vault & Studio Hub
                               _buildCyberCard(
-                                title: 'DATA VAULT & STUDIO ACCESS',
-                                subtitle:
-                                    '// MISSION ARCHIVE & MOON EDGE STUDIO HUB',
+                                title: l10n.tr('data_vault_studio'),
+                                subtitle: l10n.tr('data_vault_studio_sub'),
                                 accentColor: AppConstants.hazardRed,
                                 icon: Icons.shield_moon_rounded,
                                 child: Column(
@@ -1254,7 +1264,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       children: [
                                         Expanded(
                                           child: _buildCyberButton(
-                                            label: 'RESET TELEMETRY',
+                                            label: l10n.tr(
+                                              'reset_telemetry_btn',
+                                            ),
                                             icon: Icons.replay_rounded,
                                             color: const Color(0xFF00E5FF),
                                             onTap: () => _showResetStatsDialog(
@@ -1266,7 +1278,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: _buildCyberButton(
-                                            label: 'FACTORY RESET',
+                                            label: l10n.tr('factory_reset_btn'),
                                             icon: Icons.delete_forever_rounded,
                                             color: AppConstants.hazardRed,
                                             onTap: () =>
@@ -1288,9 +1300,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       children: [
                                         Expanded(
                                           child: _buildCyberLinkCard(
-                                            title: 'MOON EDGE STUDIO',
-                                            subtitle:
-                                                'Developer Catalog on Google Play',
+                                            title: l10n.tr('moon_edge_studio'),
+                                            subtitle: l10n.tr(
+                                              'dev_catalog_sub',
+                                            ),
                                             icon: Icons.shop_rounded,
                                             accentColor: const Color(
                                               0xFF00E676,
@@ -1301,9 +1314,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: _buildCyberLinkCard(
-                                            title: 'IMAGE RESIZER',
-                                            subtitle:
-                                                'Featured Utility Tool on Play Store',
+                                            title: l10n.tr('image_resizer'),
+                                            subtitle: l10n.tr(
+                                              'image_resizer_sub',
+                                            ),
                                             icon: Icons
                                                 .photo_size_select_large_rounded,
                                             accentColor: const Color(
@@ -1322,16 +1336,15 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                               // Card 5: Feedback & Problem Report (Google Apps Script / Gmail)
                               _buildCyberCard(
-                                title: 'OPERATIVE FEEDBACK & REPORT PROBLEM',
-                                subtitle:
-                                    '// DIRECT DISPATCH TO DEVELOPER GMAIL VIA GOOGLE SCRIPT',
+                                title: l10n.tr('feedback_title'),
+                                subtitle: l10n.tr('feedback_sub'),
                                 accentColor: const Color(0xFF00E5FF),
                                 icon: Icons.mark_email_unread_rounded,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Facing a glitch, obstacle bug, or have ideas to improve Cyber Ninja Runner? Transmit direct logs and problem descriptions to the developer via Google Gmail script link.',
+                                    Text(
+                                      l10n.tr('feedback_desc'),
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontSize: 11.5,
@@ -1341,8 +1354,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     ),
                                     const SizedBox(height: 12),
                                     _buildCyberButton(
-                                      label:
-                                          'TRANSMIT FEEDBACK / REPORT PROBLEM',
+                                      label: l10n.tr('feedback_btn'),
                                       icon: Icons.send_rounded,
                                       color: const Color(0xFF00E5FF),
                                       onTap: () => FeedbackDialog.show(
@@ -1371,7 +1383,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'CYBER NINJA RUNNER // PROTOCOL V2.5 // CORE CLEANROOM ENGINE',
+                    l10n.tr('watermark_engine'),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.35),
                       fontSize: 9,
@@ -1380,7 +1392,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ),
                   ),
                   Text(
-                    '© MOON EDGE STUDIO • ALL RIGHTS RESERVED',
+                    l10n.tr('watermark_rights'),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.35),
                       fontSize: 9,
@@ -1857,6 +1869,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     required SaveService saveService,
     required Color accentColor,
   }) {
+    final l10n = AppLocalizations(saveService.settings.languageCode);
     final sensitivity = saveService.settings.swipeSensitivity;
     final percentInt = (sensitivity * 100).toInt();
 
@@ -1870,9 +1883,9 @@ class _SettingsScreenState extends State<SettingsScreen>
               children: [
                 Icon(Icons.tune_rounded, size: 14, color: accentColor),
                 const SizedBox(width: 6),
-                const Text(
-                  'Sensitivity',
-                  style: TextStyle(
+                Text(
+                  l10n.tr('sensitivity_title'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
                     fontSize: 12.5,
@@ -1930,7 +1943,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Low',
+                l10n.tr('slider_low'),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 10,
@@ -1939,7 +1952,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
               ),
               Text(
-                'High',
+                l10n.tr('slider_high'),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 10,

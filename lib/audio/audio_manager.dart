@@ -272,21 +272,24 @@ class AudioManager with WidgetsBindingObserver {
   // 6. ADAPTIVE MUSIC SYSTEM
   // =========================================================================
 
-  Future<void> setMusicState(MusicState newState) async {
+  Future<void> setMusicState(MusicState newState, {bool force = false}) async {
     if (_isAudioQaRunning) {
       debugPrint(
         '[AudioManager] setMusicState ($newState) ignored during active Audio QA suite',
       );
       return;
     }
-    if (_currentMusicState == newState) return;
+    if (!force && _currentMusicState == newState) return;
     _currentMusicState = newState;
 
     if (_isMuted || effectiveMusicVolume <= 0) return;
 
+    // Ensure music bus is always unpaused when setting a new active music state
+    _fmod.setBusPaused('bus:/Music', false);
+
     switch (newState) {
       case MusicState.menu:
-        _fmod.stopMusicTrack(musicGameplayEvent);
+        _fmod.stopMusicTrack(musicGameplayEvent, immediate: true);
         _fmod.stopMusicTrack(musicDangerEvent);
         _fmod.setGlobalParameter('MusicState', 0.0);
         _fmod.playMusicTrack(musicMenuEvent);
@@ -295,6 +298,7 @@ class AudioManager with WidgetsBindingObserver {
       case MusicState.gameplay:
         _fmod.stopMusicTrack(musicMenuEvent);
         _fmod.stopMusicTrack(musicDangerEvent);
+        _fmod.stopMusicTrack(musicGameplayEvent, immediate: true);
         _fmod.setGlobalParameter('MusicState', 1.0);
         _fmod.playMusicTrack(musicGameplayEvent);
         break;

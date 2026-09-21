@@ -1,3 +1,4 @@
+import '../../core/localization/app_localizations.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -343,12 +344,12 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
               ),
             ),
             const SizedBox(width: 12),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'NEURAL SUPPLY DROP',
-                  style: TextStyle(
+                  context.l10n.tr('neural_supply_drop'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
@@ -356,8 +357,8 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
                   ),
                 ),
                 Text(
-                  'CYBERNETIC 24H REWARD PROTOCOL',
-                  style: TextStyle(
+                  context.l10n.tr('cybernetic_reward_protocol'),
+                  style: const TextStyle(
                     color: AppConstants.stealthBlue,
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
@@ -440,17 +441,17 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning_amber_rounded,
                 color: Color(0xFFFF4D63),
                 size: 18,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
-                'STREAK INTERRUPTED! Restore with 100 CP or Restart.',
-                style: TextStyle(
+                context.l10n.tr('streak_interrupted'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -462,8 +463,8 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
             children: [
               TextButton(
                 onPressed: _resetStreak,
-                child: const Text(
-                  'Restart Day 1',
+                child: Text(
+                  context.l10n.tr('restart_day_1'),
                   style: TextStyle(color: Colors.white54, fontSize: 11),
                 ),
               ),
@@ -480,8 +481,8 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
                   ),
                 ),
                 onPressed: _restoreStreak,
-                child: const Text(
-                  'Restore (100 CP)',
+                child: Text(
+                  context.l10n.tr('restore_streak'),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -672,8 +673,8 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
 
               // Tap Prompt / Cooldown Banner
               if (_stage == _CrateStage.locked) ...[
-                const Text(
-                  'CRATE RECHARGING',
+                Text(
+                  context.l10n.tr('crate_recharging'),
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 12,
@@ -683,7 +684,7 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Next supply beacon unlocks in ${_formatDuration(_remainingMs)}',
+                  '${context.l10n.tr('next_supply_beacon')} ${_formatDuration(_remainingMs)}',
                   style: const TextStyle(color: Colors.white38, fontSize: 10),
                 ),
               ] else ...[
@@ -991,9 +992,9 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
                 padding: const EdgeInsets.symmetric(horizontal: 16),
               ),
               onPressed: _isWatchingAd ? null : _claimAndClose,
-              child: const Text(
-                'CLAIM STANDARD',
-                style: TextStyle(
+              child: Text(
+                context.l10n.tr('claim_standard'),
+                style: const TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 12,
                   letterSpacing: 1.0,
@@ -1074,9 +1075,9 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
             AudioService().playClick();
             Navigator.of(context).pop();
           },
-          child: const Text(
-            'RETURN TO BASE',
-            style: TextStyle(
+          child: Text(
+            context.l10n.tr('return_to_base'),
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
               letterSpacing: 1.2,
@@ -1087,7 +1088,7 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
     }
 
     return Text(
-      'STEP ${_tapCount + 1} OF 3: TAP CRATE TO PROCEED',
+      '${context.l10n.tr('tap_crate_step')} ${_tapCount + 1} ${context.l10n.tr('of_step')}',
       style: TextStyle(
         color: _getGlowColor().withValues(alpha: 0.7),
         fontSize: 11,

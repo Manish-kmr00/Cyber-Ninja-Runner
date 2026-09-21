@@ -60,12 +60,15 @@ class _StartMenuScreenState extends State<StartMenuScreen>
     );
   }
 
-  void _openCpBoostDialog(BuildContext context) {
+  void _openCpBoostDialog(
+    BuildContext context, {
+    CpBoostTab initialTab = CpBoostTab.rewardedAds,
+  }) {
     AudioService().playClick();
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => const CpBoostDialog(),
+      builder: (_) => CpBoostDialog(initialTab: initialTab),
     );
   }
 
@@ -160,18 +163,18 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                             ).withValues(alpha: 0.5),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.verified_rounded,
                               color: Color(0xFFFF007F),
                               size: 14,
                             ),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Text(
-                              'OFFICIAL DEVELOPER',
-                              style: TextStyle(
+                              context.l10n.tr('official_developer'),
+                              style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w900,
                                 color: Color(0xFFFF007F),
@@ -236,8 +239,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     ),
                   ),
                   const SizedBox(height: 3),
-                  const Text(
-                    'INNOVATIVE MOBILE GAMING & ACTION EXPERIENCES',
+                  Text(
+                    context.l10n.tr('studio_sub'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 8.5,
@@ -261,8 +264,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white10),
                     ),
-                    child: const Text(
-                      'Explore our full catalog of games, updates, and upcoming releases directly on Google Play Store.',
+                    child: Text(
+                      context.l10n.tr('studio_desc'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 11.5,
@@ -499,13 +502,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                AudioService().playClick();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const ShopScreen(initialScrollToVault: true),
-                  ),
-                );
+                _openCpBoostDialog(context, initialTab: CpBoostTab.dataVault);
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -628,7 +625,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
             ),
             SizedBox(width: isCompact ? 4 : 6),
             Text(
-              'TRY: IMG RESIZER',
+              context.l10n.tr('try_img_resizer'),
               style: TextStyle(
                 fontSize: isCompact ? 9 : 10.5,
                 fontWeight: FontWeight.w900,
@@ -1226,7 +1223,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'UNLOCK MAP',
+                            context.l10n.tr('unlock_map'),
                             style: TextStyle(
                               fontSize: isCompact ? 7.5 : 9,
                               fontWeight: FontWeight.w900,
@@ -1345,18 +1342,18 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                             ),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.security_rounded,
                               size: 12,
                               color: AppConstants.hazardRed,
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             Text(
-                              'SECTOR CLEARANCE REQUIRED',
-                              style: TextStyle(
+                              context.l10n.tr('sector_clearance_req'),
+                              style: const TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w900,
                                 color: AppConstants.hazardRed,
@@ -1412,8 +1409,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'UNLOCK CLEARANCE FEE:',
+                            Text(
+                              context.l10n.tr('unlock_fee'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -1434,8 +1431,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'YOUR CURRENT BALANCE:',
+                            Text(
+                              context.l10n.tr('current_balance'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -1459,8 +1456,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'ADDITIONAL CP NEEDED:',
+                              Text(
+                                context.l10n.tr('additional_cp_needed'),
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
@@ -1497,8 +1494,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                             ),
                           ),
                           onPressed: () => Navigator.of(dialogCtx).pop(),
-                          child: const Text(
-                            'CANCEL',
+                          child: Text(
+                            context.l10n.tr('cancel'),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
@@ -1555,8 +1552,8 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                           },
                           child: Text(
                             canAfford
-                                ? 'AUTHORIZE & UNLOCK'
-                                : 'ACQUIRE CP (SHOP)',
+                                ? context.l10n.tr('unlock_access_now')
+                                : '${context.l10n.tr('buy')} CP (${context.l10n.tr('section_armory')})',
                             style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 11,
@@ -1854,7 +1851,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      'DEV HUB // GOOGLE PLAY',
+                      context.l10n.tr('dev_hub_google_play'),
                       style: TextStyle(
                         fontSize: isCompact ? 6.5 : 7.5,
                         fontWeight: FontWeight.w800,

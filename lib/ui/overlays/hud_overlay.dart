@@ -1,9 +1,12 @@
+import '../../core/localization/app_localizations.dart';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
+import '../../core/gameplay/difficulty/difficulty_config.dart';
 import '../../core/storage/save_service.dart';
 import '../../game/cyber_ninja_game.dart';
 
@@ -22,6 +25,13 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
   late final Animation<double> _sectorBannerOpacity;
   late final Animation<Offset> _sectorBannerSlide;
   SectorBiome? _announcedSector;
+
+  late final AnimationController _milestoneBannerController;
+  late final Animation<double> _milestoneBannerOpacity;
+  late final Animation<Offset> _milestoneBannerSlide;
+  MilestoneThreshold? _announcedMilestone;
+  bool _showDebugOverlay = false;
+
   Offset? _swipeStartOffset;
   bool _swipeActionTriggered = false;
 
@@ -88,12 +98,53 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
         });
       }
     };
+
+    _milestoneBannerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _milestoneBannerController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        if (mounted) {
+          setState(() {
+            _announcedMilestone = null;
+          });
+        }
+      }
+    });
+    _milestoneBannerOpacity = CurvedAnimation(
+      parent: _milestoneBannerController,
+      curve: Curves.easeOut,
+    );
+    _milestoneBannerSlide =
+        Tween<Offset>(begin: const Offset(0, -0.6), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _milestoneBannerController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    widget.game.difficultyManager.onMilestoneReached = (milestone) {
+      if (mounted) {
+        setState(() {
+          _announcedMilestone = milestone;
+        });
+        _milestoneBannerController.forward(from: 0.0);
+        AudioService().playAlert();
+        Future.delayed(const Duration(milliseconds: 2800), () {
+          if (mounted && _announcedMilestone == milestone) {
+            _milestoneBannerController.reverse();
+          }
+        });
+      }
+    };
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
     _sectorBannerController.dispose();
+    _milestoneBannerController.dispose();
     super.dispose();
   }
 
@@ -191,98 +242,164 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Distance & Telemetry Display (Exact Sci-Fi Chamfered Frame)
-                      CustomPaint(
-                        painter: _SciFiCardBorderPainter(
-                          borderColor: widget.game.currentSector.primaryAccent,
-                          glowColor: widget.game.currentSector.primaryAccent
-                              .withValues(alpha: 0.35),
-                          cut: (12.0 * scale).clamp(8.0, 16.0),
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: (14.0 * scale).clamp(10.0, 22.0),
-                            vertical: (6.0 * scale).clamp(4.0, 10.0),
+                      GestureDetector(
+                        onDoubleTap: kDebugMode
+                            ? () => setState(
+                                () => _showDebugOverlay = !_showDebugOverlay,
+                              )
+                            : null,
+                        child: CustomPaint(
+                          painter: _SciFiCardBorderPainter(
+                            borderColor:
+                                widget.game.currentSector.primaryAccent,
+                            glowColor: widget.game.currentSector.primaryAccent
+                                .withValues(alpha: 0.35),
+                            cut: (12.0 * scale).clamp(8.0, 16.0),
                           ),
-                          color: Colors.transparent,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
-                                    '${widget.game.currentDistance}',
-                                    style: TextStyle(
-                                      fontSize: (25.0 * scale).clamp(
-                                        18.0,
-                                        32.0,
-                                      ),
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white,
-                                      letterSpacing: 1.0,
-                                      fontFamily: 'monospace',
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: (14.0 * scale).clamp(10.0, 22.0),
+                              vertical: (6.0 * scale).clamp(4.0, 10.0),
+                            ),
+                            color: Colors.transparent,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      children: [
+                                        Text(
+                                          '${widget.game.currentDistance}',
+                                          style: TextStyle(
+                                            fontSize: (25.0 * scale).clamp(
+                                              18.0,
+                                              32.0,
+                                            ),
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            letterSpacing: 1.0,
+                                            fontFamily: 'monospace',
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: (5.0 * scale).clamp(3.0, 8.0),
+                                        ),
+                                        Text(
+                                          'M',
+                                          style: TextStyle(
+                                            fontSize: (14.0 * scale).clamp(
+                                              11.0,
+                                              18.0,
+                                            ),
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            letterSpacing: 1.0,
+                                            fontFamily: 'monospace',
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: (5.0 * scale).clamp(3.0, 8.0),
-                                  ),
-                                  Text(
-                                    'M',
-                                    style: TextStyle(
-                                      fontSize: (14.0 * scale).clamp(
-                                        11.0,
-                                        18.0,
-                                      ),
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white,
-                                      letterSpacing: 1.0,
-                                      fontFamily: 'monospace',
+                                    SizedBox(
+                                      height: (1.0 * scale).clamp(0.5, 2.0),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: (1.0 * scale).clamp(0.5, 2.0)),
-                              Text(
-                                'SECTOR BEST: $bestScore M',
-                                style: TextStyle(
-                                  fontSize: (9.5 * scale).clamp(7.5, 11.0),
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white.withValues(alpha: 0.65),
-                                  letterSpacing: 1.0,
-                                  fontFamily: 'monospace',
+                                    Text(
+                                      '${context.l10n.tr('sector_best')} $bestScore M',
+                                      style: TextStyle(
+                                        fontSize: (9.5 * scale).clamp(
+                                          7.5,
+                                          11.0,
+                                        ),
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.65,
+                                        ),
+                                        letterSpacing: 1.0,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: (5.0 * scale).clamp(3.0, 7.0),
+                                    ),
+                                    // Exact Chamfered Sector Pill
+                                    CustomPaint(
+                                      painter: _SciFiPillBorderPainter(
+                                        color: widget
+                                            .game
+                                            .currentSector
+                                            .primaryAccent,
+                                        cut: (5.0 * scale).clamp(3.0, 6.0),
+                                      ),
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: (8.0 * scale).clamp(
+                                            6.0,
+                                            10.0,
+                                          ),
+                                          vertical: (2.5 * scale).clamp(
+                                            1.5,
+                                            4.0,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '${widget.game.currentSector.sectorTag} | [${widget.game.currentSector.displayName}]',
+                                          style: TextStyle(
+                                            fontSize: (8.5 * scale).clamp(
+                                              7.0,
+                                              10.0,
+                                            ),
+                                            fontWeight: FontWeight.w900,
+                                            color: widget
+                                                .game
+                                                .currentSector
+                                                .primaryAccent,
+                                            letterSpacing: 1.0,
+                                            fontFamily: 'monospace',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              SizedBox(height: (5.0 * scale).clamp(3.0, 7.0)),
-                              // Exact Chamfered Sector Pill
-                              CustomPaint(
-                                painter: _SciFiPillBorderPainter(
-                                  color:
+                                SizedBox(
+                                  width: (10.0 * scale).clamp(6.0, 14.0),
+                                ),
+                                // Sci-Fi Tech Divider Line
+                                Container(
+                                  width: 1.2,
+                                  height: (48.0 * scale).clamp(38.0, 56.0),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        widget.game.currentSector.primaryAccent
+                                            .withValues(alpha: 0.05),
+                                        widget.game.currentSector.primaryAccent
+                                            .withValues(alpha: 0.55),
+                                        widget.game.currentSector.primaryAccent
+                                            .withValues(alpha: 0.05),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: (10.0 * scale).clamp(6.0, 14.0),
+                                ),
+                                // Animated Cyber Ninja Avatar
+                                _AnimatedNinjaAvatar(
+                                  accentColor:
                                       widget.game.currentSector.primaryAccent,
-                                  cut: (5.0 * scale).clamp(3.0, 6.0),
+                                  scale: scale,
                                 ),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: (8.0 * scale).clamp(6.0, 10.0),
-                                    vertical: (2.5 * scale).clamp(1.5, 4.0),
-                                  ),
-                                  child: Text(
-                                    '${widget.game.currentSector.sectorTag} | [${widget.game.currentSector.displayName}]',
-                                    style: TextStyle(
-                                      fontSize: (8.5 * scale).clamp(7.0, 10.0),
-                                      fontWeight: FontWeight.w900,
-                                      color: widget
-                                          .game
-                                          .currentSector
-                                          .primaryAccent,
-                                      letterSpacing: 1.0,
-                                      fontFamily: 'monospace',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -325,7 +442,8 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                                   if (bm.isEmpShockwaveActive)
                                     _buildActiveTimerBadge(
                                       icon: Icons.electric_bolt_rounded,
-                                      label: 'EMP BLAST',
+                                      label:
+                                          'EMP ${bm.empShockwaveTimer.toStringAsFixed(1)}s',
                                       color: const Color(0xFFFF3366),
                                       scale: scale,
                                     ),
@@ -438,98 +556,113 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildBoosterPill(
-                            type: BoosterType.safeGround,
-                            icon: Icons.shield_rounded,
-                            color: AppConstants.stealthBlue,
-                            count:
-                                saveService
-                                    .player
-                                    .boosters[BoosterType.safeGround]
-                                    ?.value ??
-                                0,
-                            scale: scale,
-                            onTap: () {
-                              if (saveService.useBooster(
-                                BoosterType.safeGround,
-                              )) {
-                                widget.game.boosterManager.activateBooster(
-                                  BoosterType.safeGround,
-                                );
-                                AudioService().playBooster();
-                              }
-                            },
-                          ),
-                          SizedBox(height: (5.0 * scale).clamp(3.0, 8.0)),
-                          _buildBoosterPill(
-                            type: BoosterType.matrixSlowMo,
-                            icon: Icons.slow_motion_video_rounded,
-                            color: AppConstants.matrixGreen,
-                            count:
-                                saveService
-                                    .player
-                                    .boosters[BoosterType.matrixSlowMo]
-                                    ?.value ??
-                                0,
-                            scale: scale,
-                            onTap: () {
-                              if (saveService.useBooster(
-                                BoosterType.matrixSlowMo,
-                              )) {
-                                widget.game.boosterManager.activateBooster(
-                                  BoosterType.matrixSlowMo,
-                                );
-                                AudioService().playBooster();
-                              }
-                            },
-                          ),
-                          SizedBox(height: (5.0 * scale).clamp(3.0, 8.0)),
-                          _buildBoosterPill(
-                            type: BoosterType.invisibility,
-                            icon: Icons.visibility_off_rounded,
-                            color: const Color(0xFFD500F9),
-                            count:
-                                saveService
-                                    .player
-                                    .boosters[BoosterType.invisibility]
-                                    ?.value ??
-                                0,
-                            scale: scale,
-                            onTap: () {
-                              if (saveService.useBooster(
-                                BoosterType.invisibility,
-                              )) {
-                                widget.game.boosterManager.activateBooster(
-                                  BoosterType.invisibility,
-                                );
-                                AudioService().playBooster();
-                              }
-                            },
-                          ),
-                          SizedBox(height: (5.0 * scale).clamp(3.0, 8.0)),
-                          _buildBoosterPill(
-                            type: BoosterType.killEyes,
-                            icon: Icons.electric_bolt_rounded,
-                            color: const Color(0xFFFF3366),
-                            count:
-                                saveService
-                                    .player
-                                    .boosters[BoosterType.killEyes]
-                                    ?.value ??
-                                0,
-                            scale: scale,
-                            onTap: () {
-                              if (saveService.useBooster(
-                                BoosterType.killEyes,
-                              )) {
-                                widget.game.triggerEmpShockwave();
-                              }
-                            },
-                          ),
-                        ],
+                      ListenableBuilder(
+                        listenable: widget.game.boosterManager,
+                        builder: (context, _) {
+                          final bm = widget.game.boosterManager;
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildBoosterPill(
+                                type: BoosterType.safeGround,
+                                icon: Icons.shield_rounded,
+                                color: AppConstants.stealthBlue,
+                                count:
+                                    saveService
+                                        .player
+                                        .boosters[BoosterType.safeGround]
+                                        ?.value ??
+                                    0,
+                                scale: scale,
+                                activeTimeRemaining: bm.safeGroundTimeRemaining,
+                                onTap: () {
+                                  if (saveService.useBooster(
+                                    BoosterType.safeGround,
+                                  )) {
+                                    widget.game.boosterManager.activateBooster(
+                                      BoosterType.safeGround,
+                                    );
+                                    AudioService().playBooster();
+                                    setState(() {});
+                                  }
+                                },
+                              ),
+                              SizedBox(height: (5.0 * scale).clamp(3.0, 8.0)),
+                              _buildBoosterPill(
+                                type: BoosterType.matrixSlowMo,
+                                icon: Icons.slow_motion_video_rounded,
+                                color: AppConstants.matrixGreen,
+                                count:
+                                    saveService
+                                        .player
+                                        .boosters[BoosterType.matrixSlowMo]
+                                        ?.value ??
+                                    0,
+                                scale: scale,
+                                activeTimeRemaining: bm.matrixTimeRemaining,
+                                onTap: () {
+                                  if (saveService.useBooster(
+                                    BoosterType.matrixSlowMo,
+                                  )) {
+                                    widget.game.boosterManager.activateBooster(
+                                      BoosterType.matrixSlowMo,
+                                    );
+                                    AudioService().playBooster();
+                                    setState(() {});
+                                  }
+                                },
+                              ),
+                              SizedBox(height: (5.0 * scale).clamp(3.0, 8.0)),
+                              _buildBoosterPill(
+                                type: BoosterType.invisibility,
+                                icon: Icons.visibility_off_rounded,
+                                color: const Color(0xFFD500F9),
+                                count:
+                                    saveService
+                                        .player
+                                        .boosters[BoosterType.invisibility]
+                                        ?.value ??
+                                    0,
+                                scale: scale,
+                                activeTimeRemaining:
+                                    bm.invisibilityTimeRemaining,
+                                onTap: () {
+                                  if (saveService.useBooster(
+                                    BoosterType.invisibility,
+                                  )) {
+                                    widget.game.boosterManager.activateBooster(
+                                      BoosterType.invisibility,
+                                    );
+                                    AudioService().playBooster();
+                                    setState(() {});
+                                  }
+                                },
+                              ),
+                              SizedBox(height: (5.0 * scale).clamp(3.0, 8.0)),
+                              _buildBoosterPill(
+                                type: BoosterType.killEyes,
+                                icon: Icons.electric_bolt_rounded,
+                                color: const Color(0xFFFF3366),
+                                count:
+                                    saveService
+                                        .player
+                                        .boosters[BoosterType.killEyes]
+                                        ?.value ??
+                                    0,
+                                scale: scale,
+                                activeTimeRemaining: bm.empShockwaveTimer,
+                                onTap: () {
+                                  if (saveService.useBooster(
+                                    BoosterType.killEyes,
+                                  )) {
+                                    widget.game.triggerEmpShockwave();
+                                    setState(() {});
+                                  }
+                                },
+                              ),
+                            ],
+                          );
+                        },
                       ),
                       // Left Action Pedal (Only visible in BUTTONS mode)
                       if (!isSwipeMode) ...[
@@ -587,7 +720,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                             ),
                             SizedBox(width: (6.0 * scale).clamp(4.0, 8.0)),
                             Text(
-                              'SWIPE CONTROLS ACTIVE // LEFT: ⇡ JUMP • RIGHT: ⚡ SLASH',
+                              context.l10n.tr('swipe_hud_hint'),
                               style: TextStyle(
                                 color: const Color(
                                   0xFF00E5FF,
@@ -703,6 +836,200 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+
+                // 4b. Milestone Announcement Banner
+                if (_announcedMilestone != null)
+                  Positioned(
+                    top: (55.0 * scale).clamp(36.0, 80.0),
+                    left: 0,
+                    right: 0,
+                    child: IgnorePointer(
+                      ignoring: true,
+                      child: Center(
+                        child: FadeTransition(
+                          opacity: _milestoneBannerOpacity,
+                          child: SlideTransition(
+                            position: _milestoneBannerSlide,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: (22.0 * scale).clamp(16.0, 28.0),
+                                vertical: (10.0 * scale).clamp(7.0, 14.0),
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFF140810,
+                                ).withValues(alpha: 0.95),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppConstants.hazardRed,
+                                  width: 1.8,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppConstants.hazardRed.withValues(
+                                      alpha: 0.45,
+                                    ),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: AppConstants.hazardRed,
+                                        size: (15.0 * scale).clamp(12.0, 18.0),
+                                      ),
+                                      SizedBox(
+                                        width: (6.0 * scale).clamp(4.0, 8.0),
+                                      ),
+                                      Text(
+                                        '// THREAT LEVEL ELEVATED //',
+                                        style: TextStyle(
+                                          color: AppConstants.hazardRed,
+                                          fontSize: (10.0 * scale).clamp(
+                                            8.5,
+                                            11.5,
+                                          ),
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 2.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: (3.0 * scale).clamp(2.0, 5.0),
+                                  ),
+                                  Text(
+                                    _announcedMilestone!.title,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: (18.0 * scale).clamp(
+                                        14.0,
+                                        22.0,
+                                      ),
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 2.5,
+                                    ),
+                                  ),
+                                  Text(
+                                    _announcedMilestone!.subtitle,
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: (9.0 * scale).clamp(7.5, 10.5),
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // 5. Development-Only Difficulty Debug Overlay (Gated to kDebugMode)
+                if (kDebugMode && _showDebugOverlay)
+                  Positioned(
+                    top: (55.0 * scale).clamp(40.0, 85.0),
+                    right: 14,
+                    child: ListenableBuilder(
+                      listenable: widget.game.difficultyManager,
+                      builder: (context, _) {
+                        final s = widget.game.difficultyManager.state;
+                        final history = widget
+                            .game
+                            .difficultyManager
+                            .patternSystem
+                            .recentPatternHistory;
+                        return Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.90),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppConstants.stealthBlue,
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppConstants.stealthBlue.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'DIFFICULTY DIRECTOR [DEBUG]',
+                                style: TextStyle(
+                                  color: AppConstants.matrixGreen,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Dist: ${s.currentDistance}m | Tier: ${s.difficultyTier.name} (Lvl ${s.difficultyLevel})',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.5,
+                                ),
+                              ),
+                              Text(
+                                'Speed: ${s.currentForwardSpeed.toStringAsFixed(1)} px/s (${s.speedMultiplier.toStringAsFixed(2)}x)',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.5,
+                                ),
+                              ),
+                              Text(
+                                'Density: ${(s.obstacleDensity * 100).toStringAsFixed(0)}% | React: ${s.minReactionTime.toStringAsFixed(2)}s',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.5,
+                                ),
+                              ),
+                              Text(
+                                'Near Misses: ${s.nearMissCount} | Streak: ${s.currentRunStreak}',
+                                style: const TextStyle(
+                                  color: Colors.cyanAccent,
+                                  fontSize: 9.5,
+                                ),
+                              ),
+                              Text(
+                                'Pattern: ${s.activePatternName}',
+                                style: const TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 9.5,
+                                ),
+                              ),
+                              if (history.isNotEmpty)
+                                Text(
+                                  'History: ${history.join(", ")}',
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 8.5,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
               ],
             );
           },
@@ -754,7 +1081,9 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
     required int count,
     required VoidCallback onTap,
     double scale = 1.0,
+    double activeTimeRemaining = 0.0,
   }) {
+    final isActive = activeTimeRemaining > 0;
     final hasStock = count > 0;
     final pillW = (44.0 * scale).clamp(36.0, 54.0);
     final pillH = (48.0 * scale).clamp(40.0, 60.0);
@@ -777,7 +1106,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                 side: BorderSide(color: color.withValues(alpha: 0.5)),
               ),
               content: Text(
-                'NO MODULES LEFT: Re-arm in Hangar!',
+                context.l10n.tr('no_modules_left'),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -790,10 +1119,10 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
       },
       child: CustomPaint(
         painter: _HexagonBoosterPainter(
-          borderColor: hasStock ? color : Colors.white24,
-          glowColor: hasStock
-              ? color.withValues(alpha: 0.35)
-              : Colors.transparent,
+          borderColor: isActive ? color : (hasStock ? color : Colors.white24),
+          glowColor: isActive
+              ? color.withValues(alpha: 0.85)
+              : (hasStock ? color.withValues(alpha: 0.35) : Colors.transparent),
         ),
         child: SizedBox(
           width: pillW,
@@ -803,7 +1132,9 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
             children: [
               Icon(
                 icon,
-                color: hasStock ? color : Colors.white24,
+                color: isActive
+                    ? Colors.white
+                    : (hasStock ? color : Colors.white24),
                 size: (20.0 * scale).clamp(16.0, 24.0),
               ),
               Positioned(
@@ -811,19 +1142,29 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                 bottom: (8.0 * scale).clamp(6.0, 12.0),
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: (4.0 * scale).clamp(3.0, 6.0),
+                    horizontal: isActive
+                        ? (3.0 * scale).clamp(2.0, 5.0)
+                        : (4.0 * scale).clamp(3.0, 6.0),
                     vertical: 1,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.transparent,
+                    color: isActive
+                        ? color.withValues(alpha: 0.90)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    '$count',
+                    isActive
+                        ? '${activeTimeRemaining.toStringAsFixed(1)}s'
+                        : '$count',
                     style: TextStyle(
-                      fontSize: (11.5 * scale).clamp(9.0, 14.0),
+                      fontSize: isActive
+                          ? (8.5 * scale).clamp(7.0, 10.5)
+                          : (11.5 * scale).clamp(9.0, 14.0),
                       fontWeight: FontWeight.w900,
-                      color: hasStock ? Colors.white : Colors.white38,
+                      color: isActive
+                          ? Colors.black
+                          : (hasStock ? Colors.white : Colors.white38),
                       fontFamily: 'monospace',
                     ),
                   ),
@@ -889,7 +1230,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: (1.5 * scale).clamp(1.0, 2.5)),
                     Text(
-                      'JUMP',
+                      context.l10n.tr('jump_label'),
                       style: TextStyle(
                         fontSize: (9.5 * scale).clamp(8.0, 11.5),
                         fontWeight: FontWeight.w900,
@@ -963,7 +1304,7 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: (1.5 * scale).clamp(1.0, 2.5)),
                     Text(
-                      'SLASH',
+                      context.l10n.tr('slash_label'),
                       style: TextStyle(
                         fontSize: (9.5 * scale).clamp(8.0, 11.5),
                         fontWeight: FontWeight.w900,
@@ -981,6 +1322,321 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+/// Animated Cyber Ninja Avatar portrait for HUD telemetry card.
+/// Features smooth breathing/hover oscillation, tactical holographic laser scanline sweep,
+/// sci-fi chamfered frame with pulsing neon glow, and live operative link status blip.
+class _AnimatedNinjaAvatar extends StatefulWidget {
+  final Color accentColor;
+  final double scale;
+
+  const _AnimatedNinjaAvatar({required this.accentColor, this.scale = 1.0});
+
+  @override
+  State<_AnimatedNinjaAvatar> createState() => _AnimatedNinjaAvatarState();
+}
+
+class _AnimatedNinjaAvatarState extends State<_AnimatedNinjaAvatar>
+    with TickerProviderStateMixin {
+  late final AnimationController _breathController;
+  late final Animation<double> _breathAnimation;
+  late final AnimationController _scanController;
+  late final Animation<double> _scanAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _breathController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+
+    _breathAnimation = Tween<double>(begin: 0.96, end: 1.04).animate(
+      CurvedAnimation(parent: _breathController, curve: Curves.easeInOutSine),
+    );
+
+    _scanController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    )..repeat();
+
+    _scanAnimation = Tween<double>(begin: -0.2, end: 1.2).animate(
+      CurvedAnimation(parent: _scanController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _breathController.dispose();
+    _scanController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = (52.0 * widget.scale).clamp(42.0, 62.0);
+    final cut = (9.0 * widget.scale).clamp(6.0, 12.0);
+
+    return AnimatedBuilder(
+      animation: Listenable.merge([_breathController, _scanController]),
+      builder: (context, _) {
+        final breath = _breathAnimation.value;
+        final scanProgress = _scanAnimation.value;
+        final glowAlpha = 0.40 + 0.35 * _breathController.value;
+
+        return Transform.scale(
+          scale: breath,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: widget.accentColor.withValues(alpha: glowAlpha * 0.8),
+                  blurRadius: 12 * widget.scale,
+                  spreadRadius: 1.5 * widget.scale,
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Base chamfered ninja image container
+                CustomPaint(
+                  size: Size(size, size),
+                  painter: _SciFiChamferBorderPainter(
+                    borderColor: widget.accentColor,
+                    glowColor: widget.accentColor.withValues(alpha: glowAlpha),
+                    cut: cut,
+                  ),
+                  child: ClipPath(
+                    clipper: _SciFiChamferClipper(cut: cut),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Cyber Tech Radial Background
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.8,
+                              colors: [
+                                widget.accentColor.withValues(alpha: 0.30),
+                                const Color(0xFF090D18),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Ninja Avatar Image (App Icon 512, focused on the glowing cyber ninja)
+                        Transform.scale(
+                          scale: 1.45,
+                          alignment: const Alignment(0.0, -0.65),
+                          child: Image.asset(
+                            'assets/images/app_icon_512.png',
+                            fit: BoxFit.cover,
+                            alignment: const Alignment(0.0, -0.65),
+                            errorBuilder: (_, _, _) => Center(
+                              child: Icon(
+                                Icons.sports_martial_arts_rounded,
+                                color: widget.accentColor,
+                                size: size * 0.7,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Subtle outer rim vignette (leaves center face crystal clear)
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.82,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.35),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Holographic Laser Scanline Sweep
+                        if (scanProgress >= 0.0 && scanProgress <= 1.0)
+                          Positioned(
+                            top: scanProgress * size - 4,
+                            left: 0,
+                            right: 0,
+                            height: 8,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    widget.accentColor.withValues(alpha: 0.0),
+                                    widget.accentColor.withValues(alpha: 0.85),
+                                    Colors.white,
+                                    widget.accentColor.withValues(alpha: 0.85),
+                                    widget.accentColor.withValues(alpha: 0.0),
+                                  ],
+                                  stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Corner Tech Reticles (Sci-Fi brackets on top-left)
+                Positioned(
+                  top: -2,
+                  left: -2,
+                  child: Container(
+                    width: 5 * widget.scale,
+                    height: 5 * widget.scale,
+                    decoration: BoxDecoration(
+                      color: widget.accentColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+
+                // Tactical Status Dot (Bottom Right Pulse)
+                Positioned(
+                  bottom: -1,
+                  right: -1,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 3.5 * widget.scale,
+                      vertical: 1.0 * widget.scale,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF070A12).withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(3),
+                      border: Border.all(
+                        color: const Color(0xFF00E5FF).withValues(alpha: 0.8),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 4 * widget.scale,
+                          height: 4 * widget.scale,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF00E676),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFF00E676,
+                                ).withValues(alpha: 0.8),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 2.5 * widget.scale),
+                        Text(
+                          'LINK',
+                          style: TextStyle(
+                            fontSize: (6.5 * widget.scale).clamp(5.0, 8.0),
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF00E5FF),
+                            fontFamily: 'monospace',
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Custom Clipper for Chamfered Sci-Fi Polygon
+class _SciFiChamferClipper extends CustomClipper<Path> {
+  final double cut;
+
+  _SciFiChamferClipper({required this.cut});
+
+  @override
+  Path getClip(Size size) {
+    final c = cut.clamp(2.0, size.width * 0.35);
+    return Path()
+      ..moveTo(c, 0)
+      ..lineTo(size.width - c, 0)
+      ..lineTo(size.width, c)
+      ..lineTo(size.width, size.height - c)
+      ..lineTo(size.width - c, size.height)
+      ..lineTo(c, size.height)
+      ..lineTo(0, size.height - c)
+      ..lineTo(0, c)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant _SciFiChamferClipper oldClipper) =>
+      oldClipper.cut != cut;
+}
+
+/// Custom Border Painter for Chamfered Sci-Fi Polygon
+class _SciFiChamferBorderPainter extends CustomPainter {
+  final Color borderColor;
+  final Color glowColor;
+  final double cut;
+
+  _SciFiChamferBorderPainter({
+    required this.borderColor,
+    required this.glowColor,
+    required this.cut,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = cut.clamp(2.0, size.width * 0.35);
+    final path = Path()
+      ..moveTo(c, 0)
+      ..lineTo(size.width - c, 0)
+      ..lineTo(size.width, c)
+      ..lineTo(size.width, size.height - c)
+      ..lineTo(size.width - c, size.height)
+      ..lineTo(c, size.height)
+      ..lineTo(0, size.height - c)
+      ..lineTo(0, c)
+      ..close();
+
+    // Outer Neon Glow
+    final glowPaint = Paint()
+      ..color = glowColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.8
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    canvas.drawPath(path, glowPaint);
+
+    // Sharp Sci-Fi Stroke
+    final strokePaint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+    canvas.drawPath(path, strokePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SciFiChamferBorderPainter oldDelegate) =>
+      oldDelegate.borderColor != borderColor ||
+      oldDelegate.glowColor != glowColor ||
+      oldDelegate.cut != cut;
 }
 
 /// Exact Sci-Fi Beveled Chamfered Card Border Painter

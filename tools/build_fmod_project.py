@@ -57,26 +57,27 @@ function cleanEvent(ev) {
         js_lines.append("    cleanEvent(ev);")
         
         if ev_path == "event:/Music/Gameplay":
-            # 3 Stems on 3 separate GroupTracks
-            stem_names = [
-                ("Base Gameplay Layer", "music_gameplay_base.wav"),
-                ("Intensity Layer", "music_gameplay_intensity.wav"),
-                ("Danger Layer", "music_gameplay_danger.wav"),
-            ]
-            for track_name, fn in stem_names:
-                js_lines.append(f"""
-    var track_{fn.replace(".", "_")} = studio.project.create("GroupTrack");
-    track_{fn.replace(".", "_")}.mixerGroup.output = ev.mixer.masterBus;
-    track_{fn.replace(".", "_")}.mixerGroup.name = "{track_name}";
-    ev.relationships.groupTracks.add(track_{fn.replace(".", "_")});
+            fn = "music_gameplay_loop.wav"
+            js_lines.append(f"""
+    var track = studio.project.create("GroupTrack");
+    track.mixerGroup.output = ev.mixer.masterBus;
+    track.mixerGroup.name = "Gameplay Music Loop";
+    ev.relationships.groupTracks.add(track);
     
-    var sound_{fn.replace(".", "_")} = studio.project.create("SingleSound");
-    sound_{fn.replace(".", "_")}.audioFile = audioMap["{fn}"];
-    sound_{fn.replace(".", "_")}.start = 0;
-    sound_{fn.replace(".", "_")}.length = audioMap["{fn}"] ? audioMap["{fn}"].length : 44.0;
-    sound_{fn.replace(".", "_")}.audioTrack = track_{fn.replace(".", "_")};
-    ev.timeline.relationships.modules.add(sound_{fn.replace(".", "_")});
-    track_{fn.replace(".", "_")}.relationships.modules.add(sound_{fn.replace(".", "_")});
+    var sound = studio.project.create("SingleSound");
+    sound.audioFile = audioMap["{fn}"];
+    sound.start = 0;
+    sound.length = audioMap["{fn}"] ? audioMap["{fn}"].length : 44.0;
+    sound.looping = true;
+    sound.audioTrack = track;
+    ev.timeline.relationships.modules.add(sound);
+    track.relationships.modules.add(sound);
+
+    if (ev.markerTracks.length > 0) {
+        var mt = ev.markerTracks[0];
+        var region = mt.addRegion(0, sound.length, "");
+        if (region) region.looping = true;
+    }
 """)
         elif len(ev_assets) == 1:
             # Single asset event (Music/Menu, Music/Danger, Music/Victory, Music/GameOver)

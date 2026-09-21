@@ -22,3 +22,14 @@
 -dontwarn com.tencent.mmkv.**
 
 
+
+# AndroidX WorkManager & Room Database ProGuard Rules
+-keep class * extends androidx.room.RoomDatabase {
+    public <init>();
+}
+-keep class androidx.work.impl.WorkDatabase_Impl {
+    public <init>();
+}
+-keep class androidx.work.** { *; }
+-dontwarn androidx.work.**
+-dontwarn androidx.room.**

@@ -22,6 +22,7 @@ class PlayerData {
   bool isFlightUnlocked = false;
   int dailyStreak = 1;
   int lastDailyClaimEpoch = 0;
+  final Set<String> deliveredTransactionIds = {};
 
   Map<String, dynamic> toJson() => {
     'cyberPoints': cyberPoints.value,
@@ -34,6 +35,7 @@ class PlayerData {
     'isFlightUnlocked': isFlightUnlocked,
     'dailyStreak': dailyStreak,
     'lastDailyClaimEpoch': lastDailyClaimEpoch,
+    'deliveredTransactionIds': deliveredTransactionIds.toList(),
   };
 
   void loadJson(Map<String, dynamic> json) {
@@ -72,6 +74,14 @@ class PlayerData {
     isFlightUnlocked = json['isFlightUnlocked'] ?? false;
     dailyStreak = json['dailyStreak'] ?? 1;
     lastDailyClaimEpoch = json['lastDailyClaimEpoch'] ?? 0;
+    if (json['deliveredTransactionIds'] != null) {
+      deliveredTransactionIds.clear();
+      for (final id in json['deliveredTransactionIds']) {
+        if (id is String && id.trim().isNotEmpty) {
+          deliveredTransactionIds.add(id.trim());
+        }
+      }
+    }
   }
 }
 

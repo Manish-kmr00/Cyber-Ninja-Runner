@@ -4,8 +4,8 @@ import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/game_enums.dart';
 import '../../core/localization/app_localizations.dart';
-import '../../core/services/iap_service.dart';
 import '../../core/storage/save_service.dart';
+import '../widgets/cp_boost_dialog.dart';
 
 class ShopScreen extends StatefulWidget {
   final bool initialScrollToVault;
@@ -18,17 +18,6 @@ class ShopScreen extends StatefulWidget {
 
 class _ShopScreenState extends State<ShopScreen> {
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey _vaultKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialScrollToVault == true) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToDataVault(immediate: false);
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -36,46 +25,9 @@ class _ShopScreenState extends State<ShopScreen> {
     super.dispose();
   }
 
-  void _scrollToDataVault({bool immediate = false}) {
-    final currentContext = _vaultKey.currentContext;
-    if (currentContext != null) {
-      Scrollable.ensureVisible(
-        currentContext,
-        duration: Duration(milliseconds: immediate ? 350 : 650),
-        curve: Curves.easeInOutCubic,
-      );
-    } else if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: immediate ? 350 : 650),
-        curve: Curves.easeInOutCubic,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final saveService = context.watch<SaveService>();
-    final iapService = context.watch<IAPService>();
-
-    if (iapService.successMessage != null) {
-      final msg = iapService.successMessage!;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          AudioService().playCollect();
-          _showPurchasedToast(context, msg);
-          iapService.clearMessages();
-        }
-      });
-    } else if (iapService.errorMessage != null) {
-      final msg = iapService.errorMessage!;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _showPurchasedToast(context, msg);
-          iapService.clearMessages();
-        }
-      });
-    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF070A0F),
@@ -127,7 +79,7 @@ class _ShopScreenState extends State<ShopScreen> {
               ),
             ),
             Text(
-              '// CHASSIS & MODULE CUSTOMIZATION',
+              context.l10n.tr('shop_header_sub'),
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
@@ -140,7 +92,15 @@ class _ShopScreenState extends State<ShopScreen> {
         actions: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: _scrollToDataVault,
+            onTap: () {
+              AudioService().playClick();
+              showDialog(
+                context: context,
+                barrierDismissible: true,
+                builder: (_) =>
+                    const CpBoostDialog(initialTab: CpBoostTab.dataVault),
+              );
+            },
             child: Container(
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -359,7 +319,7 @@ class _ShopScreenState extends State<ShopScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'DAY ${saveService.player.dailyStreak}',
+                          '${context.l10n.tr('day_streak')} ${saveService.player.dailyStreak}',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
@@ -371,64 +331,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
-
-                // Section 4: Data Vault (Cyber Point CP Acquisition)
-                KeyedSubtree(
-                  key: _vaultKey,
-                  child: _buildSectionHeader(
-                    badge: context.l10n.tr('section_vault'),
-                    title: context.l10n.tr('vault_title'),
-                    subtitle: context.l10n.tr('vault_desc'),
-                    color: const Color(0xFFFFD700),
-                    icon: Icons.diamond_rounded,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildCPCard(
-                        amount: 1000,
-                        label: '+1000 CP',
-                        priceTag: iapService.getPrice(IAPService.idCP1000),
-                        isLoading: iapService.isLoading,
-                        onTap: () async {
-                          AudioService().playClick();
-                          await iapService.buyCP(IAPService.idCP1000);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildCPCard(
-                        amount: 5000,
-                        label: '+5000 CP',
-                        priceTag: iapService.getPrice(IAPService.idCP5000),
-                        isBestValue: true,
-                        isLoading: iapService.isLoading,
-                        onTap: () async {
-                          AudioService().playClick();
-                          await iapService.buyCP(IAPService.idCP5000);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildCPCard(
-                        amount: 10000,
-                        label: '+10000 CP',
-                        priceTag: iapService.getPrice(IAPService.idCP10000),
-                        isLoading: iapService.isLoading,
-                        onTap: () async {
-                          AudioService().playClick();
-                          await iapService.buyCP(IAPService.idCP10000);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -609,10 +512,10 @@ class _ShopScreenState extends State<ShopScreen> {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: const Color(0xFF00FF88)),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'CLAIM FREE',
-                    style: TextStyle(
+                    context.l10n.tr('claim_free'),
+                    style: const TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w900,
                       color: Color(0xFF00FF88),
@@ -726,79 +629,6 @@ class _ShopScreenState extends State<ShopScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCPCard({
-    required int amount,
-    required String label,
-    required String priceTag,
-    required VoidCallback onTap,
-    bool isBestValue = false,
-    bool isLoading = false,
-  }) {
-    return GestureDetector(
-      onTap: isLoading ? null : onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppConstants.surfaceDark,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isBestValue ? AppConstants.coinGold : Colors.white24,
-          ),
-        ),
-        child: Column(
-          children: [
-            if (isBestValue)
-              Container(
-                margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppConstants.coinGold,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  'BEST VALUE',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 9,
-                  ),
-                ),
-              ),
-            const Icon(Icons.diamond, color: AppConstants.coinGold, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 6),
-            if (isLoading)
-              const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  color: AppConstants.coinGold,
-                ),
-              )
-            else
-              Text(
-                priceTag,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppConstants.coinGold,
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

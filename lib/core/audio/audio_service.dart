@@ -65,9 +65,12 @@ class AudioService {
   }
 
   // --- Music Engine ---
-  Future<void> setMusicState(MusicState state) => _mgr.setMusicState(state);
-  Future<void> startMenuMusic() => _mgr.setMusicState(MusicState.menu);
-  Future<void> startGameplayMusic() => _mgr.setMusicState(MusicState.gameplay);
+  Future<void> setMusicState(MusicState state, {bool force = false}) =>
+      _mgr.setMusicState(state, force: force);
+  Future<void> startMenuMusic({bool force = false}) =>
+      _mgr.setMusicState(MusicState.menu, force: force);
+  Future<void> startGameplayMusic({bool force = true}) =>
+      _mgr.setMusicState(MusicState.gameplay, force: force);
   Future<void> pauseMusic() => _mgr.pauseMusic();
   Future<void> resumeMusic() => _mgr.resumeMusic();
   Future<void> stopMusic() => _mgr.stopMusic();

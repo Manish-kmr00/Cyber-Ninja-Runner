@@ -270,18 +270,7 @@ class DarkBox extends BaseHazard with HasGameReference<CyberNinjaRunnerGame> {
       if (bullet.isDead) continue;
       final bWorld = myWorld + bullet.position;
 
-      // Katana Slash Mechanic: Ninja slices all incoming bullets in front!
-      if (isSlashing) {
-        if (bWorld.x <= pPos.x + player.size.x + 140.0 &&
-            bWorld.x >= pPos.x - 35.0 &&
-            (bWorld.y - (pPos.y - player.size.y * 0.45)).abs() < 70.0) {
-          bullet.isDead = true;
-          _spawnImpactSparks(bullet.position);
-          AudioService().playClick();
-          continue;
-        }
-      }
-
+      // Bullets cannot be sliced or deflected by sword - ninja must jump or slide dodge!
       // Clean slide dodge under chest-height bullets (bullet at y ~ 566, player sliding height is low)
       if (isSliding && bWorld.y < pPos.y - player.size.y * 0.32) {
         continue;

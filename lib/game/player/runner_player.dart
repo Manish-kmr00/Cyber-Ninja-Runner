@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flame/components.dart';
-import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
@@ -63,6 +62,25 @@ class FootstepDust {
   });
 }
 
+/// Running glowing cyan streak particle dot.
+class CyanStreakDot {
+  Vector2 position;
+  Vector2 vel;
+  double radius;
+  double alpha;
+  double lifeTime;
+  final double maxLifeTime;
+
+  CyanStreakDot({
+    required this.position,
+    required this.vel,
+    required this.radius,
+    this.alpha = 0.85,
+    this.lifeTime = 0.22,
+    this.maxLifeTime = 0.22,
+  });
+}
+
 /// Abstract base class for playable runner character (Cyber Ninja / Shadow Shinobi)
 abstract class RunnerPlayer extends PositionComponent
     with HasGameReference<CyberNinjaRunnerGame> {
@@ -75,6 +93,15 @@ abstract class RunnerPlayer extends PositionComponent
   bool isSlashing = false;
   bool isDead = false;
   bool canDoubleJump = false;
+
+  /// Previous Y position before physics integration (enables continuous collision sweep)
+  double previousY = 0.0;
+
+  /// True ONLY when ninja has genuinely fallen into an unshielded pit opening below track deck
+  bool isFallingInPit = false;
+
+  /// Lightweight cyan particle dots rendered directly on canvas
+  final List<CyanStreakDot> cyanStreakDots = [];
 
   bool get isInvisibilityActive {
     try {
@@ -123,12 +150,16 @@ abstract class RunnerPlayer extends PositionComponent
 
   Color getGhostNeonColor();
 
-  /// Dynamic base running speed scaling with distance traversed.
-  /// Smoothly accelerates from 250 px/s at start to 330+ px/s over 1500m.
+  /// Dynamic base running speed determined deterministically by the Difficulty Director.
+  /// Smoothly scales forward speed based on configurable curve (up to max speed cap).
   double get currentBaseSpeed {
-    final distanceMeters = (position.x / 10).clamp(0.0, 3000.0);
-    final progress = (distanceMeters / 1500.0).clamp(0.0, 1.0);
-    return AppConstants.playerBaseSpeed + (progress * 80.0);
+    final distanceMeters = (position.x / 10).clamp(0.0, 50000.0).round();
+    try {
+      return game.difficultyManager.getCurrentSpeed(distanceMeters);
+    } catch (_) {
+      final progress = (distanceMeters / 1500.0).clamp(0.0, 1.0);
+      return AppConstants.playerBaseSpeed + (progress * 80.0);
+    }
   }
 
   void jump() {
@@ -211,6 +242,7 @@ abstract class RunnerPlayer extends PositionComponent
         AudioService().triggerHaptic(heavy: true);
       }
     }
+    isFallingInPit = false;
     isGrounded = true;
     canDoubleJump = false;
     velocity.y = 0;
@@ -237,6 +269,8 @@ abstract class RunnerPlayer extends PositionComponent
   void update(double dt) {
     if (isDead) return;
 
+    previousY = position.y;
+
     final speedMultiplier = isSliding ? AppConstants.slideSpeedMultiplier : 1.0;
     velocity.x = currentBaseSpeed * speedMultiplier;
     velocity.y += AppConstants.gravity * dt;
@@ -260,39 +294,34 @@ abstract class RunnerPlayer extends PositionComponent
 
     hideController.update(dt, isDuckingOrHidden: isSliding);
 
-    // 1. Glowing Cyan Streak Trail (Flame's ParticleSystemComponent)
+    // 1. Glowing Cyan Streak Trail
     if (velocity.x > 0 && !isDead) {
       particleTrailTimer += dt;
       if (particleTrailTimer >= 0.032) {
         particleTrailTimer = 0.0;
-        final cyanStreak = ParticleSystemComponent(
-          particle: Particle.generate(
-            count: 2,
-            lifespan: 0.22,
-            generator: (i) => AcceleratedParticle(
-              acceleration: Vector2(
-                -50.0,
-                (Random().nextDouble() - 0.5) * 20.0,
-              ),
-              speed: Vector2(
-                -80.0 - Random().nextDouble() * 30.0,
-                (Random().nextDouble() - 0.5) * 15.0,
-              ),
-              position: Vector2(
-                -size.x / 2 + (Random().nextDouble() * 4.0),
-                -size.y * (0.35 + Random().nextDouble() * 0.3),
-              ),
-              child: CircleParticle(
-                radius: 2.2 + Random().nextDouble() * 2.0,
-                paint: Paint()
-                  ..color = const Color(0xFF00E5FF).withValues(alpha: 0.85)
-                  ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
-              ),
+        cyanStreakDots.add(
+          CyanStreakDot(
+            position: Vector2(
+              position.x - size.x / 2 + (Random().nextDouble() * 4.0),
+              position.y - size.y * (0.35 + Random().nextDouble() * 0.3),
             ),
+            vel: Vector2(
+              -80.0 - Random().nextDouble() * 30.0,
+              (Random().nextDouble() - 0.5) * 15.0,
+            ),
+            radius: 2.2 + Random().nextDouble() * 2.0,
           ),
-          position: position.clone(),
         );
-        parent?.add(cyanStreak);
+      }
+    }
+
+    for (int i = cyanStreakDots.length - 1; i >= 0; i--) {
+      final p = cyanStreakDots[i];
+      p.position += p.vel * dt;
+      p.lifeTime -= dt;
+      p.alpha = max(0.0, 0.85 * (p.lifeTime / p.maxLifeTime));
+      if (p.lifeTime <= 0) {
+        cyanStreakDots.removeAt(i);
       }
     }
 
@@ -356,8 +385,22 @@ abstract class RunnerPlayer extends PositionComponent
     super.update(dt);
   }
 
-  /// Render global particles (Shockwaves, Ghost Trails, Dust Puffs) relative to world coordinates
+  /// Render global particles (Shockwaves, Ghost Trails, Dust Puffs, Cyan Streaks) relative to world coordinates
   void renderWorldFX(Canvas canvas) {
+    // 0. Glowing Cyan Streaks
+    for (final dot in cyanStreakDots) {
+      final relOffset = dot.position - position;
+      final cyanPaint = Paint()
+        ..color = const Color(0xFF00E5FF).withValues(alpha: dot.alpha)
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.0);
+      canvas.drawCircle(
+        Offset(relOffset.x, relOffset.y),
+        dot.radius,
+        cyanPaint,
+      );
+    }
+
     // 1. Shockwaves
     for (final s in shockwaves) {
       final relOffset = s.position - position;

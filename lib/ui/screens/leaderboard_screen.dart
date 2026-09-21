@@ -543,6 +543,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     required SaveService saveService,
     required List<_RankEntry> baseRoster,
   }) {
+    final l10n = context.l10n;
     // Inject the player's live entry
     final rosterWithUser = List<_RankEntry>.from(baseRoster);
     final userEntry = _RankEntry(
@@ -637,7 +638,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'GLOBAL SHADOW ROSTER [TOP AGENTS]',
+                              l10n.tr('leaderboard_roster'),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.8),
                                 fontSize: 11,
@@ -648,7 +649,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                           ],
                         ),
                         Text(
-                          '${rosterWithUser.length} CLASSIFIED ENTRIES',
+                          '${rosterWithUser.length} ${l10n.tr('classified_entries')}',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.4),
                             fontSize: 10,
@@ -735,17 +736,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     color: AppConstants.coinGold.withValues(alpha: 0.5),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.workspace_premium_rounded,
                       color: AppConstants.coinGold,
                       size: 13,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
-                      'APEX WORLD RECORD',
-                      style: TextStyle(
+                      context.l10n.tr('apex_world_record'),
+                      style: const TextStyle(
                         color: AppConstants.coinGold,
                         fontSize: 9.5,
                         fontWeight: FontWeight.w900,
@@ -840,9 +841,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'APEX RECORD',
-                  style: TextStyle(
+                Text(
+                  context.l10n.tr('apex_record'),
+                  style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -932,9 +933,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    'YOUR OPERATIVE DOSSIER',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.tr('operative_dossier'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
@@ -975,9 +976,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'PERSONAL RECORD',
-                  style: TextStyle(
+                Text(
+                  context.l10n.tr('personal_record'),
+                  style: const TextStyle(
                     color: Colors.white60,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -1250,9 +1251,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'YOU',
-                          style: TextStyle(
+                        child: Text(
+                          context.l10n.tr('rank_you'),
+                          style: const TextStyle(
                             color: AppConstants.stealthBlue,
                             fontSize: 8.5,
                             fontWeight: FontWeight.w900,

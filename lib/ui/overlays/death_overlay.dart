@@ -25,37 +25,54 @@ class _DeathOverlayState extends State<DeathOverlay> {
   CyberNinjaRunnerGame get game => widget.game;
 
   Future<void> _watchAdToRevive() async {
+    debugPrint('REVIVE_DEBUG: BUTTON_CLICKED');
+    debugPrint(
+      'REVIVE_DEBUG: TopOn initialized=${MonetizationManager().isInitialized}',
+    );
     if (_isWatchingReviveAd) return;
     setState(() => _isWatchingReviveAd = true);
 
+    bool rewardGranted = false;
     try {
       final success = await MonetizationManager().showRewarded(
         rewardType: RewardType.revive,
+        onReviveReward: () {
+          debugPrint('REVIVE_DEBUG: onReviveReward callback received from SDK');
+          rewardGranted = true;
+        },
       );
 
-      if (!mounted) return;
-      setState(() => _isWatchingReviveAd = false);
+      if (mounted) {
+        setState(() => _isWatchingReviveAd = false);
+      }
 
-      if (success) {
+      if (success || rewardGranted) {
+        debugPrint(
+          'REVIVE_DEBUG: Ad flow completed with verified reward. Executing exact revive now.',
+        );
         AudioService().playCollect();
         AudioService().playBooster();
         game.revivePlayer();
+        debugPrint('REVIVE_DEBUG: PLAYER_REVIVED_AT_EXACT_LOCATION');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF141926),
-            duration: Duration(milliseconds: 1800),
-            content: Text(
-              '// AD UNAVAILABLE OR CANCELLED. YOU CAN STILL REVIVE WITH 2,000 CP.',
-              style: TextStyle(
-                color: AppConstants.stealthBlue,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'monospace',
-                fontSize: 11,
+        debugPrint('REVIVE_DEBUG: Ad closed without reward or load failed.');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color(0xFF141926),
+              duration: const Duration(milliseconds: 1800),
+              content: Text(
+                context.l10n.tr('ad_unavailable_toast'),
+                style: TextStyle(
+                  color: AppConstants.stealthBlue,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                ),
               ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -179,7 +196,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
-            'NEURAL LINK SEVERED',
+            context.l10n.tr('neural_link_severed'),
             style: TextStyle(
               fontSize: isCompact ? 16 : 18,
               fontWeight: FontWeight.w900,
@@ -193,7 +210,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
-            'CHASSIS INTEGRITY COMPROMISED',
+            context.l10n.tr('chassis_compromised'),
             style: TextStyle(
               fontSize: isCompact ? 9 : 10,
               fontWeight: FontWeight.w600,
@@ -232,7 +249,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
                 child: Column(
                   children: [
                     Text(
-                      'DISTANCE',
+                      context.l10n.tr('distance_label'),
                       style: TextStyle(
                         fontSize: compact ? 9 : 10,
                         fontWeight: FontWeight.w700,
@@ -282,7 +299,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
                 child: Column(
                   children: [
                     Text(
-                      'LOOT COLLECTED',
+                      context.l10n.tr('loot_collected'),
                       style: TextStyle(
                         fontSize: compact ? 9 : 10,
                         fontWeight: FontWeight.w700,
@@ -387,7 +404,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppConstants.coinGold, width: 1.0),
               ),
-              child: const FittedBox(
+              child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -399,7 +416,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
                     ),
                     SizedBox(width: 4),
                     Text(
-                      'NEW RECORD REGISTERED!',
+                      context.l10n.tr('new_record_registered'),
                       style: TextStyle(
                         color: AppConstants.coinGold,
                         fontSize: 9.5,
@@ -415,7 +432,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                'SECTOR BEST: $bestDistance M',
+                '${context.l10n.tr('sector_best')} $bestDistance M',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.45),
                   fontSize: 9.5,
@@ -466,8 +483,8 @@ class _DeathOverlayState extends State<DeathOverlay> {
               const SizedBox(width: 6),
               Text(
                 _isWatchingReviveAd
-                    ? 'CONNECTING AD FEED...'
-                    : 'WATCH AD → FREE REVIVE',
+                    ? context.l10n.tr('ad_connecting')
+                    : context.l10n.tr('watch_ad_revive'),
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
@@ -521,8 +538,8 @@ class _DeathOverlayState extends State<DeathOverlay> {
                       : AppConstants.hazardRed,
                 ),
                 const SizedBox(width: 5),
-                const Text(
-                  'CONTINUE SPOT:',
+                Text(
+                  context.l10n.tr('continue_spot'),
                   style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
@@ -555,7 +572,7 @@ class _DeathOverlayState extends State<DeathOverlay> {
             ),
             const SizedBox(width: 10),
             Text(
-              'VAULT: ${saveService.player.cyberPoints.value} CP',
+              '${context.l10n.tr('cp_vault')} ${saveService.player.cyberPoints.value} CP',
               style: TextStyle(
                 fontSize: 9.5,
                 fontWeight: FontWeight.w900,
@@ -618,11 +635,11 @@ class _DeathOverlayState extends State<DeathOverlay> {
           } else {
             AudioService().playClick();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                backgroundColor: Color(0xFF141926),
-                duration: Duration(milliseconds: 1800),
+              SnackBar(
+                backgroundColor: const Color(0xFF141926),
+                duration: const Duration(milliseconds: 1800),
                 content: Text(
-                  '// INSUFFICIENT CP (2,000 CP REQUIRED). RESTARTING MISSION FROM 0 M...',
+                  context.l10n.tr('insufficient_cp_toast'),
                   style: TextStyle(
                     color: AppConstants.hazardRed,
                     fontWeight: FontWeight.bold,
@@ -712,11 +729,11 @@ class _DeathOverlayState extends State<DeathOverlay> {
                 size: 14,
                 color: Color(0xFF00E5FF),
               ),
-              label: const FittedBox(
+              label: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  'RESTART',
-                  style: TextStyle(
+                  context.l10n.tr('restart_btn'),
+                  style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 11,
                     letterSpacing: 0.8,

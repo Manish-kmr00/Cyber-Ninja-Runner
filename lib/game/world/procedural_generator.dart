@@ -13,10 +13,13 @@ import '../hazards/stakes.dart';
 import '../hazards/traffic_barrier_hazard.dart';
 import 'chunk_models.dart';
 import 'track_segment_models.dart';
+import '../../core/gameplay/difficulty/difficulty_manager.dart';
+import '../../core/gameplay/difficulty/solvability_validator.dart';
 
 class ProceduralGenerator {
   final Random random;
   final GameMode gameMode;
+  final DifficultyManager difficultyManager;
   final List<WorldChunk> activeChunks = [];
   double currentEndCoordinateX = 0.0;
   double currentElevation = 0.0;
@@ -27,8 +30,16 @@ class ProceduralGenerator {
   int maxThemeSegments = 3;
   final List<CyberEnvironmentTheme> recentThemes = [];
 
-  ProceduralGenerator({this.gameMode = GameMode.run, int? seed})
-    : random = Random(seed ?? DateTime.now().millisecondsSinceEpoch);
+  ProceduralGenerator({
+    this.gameMode = GameMode.run,
+    int? seed,
+    DifficultyManager? difficultyManager,
+  }) : random = Random(seed ?? DateTime.now().millisecondsSinceEpoch),
+       difficultyManager =
+           difficultyManager ??
+           DifficultyManager(
+             random: Random(seed ?? DateTime.now().millisecondsSinceEpoch),
+           );
 
   void reset() {
     activeChunks.clear();
@@ -39,6 +50,7 @@ class ProceduralGenerator {
     currentThemeSegmentCount = 0;
     maxThemeSegments = 3;
     recentThemes.clear();
+    difficultyManager.reset();
   }
 
   /// Calculates which dynamic sector biome should be rendered at the given distance.
@@ -370,8 +382,8 @@ class ProceduralGenerator {
       return chunk;
     }
 
-    // 4. Inject Hazards based on Difficulty Tier & Sector
-    _injectHazards(chunk, difficultyTier, groundY, roofY);
+    // 4. Inject Hazards based on Difficulty Director & Obstacle Pattern System
+    _applyObstaclePattern(chunk, difficultyTier, groundY, roofY);
 
     return chunk;
   }
@@ -712,246 +724,172 @@ class ProceduralGenerator {
     );
   }
 
-  void _injectHazards(
+  void _applyObstaclePattern(
     WorldChunk chunk,
     int tier,
     double baseGroundY,
     double roofY,
   ) {
-    final b = chunk.biome;
-    final sx = chunk.startX;
-    final length = chunk.length;
-    final hasPit = chunk.hasPit;
-    final pitLeft = chunk.pitStartX;
-    final pitRight = chunk.pitStartX + chunk.pitWidth;
-
-    bool isInPit(double x, double margin) {
-      return hasPit && x >= (pitLeft - margin) && x <= (pitRight + margin);
+    if (tier == 0) {
+      // Gentle intro: single road barrier or clean runway
+      if (random.nextDouble() < 0.65) {
+        const x1 = 260.0;
+        if (!chunk.hasPit) {
+          chunk.hazards.add(
+            TrafficBarrierHazard(
+              position: Vector2(x1, chunk.getSurfaceY(chunk.startX + x1)),
+              biome: chunk.biome,
+            ),
+          );
+        }
+      }
+      return;
     }
 
-    switch (chunk.gameplayEvent) {
-      case SegmentGameplayEvent.tunnelLowSlide:
-        // 1. Low overhead pipe requiring ninja to SLIDE
-        const x1 = 200.0;
-        if (!isInPit(x1, 35.0)) {
-          final y1 = chunk.getSurfaceY(sx + x1) - 58.0;
-          chunk.hazards.add(LowPipeHazard(position: Vector2(x1, y1), biome: b));
-        }
-        // If tier >= 2: follow-up obstacle with 180px gap: Traffic barrier to jump over!
-        if (tier >= 2) {
-          const x2 = 380.0;
-          if (!isInPit(x2, 35.0)) {
-            chunk.hazards.add(
-              TrafficBarrierHazard(
-                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
-                biome: b,
-              ),
-            );
-          }
-        }
-        break;
+    final diffState = difficultyManager.state;
+    final currentSpeed = diffState.currentForwardSpeed;
+    final minReact = diffState.minReactionTime;
 
-      case SegmentGameplayEvent.rampJump:
-        // Road barrier or stakes positioned along/after the ramp
-        const x1 = 280.0;
-        if (!isInPit(x1, 35.0)) {
+    final pattern = difficultyManager.patternSystem.selectNextPattern(
+      state: diffState,
+      hasPit: chunk.hasPit,
+      pitStartX: chunk.pitStartX,
+      pitWidth: chunk.pitWidth,
+    );
+
+    difficultyManager.setActivePatternName(pattern.name);
+
+    final sx = chunk.startX;
+    final b = chunk.biome;
+    ProspectiveHazardPlacement? lastPlacement;
+
+    for (final hDef in pattern.hazards) {
+      final prospective = ProspectiveHazardPlacement(
+        xOffset: hDef.relX,
+        width: hDef.width,
+        requiredAction: hDef.action,
+        isAirborne: hDef.isAirborne,
+      );
+
+      final isSolvable = SolvabilityValidator.validateSequence(
+        previousHazard: lastPlacement,
+        currentHazard: prospective,
+        currentSpeed: currentSpeed,
+        minReactionTime: minReact,
+        hasPit: chunk.hasPit,
+        pitStartX: chunk.pitStartX,
+        pitWidth: chunk.pitWidth,
+      );
+
+      if (!isSolvable) {
+        continue; // Kinematic recovery or reaction window violation; maintain 100% fair solvability
+      }
+
+      lastPlacement = prospective;
+      final targetX = hDef.relX;
+      final surfaceY = chunk.getSurfaceY(sx + targetX);
+
+      switch (hDef.hazardType) {
+        case 'barrier':
           chunk.hazards.add(
             TrafficBarrierHazard(
-              position: Vector2(x1, chunk.getSurfaceY(sx + x1)),
-              barrierWidth: 44.0,
-              barrierHeight: 38.0,
+              position: Vector2(targetX, surfaceY),
+              barrierWidth: hDef.width,
+              barrierHeight: hDef.height,
               biome: b,
             ),
           );
-        }
-        // If high tier (>= 3): add a flying security drone overhead
-        if (tier >= 3) {
-          const x2 = 110.0;
-          if (!isInPit(x2, 35.0)) {
-            chunk.hazards.add(
-              HoverDroneHazard(
-                position: Vector2(x2, chunk.getSurfaceY(sx + x2) - 75.0),
-                biome: b,
-                patrolDistance: 35.0,
-                patrolSpeed: 70.0 + tier * 5.0,
-              ),
-            );
-          }
-        }
-        break;
-
-      case SegmentGameplayEvent.alleyDroneEncounter:
-        // Security drone patrolling in the alley
-        const x1 = 250.0;
-        if (!isInPit(x1, 35.0)) {
+          break;
+        case 'pipe':
           chunk.hazards.add(
-            HoverDroneHazard(
-              position: Vector2(x1, chunk.getSurfaceY(sx + x1) - 72.0),
+            LowPipeHazard(
+              position: Vector2(targetX, surfaceY - 58.0),
+              pipeWidth: hDef.width,
+              pipeHeight: hDef.height,
               biome: b,
-              patrolDistance: 65.0,
-              patrolSpeed: 75.0 + tier * 6.0,
             ),
           );
-        }
-        // If tier >= 3: ground bug crawler
-        if (tier >= 3) {
-          const x2 = 410.0;
-          if (!isInPit(x2, 35.0)) {
-            chunk.hazards.add(
-              BugCrawler(
-                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
-                speed: 170.0 + tier * 8.0,
-                biome: b,
-              ),
-            );
-          }
-        }
-        break;
-
-      case SegmentGameplayEvent.industrialContainerVault:
-        // Cargo container requiring JUMP or slash
-        const x1 = 220.0;
-        if (!isInPit(x1, 35.0)) {
+          break;
+        case 'stakes':
           chunk.hazards.add(
-            TrafficBarrierHazard(
-              position: Vector2(x1, chunk.getSurfaceY(sx + x1)),
-              barrierWidth: 50.0,
-              barrierHeight: 42.0,
-              isCargoContainer: true,
-              biome: b,
-            ),
+            _createTrackStakes(chunk, targetX, surfaceY, spikeCount: 3),
           );
-        }
-        if (tier >= 3) {
-          const x2 = 390.0;
-          if (!isInPit(x2, 35.0)) {
-            final y2 = chunk.getSurfaceY(sx + x2) - 58.0;
-            chunk.hazards.add(
-              LowPipeHazard(position: Vector2(x2, y2), biome: b),
-            );
-          }
-        }
-        break;
-
-      case SegmentGameplayEvent.hologramLaserGateTiming:
-        // Pulsing security laser gate (high beam: slide under)
-        const x1 = 240.0;
-        if (!isInPit(x1, 35.0)) {
+          break;
+        case 'laser_high':
           chunk.hazards.add(
             LaserGateHazard(
-              position: Vector2(x1, chunk.getSurfaceY(sx + x1)),
+              position: Vector2(targetX, surfaceY),
               isHighBeam: true,
               biome: b,
             ),
           );
-        }
-        if (tier >= 4) {
-          // Additional ground laser gate or droid with safe 180px separation
-          const x2 = 420.0;
-          if (!isInPit(x2, 35.0)) {
-            chunk.hazards.add(
-              LaserGateHazard(
-                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
-                isHighBeam: false,
-                biome: b,
-              ),
-            );
-          }
-        }
-        break;
-
-      case SegmentGameplayEvent.darkReactionGauntlet:
-        // Fast reaction: Spikes at x = 160 followed by BugCrawler at x = 360
-        const x1 = 160.0;
-        if (!isInPit(x1, 35.0)) {
+          break;
+        case 'laser_low':
           chunk.hazards.add(
-            _createTrackStakes(
-              chunk,
-              x1,
-              chunk.getSurfaceY(sx + x1),
-              spikeCount: 3,
+            LaserGateHazard(
+              position: Vector2(targetX, surfaceY),
+              isHighBeam: false,
+              biome: b,
             ),
           );
-        }
-        if (tier >= 2) {
-          const x2 = 360.0;
-          if (!isInPit(x2, 35.0)) {
-            chunk.hazards.add(
-              BugCrawler(
-                position: Vector2(x2, chunk.getSurfaceY(sx + x2)),
-                speed: 180.0 + tier * 8.0,
-                biome: b,
-              ),
-            );
-          }
-        }
-        break;
-
-      case SegmentGameplayEvent.rooftopGapJump:
-      case SegmentGameplayEvent.skyBridgeGapJump:
-        // Gap jump across rooftop or bridge
-        if (!hasPit) {
-          const x1 = 250.0;
+          break;
+        case 'drone':
           chunk.hazards.add(
-            _createTrackStakes(
-              chunk,
-              x1,
-              chunk.getSurfaceY(sx + x1),
-              spikeCount: 3,
+            HoverDroneHazard(
+              position: Vector2(targetX, surfaceY - 75.0),
+              patrolDistance: 45.0,
+              patrolSpeed: 70.0 + diffState.enemyIntensity * 25.0,
+              biome: b,
             ),
           );
-        } else if (tier >= 3) {
-          // Overhead roof cannon guarding the chasm
+          break;
+        case 'bug':
           chunk.hazards.add(
-            CyberCannon(position: Vector2(length * 0.5, roofY + 45), biome: b),
+            BugCrawler(
+              position: Vector2(targetX, surfaceY),
+              speed: 170.0 + diffState.enemyIntensity * 30.0,
+              biome: b,
+            ),
           );
-        }
-        break;
-
-      case SegmentGameplayEvent.catwalkMultiJumpChain:
-        // Elevated platform already spawned. Ground hazard underneath
-        const x1 = 280.0;
-        if (!isInPit(x1, 35.0)) {
+          break;
+        case 'droid':
           chunk.hazards.add(
             _createTrackDroid(
               chunk,
-              x1,
-              chunk.getSurfaceY(sx + x1),
+              targetX,
+              surfaceY,
               patrolDist: 60.0,
-              speed: 80.0 + tier * 7.0,
+              speed: 80.0 + diffState.enemyIntensity * 25.0,
             ),
           );
-        }
-        break;
-
-      case SegmentGameplayEvent.runPacing:
-        // Clean high-speed runway. Add single hazard if tier >= 1
-        if (tier >= 1) {
-          const x1 = 260.0;
-          if (!isInPit(x1, 35.0)) {
-            if (tier % 2 == 0) {
-              chunk.hazards.add(
-                _createTrackDroid(
-                  chunk,
-                  x1,
-                  chunk.getSurfaceY(sx + x1),
-                  patrolDist: 60.0,
-                  speed: 85.0 + tier * 5.0,
-                ),
-              );
-            } else {
-              chunk.hazards.add(
-                _createTrackStakes(
-                  chunk,
-                  x1,
-                  chunk.getSurfaceY(sx + x1),
-                  spikeCount: 3,
-                ),
+          break;
+        case 'cannon':
+          chunk.hazards.add(
+            CyberCannon(position: Vector2(targetX, roofY + 45), biome: b),
+          );
+          break;
+        case 'platform':
+          // High-Risk / High-Reward elevated route
+          final platW = hDef.width;
+          final platY = surfaceY - 85.0;
+          chunk.elevatedPlatforms.add(
+            ElevatedPlatform(
+              position: Vector2(targetX, platY),
+              size: Vector2(platW, 18.0),
+              biome: b,
+            ),
+          );
+          final bonusCP = hDef.cpReward > 0 ? hDef.cpReward : 4;
+          for (int c = 0; c < bonusCP; c++) {
+            final cpX = targetX + 20.0 + (c * 28.0);
+            if (cpX < targetX + platW - 15.0) {
+              chunk.collectibles.add(
+                CollectibleCP(position: Vector2(cpX, platY - 35.0), biome: b),
               );
             }
           }
-        }
-        break;
+          break;
+      }
     }
   }
 }

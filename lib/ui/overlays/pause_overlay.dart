@@ -112,9 +112,9 @@ class PauseOverlay extends StatelessWidget {
                         const SizedBox(height: 12),
 
                         // Title
-                        const Text(
-                          'MISSION SUSPENDED',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.tr('mission_suspended'),
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -123,7 +123,7 @@ class PauseOverlay extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'SECTOR TELEMETRY PAUSED',
+                          context.l10n.tr('telemetry_paused'),
                           style: TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w600,
@@ -155,7 +155,7 @@ class PauseOverlay extends StatelessWidget {
                               Column(
                                 children: [
                                   Text(
-                                    'CURRENT DISTANCE',
+                                    context.l10n.tr('current_distance'),
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.5,
@@ -184,7 +184,7 @@ class PauseOverlay extends StatelessWidget {
                               Column(
                                 children: [
                                   Text(
-                                    'COLLECTED CP',
+                                    context.l10n.tr('collected_cp'),
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.5,

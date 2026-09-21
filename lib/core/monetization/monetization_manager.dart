@@ -91,21 +91,26 @@ class MonetizationManager {
 
   /// Presents a rewarded ad and awaits verified completion.
   ///
-  /// Returns `true` ONLY if the user watched the entire ad and the reward
-  /// callback was validated. Returns `false` on failure/cancellation.
+  /// Strictly single-ad execution:
+  /// - [RewardType.revive]: 1 rewarded ad -> triggers [onReviveReward] upon reward grant.
+  /// - [RewardType.dailyCrateBonus]: 1 rewarded ad -> 2X crate loot bonus.
+  /// - [RewardType.doubleCyberPoints]: 1 rewarded ad -> 2X run CP multiplier.
+  /// - [RewardType.cpBoost]: 1 rewarded ad -> CP Boost reward.
   Future<bool> showRewarded({
     required RewardType rewardType,
     String? rewardContext,
-  }) {
+    VoidCallback? onReviveReward,
+    void Function(int completed, int total, String statusText)? onProgress,
+  }) async {
     switch (rewardType) {
       case RewardType.revive:
         MonetizationAnalytics.trackEvent(AdEventType.reviveAdRequested);
         break;
-      case RewardType.doubleCyberPoints:
-        MonetizationAnalytics.trackEvent(AdEventType.doubleCpRequested);
-        break;
       case RewardType.dailyCrateBonus:
         MonetizationAnalytics.trackEvent(AdEventType.dailyCrateAdRequested);
+        break;
+      case RewardType.doubleCyberPoints:
+        MonetizationAnalytics.trackEvent(AdEventType.doubleCpRequested);
         break;
       case RewardType.cpBoost:
         MonetizationAnalytics.trackEvent(AdEventType.cpBoostAdRequested, {
@@ -116,10 +121,49 @@ class MonetizationManager {
         break;
     }
 
-    return _rewarded.showRewarded(
+    final success = await _rewarded.showRewarded(
       rewardType: rewardType,
       rewardContext: rewardContext,
+      onRewardGranted: () {
+        if (rewardType == RewardType.revive) {
+          debugPrint(
+            '[MonetizationManager] onRewardGranted for revive -> invoking onReviveReward callback',
+          );
+          try {
+            onReviveReward?.call();
+          } catch (e) {
+            debugPrint(
+              '[MonetizationManager] Error invoking onReviveReward: $e',
+            );
+          }
+        }
+      },
     );
+
+    if (success) {
+      switch (rewardType) {
+        case RewardType.revive:
+          MonetizationAnalytics.trackEvent(AdEventType.reviveAdCompleted);
+          break;
+        case RewardType.dailyCrateBonus:
+          MonetizationAnalytics.trackEvent(AdEventType.dailyCrateAdCompleted);
+          break;
+        case RewardType.doubleCyberPoints:
+          MonetizationAnalytics.trackEvent(AdEventType.doubleCpCompleted);
+          break;
+        case RewardType.cpBoost:
+          MonetizationAnalytics.trackEvent(AdEventType.cpBoostAdCompleted);
+          break;
+        case RewardType.bonusReward:
+          break;
+      }
+    } else {
+      if (rewardType == RewardType.revive) {
+        MonetizationAnalytics.trackEvent(AdEventType.reviveAdFailed);
+      }
+    }
+
+    return success;
   }
 
   // --- Interstitials ---

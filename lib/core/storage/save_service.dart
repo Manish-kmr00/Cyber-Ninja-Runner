@@ -68,15 +68,21 @@ class SaveService extends ChangeNotifier {
 
   bool get isTenXUnlocked => player.isTenXUnlocked;
   bool get isFlightUnlocked => player.isFlightUnlocked;
-  bool isSkinUnlocked(PlayerSkin skin) => player.unlockedSkins.contains(skin);
+  bool isSkinUnlocked(PlayerSkin skin) =>
+      player.unlockedSkins.contains(skin);
 
-  int getBoosterCount(BoosterType type) => player.boosters[type]?.value ?? 0;
+  int getBoosterCount(BoosterType type) =>
+      player.boosters[type]?.value ?? 0;
 
   Future<void> saveAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyPlayer, jsonEncode(player.toJson()));
-    await prefs.setString(_keyStats, jsonEncode(stats.toJson()));
-    await prefs.setString(_keySettings, jsonEncode(settings.toJson()));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyPlayer, jsonEncode(player.toJson()));
+      await prefs.setString(_keyStats, jsonEncode(stats.toJson()));
+      await prefs.setString(_keySettings, jsonEncode(settings.toJson()));
+    } catch (e) {
+      debugPrint('SaveService.saveAll non-fatal storage error: $e');
+    }
     notifyListeners();
   }
 
@@ -121,6 +127,19 @@ class SaveService extends ChangeNotifier {
   }
 
   bool spendCubePoints(int amount) => spendCyberNinjaPoints(amount);
+
+  /// Check whether a Google Play IAP transaction identifier has already been credited
+  bool isTransactionDelivered(String transactionId) {
+    if (transactionId.trim().isEmpty) return false;
+    return player.deliveredTransactionIds.contains(transactionId.trim());
+  }
+
+  /// Persistently record a Google Play IAP transaction as delivered to prevent duplicate grants
+  void recordDeliveredTransaction(String transactionId) {
+    if (transactionId.trim().isEmpty) return;
+    player.deliveredTransactionIds.add(transactionId.trim());
+    saveAll();
+  }
 
   void unlockSkin(PlayerSkin skin) {
     player.unlockedSkins.add(skin);

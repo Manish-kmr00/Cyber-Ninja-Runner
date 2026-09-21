@@ -518,24 +518,19 @@ class CyberTitan extends BaseHazard
     final pPos = player.position;
     final isSliding = player.isSliding;
     final isSlashing = player.isSlashing;
-    final myWorld = worldPosition;
+    final myWorld = isMounted
+        ? worldPosition
+        : ((parent is PositionComponent
+                  ? (parent as PositionComponent).position
+                  : Vector2.zero()) +
+              position);
 
     // 1. Check incoming plasma rounds
     for (final round in activeRounds) {
       if (round.isDead) continue;
       final rWorld = myWorld + round.position;
 
-      // Katana cuts plasma in mid-air
-      if (isSlashing) {
-        if (rWorld.x <= pPos.x + player.size.x + 160.0 &&
-            rWorld.x >= pPos.x - 40.0 &&
-            (rWorld.y - (pPos.y - player.size.y * 0.50)).abs() < 85.0) {
-          round.isDead = true;
-          AudioService().playClick();
-          continue;
-        }
-      }
-
+      // Bullets cannot be sliced or deflected by sword - ninja must jump or slide dodge!
       // High shot: slide underneath
       if (round.isHighShot &&
           isSliding &&
@@ -582,15 +577,9 @@ class CyberTitan extends BaseHazard
       size.y * 0.96,
     );
 
-    // Jump Stomp attack from above (acrobatic head bounce)
-    if (player.velocity.y > 60.0 &&
-        pPos.y < (myWorld.y - size.y * 0.70) &&
-        (pPos.x - myWorld.x).abs() < size.x * 0.55) {
-      player.velocity.y = -640.0; // high acrobatic bounce
-      takeDamage(amount: 1);
-      return false; // player lands hit safely
-    }
-
+    // Direct body collision with CyberTitan robot:
+    // ONLY sword slash (talwar) can damage/destroy the robot!
+    // Simply jumping, landing, or running into the robot without slashing kills the ninja!
     if (pBodyRect.overlaps(titanBodyRect)) {
       if (isSlashing) {
         takeDamage(amount: 1);

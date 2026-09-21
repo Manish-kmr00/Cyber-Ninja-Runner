@@ -115,6 +115,7 @@ class FrequencyManager {
 
   /// Determines whether a rewarded ad is allowed (e.g. daily cap check).
   bool canShowRewarded() {
+    if (MonetizationConfig.isTestMode) return true;
     final dailyRewarded = getDailyRewardedCount();
     return dailyRewarded < MonetizationConfig.dailyRewardedCap;
   }

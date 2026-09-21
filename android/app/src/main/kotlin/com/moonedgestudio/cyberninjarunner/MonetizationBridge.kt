@@ -66,7 +66,14 @@ class MonetizationBridge private constructor(
             }
             "isRewardedReady" -> {
                 val placementId = call.argument<String>("placementId") ?: ""
-                val ready = rewardedAdMap[placementId]?.isAdReady ?: false
+                val scenarioId = call.argument<String>("scenarioId")
+                var rewardVideoAd = rewardedAdMap[placementId]
+                if (rewardVideoAd == null) {
+                    rewardVideoAd = ATRewardVideoAd(activity, placementId)
+                    rewardedAdMap[placementId] = rewardVideoAd
+                }
+                val ready = rewardVideoAd.isAdReady
+                Log.i(TAG, "isRewardedReady checked: placement=$placementId, scenario=$scenarioId, ready=$ready")
                 result.success(ready)
             }
             "loadRewarded" -> {
@@ -122,6 +129,7 @@ class MonetizationBridge private constructor(
             } catch (e: Throwable) {
                 Log.w(TAG, "TopOn integrationChecking note: ${e.message}")
             }
+            com.secmtp.sdk.core.api.ATCommonConfig.isShowInitErrorTips = false
             ATSDK.init(activity.applicationContext, appId, appKey)
             Log.i(TAG, "TopOn ATSDK initialized successfully. Version: ${ATSDK.getSDKVersionName()}")
 
@@ -153,11 +161,13 @@ class MonetizationBridge private constructor(
                 rewardVideoAd.setAdListener(object : ATRewardVideoListener {
                     override fun onRewardedVideoAdLoaded() {
                         Log.i(TAG, "[Real SDK Callback] onRewardedVideoAdLoaded: $placementId")
+                        Log.i(TAG, "REVIVE_DEBUG: AD_LOAD_SUCCESS placement=$placementId")
                         channel.invokeMethod("onRewardedLoaded", mapOf("placementId" to placementId))
                     }
 
                     override fun onRewardedVideoAdFailed(adError: AdError) {
                         Log.e(TAG, "[Real SDK Callback] onRewardedVideoAdFailed: $placementId - Code: ${adError.code}, Desc: ${adError.desc}, Full: ${adError.fullErrorInfo}")
+                        Log.e(TAG, "REVIVE_DEBUG: AD_LOAD_FAILED placement=$placementId code=${adError.code} platformCode=${adError.platformCode} desc=${adError.desc} fullError=${adError.fullErrorInfo}")
                         channel.invokeMethod(
                             "onRewardedLoadFailed",
                             mapOf(
@@ -249,10 +259,28 @@ class MonetizationBridge private constructor(
         scenarioId: String?,
         result: MethodChannel.Result
     ) {
-        val rewardVideoAd = rewardedAdMap[placementId]
-        val ready = rewardVideoAd?.isAdReady ?: false
+        Log.i(TAG, "REVIVE_DEBUG: SHOW_REQUESTED")
+        Log.i(TAG, "REVIVE_DEBUG: placement=$placementId")
+        Log.i(TAG, "REVIVE_DEBUG: scenario=$scenarioId")
+        Log.i(TAG, "REVIVE_DEBUG: activityClass=${activity.javaClass.name}")
+        Log.i(TAG, "REVIVE_DEBUG: isFinishing=${activity.isFinishing}")
+        Log.i(TAG, "REVIVE_DEBUG: isDestroyed=${activity.isDestroyed}")
+
+        if (activity.isFinishing || activity.isDestroyed) {
+            Log.e(TAG, "REVIVE_DEBUG: SHOW_FAILED Activity is finishing or destroyed")
+            result.success(false)
+            return
+        }
+
+        var rewardVideoAd = rewardedAdMap[placementId]
+        if (rewardVideoAd == null) {
+            rewardVideoAd = ATRewardVideoAd(activity, placementId)
+            rewardedAdMap[placementId] = rewardVideoAd
+        }
+
+        val ready = rewardVideoAd.isAdReady
         if (!ready) {
-            Log.w(TAG, "showRewarded called but real ad is not ready: $placementId")
+            Log.w(TAG, "REVIVE_DEBUG: SHOW_FAILED real ad is not ready: placement=$placementId, scenario=$scenarioId")
             result.success(false)
             return
         }
@@ -265,10 +293,13 @@ class MonetizationBridge private constructor(
         mainHandler.post {
             try {
                 if (scenarioId != null) {
-                    rewardVideoAd.show(activity, scenarioId)
-                } else {
-                    rewardVideoAd.show(activity)
+                    try {
+                        rewardVideoAd.entryAdScenario(scenarioId)
+                    } catch (e: Throwable) {
+                        Log.w(TAG, "entryAdScenario note: ${e.message}")
+                    }
                 }
+                rewardVideoAd.show(activity)
             } catch (e: Throwable) {
                 Log.e(TAG, "Error showing real rewarded ad: ${e.message}", e)
             }

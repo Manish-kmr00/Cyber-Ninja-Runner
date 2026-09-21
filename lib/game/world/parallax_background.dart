@@ -88,15 +88,24 @@ class ParallaxBackground extends PositionComponent
     beaconTimer += dt * 3.0;
 
     final camX = game.camera.viewfinder.position.x;
+    final screenAspect = game.size.y > 0
+        ? (game.size.x / game.size.y)
+        : (16.0 / 9.0);
+    final visibleWorldWidth = max(
+      AppConstants.virtualWidth,
+      AppConstants.virtualHeight * screenAspect,
+    );
+    final wrapLeft = camX - (visibleWorldWidth * 0.35) - 500.0;
+    final wrapRight = camX + (visibleWorldWidth * 0.85) + 700.0;
 
     // Update flying traffic
     for (final car in aerocars) {
       car.x += car.speed * dt;
-      if (car.speed > 0 && car.x > camX + 1000) {
-        car.x = camX - 800;
+      if (car.speed > 0 && car.x > wrapRight) {
+        car.x = wrapLeft;
         car.y = 120.0 + _rng.nextDouble() * 240.0;
-      } else if (car.speed < 0 && car.x < camX - 800) {
-        car.x = camX + 1000;
+      } else if (car.speed < 0 && car.x < wrapLeft) {
+        car.x = wrapRight;
         car.y = 120.0 + _rng.nextDouble() * 240.0;
       }
     }
@@ -107,8 +116,8 @@ class ParallaxBackground extends PositionComponent
 
     for (final s in speedStreaks) {
       s.x -= s.speed * streakMultiplier * dt;
-      if (s.x < camX - 700) {
-        s.x = camX + 700 + _rng.nextDouble() * 300;
+      if (s.x < wrapLeft) {
+        s.x = wrapRight + _rng.nextDouble() * 300;
         s.y = _rng.nextDouble() * (AppConstants.virtualHeight - 140);
       }
     }
@@ -119,10 +128,20 @@ class ParallaxBackground extends PositionComponent
     super.render(canvas);
 
     final camX = game.camera.viewfinder.position.x;
-    final viewWidth = AppConstants.virtualWidth;
-    final viewHeight = AppConstants.virtualHeight;
-    final leftX = camX - viewWidth / 2 - 200;
-    final rightX = camX + viewWidth / 2 + 200;
+    final screenAspect = game.size.y > 0
+        ? (game.size.x / game.size.y)
+        : (16.0 / 9.0);
+    final visibleWorldWidth = max(
+      AppConstants.virtualWidth,
+      AppConstants.virtualHeight * screenAspect,
+    );
+
+    // Camera anchor is (0.25, 0.5): Ninja/camX is at 25% from the screen's left edge,
+    // meaning 75% of the screen extends to the right of camX.
+    // We add generous padding on both sides to completely cover wide/ultra-wide screens (16:9, 20:9, 21:9).
+    final leftX = camX - (visibleWorldWidth * 0.35) - 400.0;
+    final rightX = camX + (visibleWorldWidth * 0.85) + 700.0;
+    final totalSpanX = rightX - leftX;
 
     final distanceMeters = game.currentDistance;
     final biome = ProceduralGenerator.getBiomeForDistance(
@@ -132,13 +151,16 @@ class ParallaxBackground extends PositionComponent
 
     // 1. Deep Atmospheric Gradient Sky (Dynamically tinted per Sector Biome)
     final skyPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: biome.skyGradient,
-      ).createShader(Rect.fromLTWH(leftX, 0, viewWidth + 400, viewHeight));
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: biome.skyGradient,
+          ).createShader(
+            Rect.fromLTWH(leftX, 0, totalSpanX, AppConstants.virtualHeight),
+          );
     canvas.drawRect(
-      Rect.fromLTWH(leftX, 0, viewWidth + 400, viewHeight),
+      Rect.fromLTWH(leftX, 0, totalSpanX, AppConstants.virtualHeight),
       skyPaint,
     );
 
@@ -182,10 +204,10 @@ class ParallaxBackground extends PositionComponent
         _renderQuantumNexus(canvas, offsetX, leftX, rightX);
         break;
       case SectorBiome.cyberShinto:
-        _renderCyberShintoSkyline(canvas, offsetX, leftX, rightX);
+        _renderCyberShintoSkyline(canvas, camX, offsetX, leftX, rightX);
         break;
       case SectorBiome.neoNebula:
-        _renderNeoNebulaSkyline(canvas, offsetX, leftX, rightX);
+        _renderNeoNebulaSkyline(canvas, camX, offsetX, leftX, rightX);
         break;
     }
   }
@@ -573,6 +595,7 @@ class ParallaxBackground extends PositionComponent
 
   void _renderCyberShintoSkyline(
     Canvas canvas,
+    double camX,
     double offsetX,
     double leftX,
     double rightX,
@@ -581,8 +604,8 @@ class ParallaxBackground extends PositionComponent
     final startIdx = ((leftX - offsetX) / templeInterval).floor() - 1;
     final endIdx = ((rightX - offsetX) / templeInterval).ceil() + 1;
 
-    // 1. Giant Glitched Crimson Blood Moon in the background
-    final moonCenter = Offset(offsetX * 0.3 + 450, 140);
+    // 1. Giant Glitched Crimson Blood Moon in the background (tracking in the upper sky)
+    final moonCenter = Offset(camX + 380.0 + (offsetX * 0.1), 140);
     final moonPaint = Paint()
       ..color = const Color(0xFFFF003C).withValues(alpha: 0.25)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
@@ -694,12 +717,13 @@ class ParallaxBackground extends PositionComponent
 
   void _renderNeoNebulaSkyline(
     Canvas canvas,
+    double camX,
     double offsetX,
     double leftX,
     double rightX,
   ) {
-    // 1. Giant Quantum Core / Vector Sun on Horizon
-    final sunCenter = Offset(offsetX * 0.15 + 480, 150);
+    // 1. Giant Quantum Core / Vector Sun on Horizon (tracking in upper sky)
+    final sunCenter = Offset(camX + 420.0 + (offsetX * 0.08), 150);
     final sunGlowPaint = Paint()
       ..color = const Color(0xFF00F5FF).withValues(alpha: 0.18)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);

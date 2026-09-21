@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/audio/audio_service.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/services/feedback_service.dart';
 import '../../core/storage/save_service.dart';
 
@@ -208,10 +209,10 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              'TRANSMIT FEEDBACK // PROBLEM REPORT',
-                              style: TextStyle(
+                              context.l10n.tr('feedback_title'),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 13,
@@ -220,8 +221,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                               ),
                             ),
                             Text(
-                              'DIRECT GOOGLE GMAIL SCRIPT LINK',
-                              style: TextStyle(
+                              context.l10n.tr('feedback_sub'),
+                              style: const TextStyle(
                                 color: Color(0xFF00E5FF),
                                 fontSize: 10,
                                 fontFamily: 'monospace',
@@ -272,8 +273,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                   size: 42,
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  'TRANSMISSION DELIVERED',
+                                Text(
+                                  context.l10n.tr('transmission_delivered'),
                                   style: TextStyle(
                                     color: Color(0xFF00E676),
                                     fontWeight: FontWeight.w900,
@@ -313,8 +314,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                 AudioService().playClick();
                                 Navigator.of(context).pop();
                               },
-                              child: const Text(
-                                'CLOSE CONSOLE',
+                              child: Text(
+                                context.l10n.tr('close_console'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 1.0,
@@ -324,8 +325,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           ),
                         ] else ...[
                           // Category Selector
-                          const Text(
-                            'REPORT CATEGORY',
+                          Text(
+                            context.l10n.tr('report_category'),
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 10.5,
@@ -365,7 +366,18 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                     ),
                                   ),
                                   child: Text(
-                                    cat,
+                                    switch (cat) {
+                                      'BUG REPORT' => context.l10n.tr(
+                                        'bug_report',
+                                      ),
+                                      'GAMEPLAY ISSUE' => context.l10n.tr(
+                                        'gameplay_issue',
+                                      ),
+                                      'FEATURE REQUEST' => context.l10n.tr(
+                                        'feature_request',
+                                      ),
+                                      _ => context.l10n.tr('general_feedback'),
+                                    },
                                     style: TextStyle(
                                       color: isSelected
                                           ? catColor
@@ -382,8 +394,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           const SizedBox(height: 14),
 
                           // Contact Email (Optional)
-                          const Text(
-                            'YOUR CONTACT EMAIL (OPTIONAL)',
+                          Text(
+                            context.l10n.tr('contact_email_optional'),
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 10.5,
@@ -435,8 +447,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           const SizedBox(height: 14),
 
                           // Problem Description
-                          const Text(
-                            'PROBLEM DETAILS / FEEDBACK *',
+                          Text(
+                            context.l10n.tr('problem_details_label'),
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 10.5,
@@ -606,9 +618,9 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                         AudioService().playClick();
                                         Navigator.of(context).pop();
                                       },
-                                child: const Text(
-                                  'ABORT',
-                                  style: TextStyle(
+                                child: Text(
+                                  context.l10n.tr('abort_btn'),
+                                  style: const TextStyle(
                                     color: Colors.white54,
                                     fontFamily: 'monospace',
                                     fontWeight: FontWeight.w800,
@@ -642,16 +654,16 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                       )
                                     : Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          Icon(
+                                        children: [
+                                          const Icon(
                                             Icons.send_rounded,
                                             size: 14,
                                             color: Colors.black,
                                           ),
-                                          SizedBox(width: 6),
+                                          const SizedBox(width: 6),
                                           Text(
-                                            'TRANSMIT LOG',
-                                            style: TextStyle(
+                                            context.l10n.tr('transmit_log'),
+                                            style: const TextStyle(
                                               fontWeight: FontWeight.w900,
                                               fontSize: 11.5,
                                               letterSpacing: 1.0,

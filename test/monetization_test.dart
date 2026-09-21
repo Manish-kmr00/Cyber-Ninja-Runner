@@ -132,5 +132,74 @@ void main() {
       final duplicateBlocked = validator.validateAndGrant(tx.transactionId);
       expect(duplicateBlocked, isFalse);
     });
+
+    test(
+      'Single-ad Revive: RewardValidator grants exactly once and blocks duplicates',
+      () {
+        final validator = RewardValidator();
+        final tx = validator.createTransaction(RewardType.revive);
+
+        expect(tx.rewardType, RewardType.revive);
+        expect(tx.status, RewardTransactionStatus.pending);
+
+        // First callback grants reward (triggers single revive)
+        final granted = validator.validateAndGrant(tx.transactionId);
+        expect(granted, isTrue);
+        expect(tx.status, RewardTransactionStatus.granted);
+
+        // Duplicate callback must be blocked
+        final duplicateBlocked = validator.validateAndGrant(tx.transactionId);
+        expect(duplicateBlocked, isFalse);
+      },
+    );
+
+    test(
+      'Single-ad Daily Crate: RewardValidator grants exactly once and blocks duplicates',
+      () {
+        final validator = RewardValidator();
+        final tx = validator.createTransaction(RewardType.dailyCrateBonus);
+
+        expect(tx.rewardType, RewardType.dailyCrateBonus);
+        expect(tx.status, RewardTransactionStatus.pending);
+
+        final granted = validator.validateAndGrant(tx.transactionId);
+        expect(granted, isTrue);
+        expect(tx.status, RewardTransactionStatus.granted);
+
+        final duplicateBlocked = validator.validateAndGrant(tx.transactionId);
+        expect(duplicateBlocked, isFalse);
+      },
+    );
+
+    test(
+      'Single-ad Double CP: RewardValidator grants exactly once and blocks duplicates',
+      () {
+        final validator = RewardValidator();
+        final tx = validator.createTransaction(RewardType.doubleCyberPoints);
+
+        expect(tx.rewardType, RewardType.doubleCyberPoints);
+        expect(tx.status, RewardTransactionStatus.pending);
+
+        final granted = validator.validateAndGrant(tx.transactionId);
+        expect(granted, isTrue);
+        expect(tx.status, RewardTransactionStatus.granted);
+
+        final duplicateBlocked = validator.validateAndGrant(tx.transactionId);
+        expect(duplicateBlocked, isFalse);
+      },
+    );
+
+    test(
+      'Single-ad cancellation: ungranted transaction remains unfulfilled',
+      () {
+        final validator = RewardValidator();
+        final tx = validator.createTransaction(RewardType.revive);
+
+        // User closed ad before earning reward -> markFailed
+        validator.markFailed(tx.transactionId);
+        expect(tx.status, RewardTransactionStatus.failed);
+        expect(tx.granted, isFalse);
+      },
+    );
   });
 }
