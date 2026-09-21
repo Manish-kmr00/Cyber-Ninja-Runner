@@ -237,4 +237,102 @@ class MonetizationPlatform {
       return {'error': e.toString()};
     }
   }
+
+  /// Requests Google UMP consent info update and displays the consent form if required.
+  Future<ConsentResult> requestConsent({required bool isTestMode}) async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return const ConsentResult(
+        canRequestAds: true,
+        consentStatus: 'NOT_REQUIRED',
+        isPrivacyOptionsRequired: false,
+      );
+    }
+    try {
+      final res = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'requestConsent',
+        {'isTestMode': isTestMode},
+      );
+      return ConsentResult.fromMap(res);
+    } catch (e) {
+      debugPrint('[MonetizationPlatform] requestConsent error: $e');
+      return ConsentResult(
+        canRequestAds: true,
+        consentStatus: 'ERROR',
+        isPrivacyOptionsRequired: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// Checks if Google UMP requires a privacy options entry point.
+  Future<bool> isPrivacyOptionsRequired() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return false;
+    try {
+      final res = await _channel.invokeMethod<bool>('isPrivacyOptionsRequired');
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Re-opens the official Google UMP privacy options form.
+  Future<bool> showPrivacyOptionsForm() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return false;
+    try {
+      final res = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'showPrivacyOptionsForm',
+      );
+      return res?['success'] as bool? ?? false;
+    } catch (e) {
+      debugPrint('[MonetizationPlatform] showPrivacyOptionsForm error: $e');
+      return false;
+    }
+  }
+
+  /// Quick check whether ads can be requested based on consent.
+  Future<bool> canRequestAds() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return true;
+    try {
+      final res = await _channel.invokeMethod<bool>('canRequestAds');
+      return res ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+}
+
+/// Represents the outcome of the Google UMP consent evaluation.
+class ConsentResult {
+  final bool canRequestAds;
+  final String consentStatus;
+  final bool isPrivacyOptionsRequired;
+  final String? error;
+
+  const ConsentResult({
+    required this.canRequestAds,
+    required this.consentStatus,
+    required this.isPrivacyOptionsRequired,
+    this.error,
+  });
+
+  factory ConsentResult.fromMap(Map<dynamic, dynamic>? map) {
+    if (map == null) {
+      return const ConsentResult(
+        canRequestAds: true,
+        consentStatus: 'NOT_REQUIRED',
+        isPrivacyOptionsRequired: false,
+      );
+    }
+    return ConsentResult(
+      canRequestAds: map['canRequestAds'] as bool? ?? true,
+      consentStatus: map['consentStatus'] as String? ?? 'UNKNOWN',
+      isPrivacyOptionsRequired:
+          map['isPrivacyOptionsRequired'] as bool? ?? false,
+      error: map['error'] as String?,
+    );
+  }
+
+  @override
+  String toString() =>
+      'ConsentResult(canRequestAds: $canRequestAds, status: $consentStatus, privacyOptionsRequired: $isPrivacyOptionsRequired, error: $error)';
 }

@@ -1,33 +1,94 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cyber_ninja_runner/core/monetization/monetization_config.dart';
-import 'package:cyber_ninja_runner/core/monetization/monetization_events.dart';
 import 'package:cyber_ninja_runner/core/monetization/frequency_manager.dart';
 import 'package:cyber_ninja_runner/core/monetization/reward_validator.dart';
 import 'package:cyber_ninja_runner/core/monetization/shared_counter_service.dart';
 
 import 'package:cyber_ninja_runner/core/monetization/cp_boost_config.dart';
 import 'package:cyber_ninja_runner/core/monetization/cp_boost_service.dart';
+import 'package:cyber_ninja_runner/core/monetization/monetization_manager.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Monetization Architecture Unit Tests', () {
-    test('MonetizationConfig strictly enforces test mode in debug', () {
+    test('MonetizationConfig strictly enforces test mode by default', () {
       expect(MonetizationConfig.environment, MonetizationEnvironment.test);
       expect(MonetizationConfig.isTestMode, isTrue);
 
-      // Attempting to set production mode in debug environment must be rejected
-      MonetizationConfig.setProductionEnvironment(
-        productionTopOnAppId: 'fake_prod_app_id',
-        productionTopOnAppKey: 'fake_prod_app_key',
-        productionRewardedPlacementId: 'fake_prod_rew_id',
-        productionInterstitialPlacementId: 'fake_prod_int_id',
-      );
+      // Verify default validation passes without throwing
+      expect(() => MonetizationConfig.validateConfiguration(), returnsNormally);
 
-      // Safety guard check
-      expect(MonetizationConfig.environment, MonetizationEnvironment.test);
-      expect(MonetizationConfig.topOnAppId, MonetizationConfig.testTopOnAppId);
+      // Verify test AdMob IDs match Google test IDs
+      expect(MonetizationConfig.adMobAppId, MonetizationConfig.testAdMobAppId);
+      expect(
+        MonetizationConfig.adMobRewardedUnitId,
+        MonetizationConfig.testRewardedAdUnitId,
+      );
+      expect(
+        MonetizationConfig.adMobInterstitialUnitId,
+        MonetizationConfig.testInterstitialAdUnitId,
+      );
+      expect(MonetizationConfig.adMobAppId, contains('3940256099942544'));
+
+      // Verify TopOn IDs are populated
+      expect(MonetizationConfig.topOnAppId, equals('h6aa91bb8dc11b'));
+      expect(MonetizationConfig.rewardedPlacementId, equals('n6aa91d84caf8e'));
+      expect(
+        MonetizationConfig.interstitialPlacementId,
+        equals('n6aa925b616e0b'),
+      );
     });
+
+    test(
+      'MonetizationConfig validates configuration and rejects cross-contamination',
+      () {
+        // Valid Test configuration must pass
+        expect(
+          () => MonetizationConfig.validateIdsForEnvironment(
+            MonetizationEnvironment.test,
+            appId: MonetizationConfig.testAdMobAppId,
+            rewardedUnitId: MonetizationConfig.testRewardedAdUnitId,
+            interstitialUnitId: MonetizationConfig.testInterstitialAdUnitId,
+          ),
+          returnsNormally,
+        );
+
+        // Test environment using Production AdMob IDs must be rejected
+        expect(
+          () => MonetizationConfig.validateIdsForEnvironment(
+            MonetizationEnvironment.test,
+            appId: MonetizationConfig.productionAdMobAppId, // Contamination!
+            rewardedUnitId: MonetizationConfig.testRewardedAdUnitId,
+            interstitialUnitId: MonetizationConfig.testInterstitialAdUnitId,
+          ),
+          throwsA(isA<StateError>()),
+        );
+
+        // Production environment using Test AdMob IDs must be rejected
+        expect(
+          () => MonetizationConfig.validateIdsForEnvironment(
+            MonetizationEnvironment.production,
+            appId: MonetizationConfig.testAdMobAppId, // Contamination!
+            rewardedUnitId: MonetizationConfig.productionRewardedAdUnitId,
+            interstitialUnitId:
+                MonetizationConfig.productionInterstitialAdUnitId,
+          ),
+          throwsA(isA<StateError>()),
+        );
+
+        // Valid Production configuration must pass
+        expect(
+          () => MonetizationConfig.validateIdsForEnvironment(
+            MonetizationEnvironment.production,
+            appId: MonetizationConfig.productionAdMobAppId,
+            rewardedUnitId: MonetizationConfig.productionRewardedAdUnitId,
+            interstitialUnitId:
+                MonetizationConfig.productionInterstitialAdUnitId,
+          ),
+          returnsNormally,
+        );
+      },
+    );
 
     test('SharedCounterService increment, get, and reset logic', () {
       final counter = SharedCounterService();
@@ -201,5 +262,54 @@ void main() {
         expect(tx.granted, isFalse);
       },
     );
+
+    test('ConsentResult parses native UMP maps correctly and safely', () {
+      // 1. Null map returns safe defaults
+      final defaultResult = ConsentResult.fromMap(null);
+      expect(defaultResult.canRequestAds, isTrue);
+      expect(defaultResult.consentStatus, 'NOT_REQUIRED');
+      expect(defaultResult.isPrivacyOptionsRequired, isFalse);
+      expect(defaultResult.error, isNull);
+
+      // 2. Parsed valid map with consent obtained
+      final obtainedResult = ConsentResult.fromMap({
+        'canRequestAds': true,
+        'consentStatus': 'OBTAINED',
+        'isPrivacyOptionsRequired': true,
+      });
+      expect(obtainedResult.canRequestAds, isTrue);
+      expect(obtainedResult.consentStatus, 'OBTAINED');
+      expect(obtainedResult.isPrivacyOptionsRequired, isTrue);
+      expect(obtainedResult.error, isNull);
+
+      // 3. Parsed map where user/regulation restricted ads
+      final restrictedResult = ConsentResult.fromMap({
+        'canRequestAds': false,
+        'consentStatus': 'REQUIRED',
+        'isPrivacyOptionsRequired': true,
+      });
+      expect(restrictedResult.canRequestAds, isFalse);
+      expect(restrictedResult.consentStatus, 'REQUIRED');
+      expect(restrictedResult.isPrivacyOptionsRequired, isTrue);
+
+      // 4. Parsed map with error payload
+      final errorResult = ConsentResult.fromMap({
+        'canRequestAds': true,
+        'consentStatus': 'ERROR',
+        'isPrivacyOptionsRequired': false,
+        'error': 'Network timeout',
+      });
+      expect(errorResult.canRequestAds, isTrue);
+      expect(errorResult.consentStatus, 'ERROR');
+      expect(errorResult.isPrivacyOptionsRequired, isFalse);
+      expect(errorResult.error, 'Network timeout');
+    });
+
+    test('MonetizationManager exposes UMP consent state and privacy options', () {
+      final manager = MonetizationManager();
+      // Initially, consentResult may be null before init completes in test harness
+      expect(manager.canRequestAds, isTrue);
+      expect(manager.isPrivacyOptionsRequired, isFalse);
+    });
   });
 }

@@ -23,6 +23,7 @@ class PlayerData {
   int dailyStreak = 1;
   int lastDailyClaimEpoch = 0;
   final Set<String> deliveredTransactionIds = {};
+  final Set<String> processedPurchaseTokens = {};
 
   Map<String, dynamic> toJson() => {
     'cyberPoints': cyberPoints.value,
@@ -36,6 +37,7 @@ class PlayerData {
     'dailyStreak': dailyStreak,
     'lastDailyClaimEpoch': lastDailyClaimEpoch,
     'deliveredTransactionIds': deliveredTransactionIds.toList(),
+    'processedPurchaseTokens': processedPurchaseTokens.toList(),
   };
 
   void loadJson(Map<String, dynamic> json) {
@@ -79,6 +81,14 @@ class PlayerData {
       for (final id in json['deliveredTransactionIds']) {
         if (id is String && id.trim().isNotEmpty) {
           deliveredTransactionIds.add(id.trim());
+          processedPurchaseTokens.add(id.trim());
+        }
+      }
+    }
+    if (json['processedPurchaseTokens'] != null) {
+      for (final token in json['processedPurchaseTokens']) {
+        if (token is String && token.trim().isNotEmpty) {
+          processedPurchaseTokens.add(token.trim());
         }
       }
     }

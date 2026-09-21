@@ -42,7 +42,7 @@ class DailyCrateService {
   static const int cooldownMs = 20 * 60 * 60 * 1000; // 20 hours
   static const int streakTimeoutMs =
       48 * 60 * 60 * 1000; // 48 hours to preserve streak
-  static const int streakSaverCostCP = 100;
+  static const int streakSaverCostCP = 2500;
 
   final Random _random = Random();
 

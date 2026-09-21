@@ -213,7 +213,9 @@ class _DailyCrateDialogState extends State<DailyCrateDialog>
       AudioService().playClick();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Not enough CP to restore streak! Need 100 CP.'),
+          content: Text(
+            'Not enough CP to restore streak! Need ${DailyCrateService.streakSaverCostCP} CP.',
+          ),
           backgroundColor: Color(0xFFE53935),
         ),
       );

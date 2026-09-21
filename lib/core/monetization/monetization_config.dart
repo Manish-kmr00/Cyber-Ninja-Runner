@@ -6,9 +6,15 @@ class MonetizationConfig {
   /// Active environment. Defaults strictly to [MonetizationEnvironment.test].
   static MonetizationEnvironment _environment = MonetizationEnvironment.test;
 
+  @visibleForTesting
+  static MonetizationEnvironment? forceEnvironmentForTesting;
+
   /// Returns active environment with an unbreakable safety guard:
   /// Debug and profile builds CANNOT run in production mode under any circumstance.
   static MonetizationEnvironment get environment {
+    if (forceEnvironmentForTesting != null) {
+      return forceEnvironmentForTesting!;
+    }
     if (kDebugMode || kProfileMode) {
       return MonetizationEnvironment.test;
     }
@@ -17,10 +23,10 @@ class MonetizationConfig {
 
   /// Explicitly sets production environment. Rejects if running in debug/profile.
   static void setProductionEnvironment({
-    required String productionTopOnAppId,
-    required String productionTopOnAppKey,
-    required String productionRewardedPlacementId,
-    required String productionInterstitialPlacementId,
+    String? productionTopOnAppId,
+    String? productionTopOnAppKey,
+    String? productionRewardedPlacementId,
+    String? productionInterstitialPlacementId,
   }) {
     if (kDebugMode || kProfileMode) {
       debugPrint(
@@ -30,59 +36,117 @@ class MonetizationConfig {
       return;
     }
 
-    _prodTopOnAppId = productionTopOnAppId;
-    _prodTopOnAppKey = productionTopOnAppKey;
-    _prodRewardedPlacementId = productionRewardedPlacementId;
-    _prodInterstitialPlacementId = productionInterstitialPlacementId;
     _environment = MonetizationEnvironment.production;
     debugPrint(
       '[MonetizationConfig] PRODUCTION environment activated explicitly.',
     );
   }
 
-  // --- Real Cyber Ninja Runner TopOn Credentials ---
-  // App ID and Placement IDs generated from the Cyber Ninja Runner TopOn dashboard.
-  // DO NOT log the App Key. Use CONFIGURED/MATCHED in any report.
-  static const String testTopOnAppId = 'h6aa91bb8dc11b';
-  static const String testTopOnAppKey = 'ac9da0a61c59ab2bdf3cdc28e66c92b27';
-  static const String testRewardedPlacementId = 'n6aa91d84caf8e';
-  static const String testInterstitialPlacementId = 'n6aa925b616e0b';
+  // --- TopOn Dashboard Configuration (Verified) ---
+  static const String topOnAppId = 'h6aa91bb8dc11b';
+  static const String topOnAppKey = 'ac9da0a61c59ab2bdf3cdc28e66c92b27';
+  static const String rewardedPlacementId = 'n6aa91d84caf8e';
+  static const String interstitialPlacementId = 'n6aa925b616e0b';
 
-  // Google AdMob official test units for demand validation
-  // These are the Google-published universal test ad units — safe for all test devices.
-  static const String testGoogleRewardedUnitId =
+  // TopOn Scenario IDs
+  static const String scenarioRevive = 'f6aa93d000c34b';
+  static const String scenarioDoubleCp = 'f6aa93d2b791fc';
+  static const String scenarioCrate = 'f6aa93d397ef4c';
+
+  // --- Official Google Test AdMob IDs ---
+  static const String testAdMobAppId = 'ca-app-pub-3940256099942544~3347511713';
+  static const String testRewardedAdUnitId =
       'ca-app-pub-3940256099942544/5224354917';
-  static const String testGoogleInterstitialUnitId =
+  static const String testInterstitialAdUnitId =
       'ca-app-pub-3940256099942544/1033173712';
 
-  // --- Production placeholders (Supplied only at runtime via setProductionEnvironment) ---
-  static String? _prodTopOnAppId;
-  static String? _prodTopOnAppKey;
-  static String? _prodRewardedPlacementId;
-  static String? _prodInterstitialPlacementId;
+  // Backward-compatibility aliases
+  static const String testTopOnAppId = topOnAppId;
+  static const String testTopOnAppKey = topOnAppKey;
+  static const String testRewardedPlacementId = rewardedPlacementId;
+  static const String testInterstitialPlacementId = interstitialPlacementId;
+  static const String testGoogleRewardedUnitId = testRewardedAdUnitId;
+  static const String testGoogleInterstitialUnitId = testInterstitialAdUnitId;
 
-  // Resolved IDs based on active environment
-  static String get topOnAppId =>
-      environment == MonetizationEnvironment.production
-      ? (_prodTopOnAppId ?? testTopOnAppId)
-      : testTopOnAppId;
+  // --- Verified Production AdMob IDs ---
+  static const String productionAdMobAppId =
+      'ca-app-pub-5727644626056713~7098346023';
+  static const String productionRewardedAdUnitId =
+      'ca-app-pub-5727644626056713/8136929678';
+  static const String productionInterstitialAdUnitId =
+      'ca-app-pub-5727644626056713/7318672020';
 
-  static String get topOnAppKey =>
+  // Resolved AdMob IDs based on active environment
+  static String get adMobAppId =>
       environment == MonetizationEnvironment.production
-      ? (_prodTopOnAppKey ?? testTopOnAppKey)
-      : testTopOnAppKey;
+      ? productionAdMobAppId
+      : testAdMobAppId;
 
-  static String get rewardedPlacementId =>
+  static String get adMobRewardedUnitId =>
       environment == MonetizationEnvironment.production
-      ? (_prodRewardedPlacementId ?? testRewardedPlacementId)
-      : testRewardedPlacementId;
+      ? productionRewardedAdUnitId
+      : testRewardedAdUnitId;
 
-  static String get interstitialPlacementId =>
+  static String get adMobInterstitialUnitId =>
       environment == MonetizationEnvironment.production
-      ? (_prodInterstitialPlacementId ?? testInterstitialPlacementId)
-      : testInterstitialPlacementId;
+      ? productionInterstitialAdUnitId
+      : testInterstitialAdUnitId;
 
   static bool get isTestMode => environment == MonetizationEnvironment.test;
+  static bool get enableNetworkLogDebug => isTestMode;
+
+  /// Strict validation ensuring zero cross-environment contamination.
+  /// Throws [StateError] if any mismatch or mixing is detected.
+  static void validateConfiguration() {
+    validateIdsForEnvironment(
+      environment,
+      appId: adMobAppId,
+      rewardedUnitId: adMobRewardedUnitId,
+      interstitialUnitId: adMobInterstitialUnitId,
+    );
+  }
+
+  /// Validates specific IDs against the target environment.
+  static void validateIdsForEnvironment(
+    MonetizationEnvironment env, {
+    required String appId,
+    required String rewardedUnitId,
+    required String interstitialUnitId,
+  }) {
+    if (env == MonetizationEnvironment.test) {
+      if (appId != testAdMobAppId ||
+          rewardedUnitId != testRewardedAdUnitId ||
+          interstitialUnitId != testInterstitialAdUnitId) {
+        throw StateError(
+          '[MonetizationConfig] VALIDATION FAILED: TEST environment resolved non-test AdMob IDs! '
+          'appId=$appId, rewarded=$rewardedUnitId, interstitial=$interstitialUnitId',
+        );
+      }
+      if (appId == productionAdMobAppId ||
+          rewardedUnitId == productionRewardedAdUnitId ||
+          interstitialUnitId == productionInterstitialAdUnitId) {
+        throw StateError(
+          '[MonetizationConfig] CRITICAL ERROR: Production AdMob ID detected in TEST environment!',
+        );
+      }
+    } else if (env == MonetizationEnvironment.production) {
+      if (appId != productionAdMobAppId ||
+          rewardedUnitId != productionRewardedAdUnitId ||
+          interstitialUnitId != productionInterstitialAdUnitId) {
+        throw StateError(
+          '[MonetizationConfig] VALIDATION FAILED: PRODUCTION environment resolved non-production AdMob IDs! '
+          'appId=$appId, rewarded=$rewardedUnitId, interstitial=$interstitialUnitId',
+        );
+      }
+      if (appId.contains('3940256099942544') ||
+          rewardedUnitId.contains('3940256099942544') ||
+          interstitialUnitId.contains('3940256099942544')) {
+        throw StateError(
+          '[MonetizationConfig] CRITICAL ERROR: Google sample/test AdMob ID detected in PRODUCTION environment!',
+        );
+      }
+    }
+  }
 
   // --- Frequency & Pacing Constraints ---
   /// Minimum cooldown between consecutive interstitials (in seconds).

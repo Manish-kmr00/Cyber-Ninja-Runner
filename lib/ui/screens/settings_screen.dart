@@ -9,6 +9,7 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/storage/save_service.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../widgets/cp_boost_dialog.dart';
+import '../../core/monetization/monetization_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -1365,6 +1366,44 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ],
                                 ),
                               ),
+
+                              // Card 6: Privacy & Consent Options (Google UMP / GDPR)
+                              if (MonetizationManager()
+                                  .isPrivacyOptionsRequired) ...[
+                                const SizedBox(height: 14),
+                                _buildCyberCard(
+                                  title: 'PRIVACY & CONSENT',
+                                  subtitle: 'MANAGE DATA & AD PREFERENCES',
+                                  accentColor: const Color(0xFF00E5FF),
+                                  icon: Icons.privacy_tip_outlined,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Configure your advertising consent choices and data preferences under applicable privacy regulations.',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 11.5,
+                                          height: 1.4,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _buildCyberButton(
+                                        label: 'UPDATE PRIVACY CHOICES',
+                                        icon: Icons.manage_accounts_outlined,
+                                        color: const Color(0xFF00E5FF),
+                                        onTap: () {
+                                          AudioService().playClick();
+                                          MonetizationManager()
+                                              .showPrivacyOptionsForm();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

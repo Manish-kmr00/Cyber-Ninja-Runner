@@ -17,6 +17,13 @@ import com.secmtp.sdk.rewardvideo.api.ATRewardVideoListener
 import com.secmtp.sdk.interstitial.api.ATInterstitial
 import com.secmtp.sdk.interstitial.api.ATInterstitialListener
 
+// Official Google User Messaging Platform (UMP) Imports
+import com.google.android.ump.ConsentDebugSettings
+import com.google.android.ump.ConsentInformation
+import com.google.android.ump.ConsentRequestParameters
+import com.google.android.ump.UserMessagingPlatform
+import com.google.android.ump.FormError
+
 /**
  * Android Monetization Bridge for Cyber Ninja Runner.
  *
@@ -58,6 +65,19 @@ class MonetizationBridge private constructor(
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
+            "requestConsent" -> {
+                val testMode = call.argument<Boolean>("isTestMode") ?: true
+                requestConsent(testMode, result)
+            }
+            "showPrivacyOptionsForm" -> {
+                showPrivacyOptionsForm(result)
+            }
+            "isPrivacyOptionsRequired" -> {
+                isPrivacyOptionsRequired(result)
+            }
+            "canRequestAds" -> {
+                canRequestAds(result)
+            }
             "initMonetization" -> {
                 val appId = call.argument<String>("appId") ?: ""
                 val appKey = call.argument<String>("appKey") ?: ""
@@ -107,6 +127,128 @@ class MonetizationBridge private constructor(
             else -> {
                 result.notImplemented()
             }
+        }
+    }
+
+    private fun requestConsent(testMode: Boolean, result: MethodChannel.Result) {
+        mainHandler.post {
+            try {
+                val consentInformation = UserMessagingPlatform.getConsentInformation(activity)
+
+                val paramsBuilder = ConsentRequestParameters.Builder()
+                    .setTagForUnderAgeOfConsent(false)
+
+                if (testMode) {
+                    val debugSettings = ConsentDebugSettings.Builder(activity)
+                        .build()
+                    paramsBuilder.setConsentDebugSettings(debugSettings)
+                }
+
+                val params = paramsBuilder.build()
+
+                Log.i(TAG, "Requesting UMP consent information update (testMode=$testMode)...")
+                consentInformation.requestConsentInfoUpdate(
+                    activity,
+                    params,
+                    {
+                        Log.i(TAG, "UMP consent info update success. Status: ${consentInformation.consentStatus}, PrivacyOptions: ${consentInformation.privacyOptionsRequirementStatus}")
+                        UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) { formError ->
+                            if (formError != null) {
+                                Log.w(TAG, "Consent form dismiss/load error: [${formError.errorCode}] ${formError.message}")
+                            } else {
+                                Log.i(TAG, "Consent form completed or not required.")
+                            }
+                            val canRequest = consentInformation.canRequestAds()
+                            val statusName = getConsentStatusName(consentInformation.consentStatus)
+                            val isPrivacyRequired = consentInformation.privacyOptionsRequirementStatus == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
+                            Log.i(TAG, "UMP completed: canRequestAds=$canRequest, status=$statusName, privacyOptionsRequired=$isPrivacyRequired")
+                            result.success(mapOf(
+                                "canRequestAds" to canRequest,
+                                "consentStatus" to statusName,
+                                "isPrivacyOptionsRequired" to isPrivacyRequired
+                            ))
+                        }
+                    },
+                    { requestError ->
+                        Log.w(TAG, "UMP consent info update failed: [${requestError.errorCode}] ${requestError.message}")
+                        val canRequest = consentInformation.canRequestAds()
+                        val statusName = getConsentStatusName(consentInformation.consentStatus)
+                        val isPrivacyRequired = consentInformation.privacyOptionsRequirementStatus == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
+                        result.success(mapOf(
+                            "canRequestAds" to canRequest,
+                            "consentStatus" to statusName,
+                            "isPrivacyOptionsRequired" to isPrivacyRequired,
+                            "error" to requestError.message
+                        ))
+                    }
+                )
+            } catch (e: Throwable) {
+                Log.e(TAG, "Unexpected error in requestConsent: ${e.message}", e)
+                result.success(mapOf(
+                    "canRequestAds" to true,
+                    "consentStatus" to "ERROR",
+                    "isPrivacyOptionsRequired" to false,
+                    "error" to (e.message ?: "Unknown error")
+                ))
+            }
+        }
+    }
+
+    private fun showPrivacyOptionsForm(result: MethodChannel.Result) {
+        mainHandler.post {
+            try {
+                UserMessagingPlatform.showPrivacyOptionsForm(activity) { formError ->
+                    if (formError != null) {
+                        Log.w(TAG, "showPrivacyOptionsForm error: [${formError.errorCode}] ${formError.message}")
+                        result.success(mapOf(
+                            "success" to false,
+                            "error" to formError.message
+                        ))
+                    } else {
+                        Log.i(TAG, "Privacy options form completed successfully.")
+                        val consentInformation = UserMessagingPlatform.getConsentInformation(activity)
+                        result.success(mapOf(
+                            "success" to true,
+                            "canRequestAds" to consentInformation.canRequestAds(),
+                            "consentStatus" to getConsentStatusName(consentInformation.consentStatus)
+                        ))
+                    }
+                }
+            } catch (e: Throwable) {
+                Log.e(TAG, "Error showing privacy options form: ${e.message}", e)
+                result.success(mapOf(
+                    "success" to false,
+                    "error" to (e.message ?: "Exception showing privacy options")
+                ))
+            }
+        }
+    }
+
+    private fun isPrivacyOptionsRequired(result: MethodChannel.Result) {
+        try {
+            val consentInformation = UserMessagingPlatform.getConsentInformation(activity)
+            val isRequired = consentInformation.privacyOptionsRequirementStatus == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
+            result.success(isRequired)
+        } catch (e: Throwable) {
+            result.success(false)
+        }
+    }
+
+    private fun canRequestAds(result: MethodChannel.Result) {
+        try {
+            val canRequest = UserMessagingPlatform.getConsentInformation(activity).canRequestAds()
+            result.success(canRequest)
+        } catch (e: Throwable) {
+            result.success(true)
+        }
+    }
+
+    private fun getConsentStatusName(status: Int): String {
+        return when (status) {
+            ConsentInformation.ConsentStatus.NOT_REQUIRED -> "NOT_REQUIRED"
+            ConsentInformation.ConsentStatus.REQUIRED -> "REQUIRED"
+            ConsentInformation.ConsentStatus.OBTAINED -> "OBTAINED"
+            else -> "UNKNOWN"
         }
     }
 
@@ -407,6 +549,15 @@ class MonetizationBridge private constructor(
             "Not Initialized"
         }
 
+        val consentInfo = try {
+            UserMessagingPlatform.getConsentInformation(activity)
+        } catch (_: Throwable) {
+            null
+        }
+        val umpStatus = if (consentInfo != null) getConsentStatusName(consentInfo.consentStatus) else "UNKNOWN"
+        val umpCanRequest = consentInfo?.canRequestAds() ?: true
+        val umpPrivacyRequired = consentInfo?.privacyOptionsRequirementStatus == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
+
         return mapOf(
             "isInitialized" to isInitialized,
             "isTestMode" to isTestMode,
@@ -418,6 +569,9 @@ class MonetizationBridge private constructor(
             "omidVersion" to "N/A",
             "omidActive" to false,
             "omidSessionCreated" to false,
+            "umpConsentStatus" to umpStatus,
+            "umpCanRequestAds" to umpCanRequest,
+            "umpPrivacyOptionsRequired" to umpPrivacyRequired,
             "rewardedReadyPlacements" to rewardedAdMap.filter { it.value.isAdReady }.keys.toList(),
             "interstitialReadyPlacements" to interstitialAdMap.filter { it.value.isAdReady }.keys.toList()
         )

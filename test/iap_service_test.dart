@@ -92,15 +92,17 @@ PurchaseDetails createTestPurchaseDetails({
   required String transactionId,
   required String productId,
   required PurchaseStatus status,
+  String? purchaseToken,
   bool pendingCompletePurchase = true,
   IAPError? error,
 }) {
+  final token = purchaseToken ?? 'token_$transactionId';
   final details = PurchaseDetails(
     purchaseID: transactionId,
     productID: productId,
     verificationData: PurchaseVerificationData(
       localVerificationData: '{"orderId":"$transactionId"}',
-      serverVerificationData: 'token_$transactionId',
+      serverVerificationData: token,
       source: 'google_play',
     ),
     transactionDate: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -395,6 +397,182 @@ void main() {
           newPlayer.deliveredTransactionIds.contains('TX_PERSIST_TEST'),
           isTrue,
         );
+      },
+    );
+
+    test(
+      '13. Fix 1: Google Play purchase token is primary idempotency key (orderId changes ignored)',
+      () async {
+        await iapService.init(saveService);
+        final initialCP = saveService.player.cyberPoints.value; // 1000
+
+        const String uniquePurchaseToken = 'google_play_purchase_token_abc123';
+
+        // Delivery 1: orderId = GPA.ORDER-1, purchaseToken = uniquePurchaseToken
+        final purchase1 = createTestPurchaseDetails(
+          transactionId: 'GPA.ORDER-1',
+          productId: IAPService.idCP5000,
+          purchaseToken: uniquePurchaseToken,
+          status: PurchaseStatus.purchased,
+        );
+
+        await iapService.handlePurchaseUpdatesForTesting([purchase1]);
+
+        // First delivery verifies and grants 10,000 CP for cp_5000
+        expect(saveService.player.cyberPoints.value, initialCP + 10000);
+        expect(
+          saveService.isPurchaseTokenProcessed(uniquePurchaseToken),
+          isTrue,
+        );
+        expect(fakeIAP.completedPurchases.contains(purchase1), isTrue);
+
+        // Delivery 2: Different orderId GPA.ORDER-2, but SAME purchase token!
+        final purchase2 = createTestPurchaseDetails(
+          transactionId: 'GPA.ORDER-2',
+          productId: IAPService.idCP5000,
+          purchaseToken: uniquePurchaseToken,
+          status: PurchaseStatus.purchased,
+        );
+
+        await iapService.handlePurchaseUpdatesForTesting([purchase2]);
+
+        // Balance must remain unchanged (+10,000 CP, NOT +20,000 CP)
+        expect(saveService.player.cyberPoints.value, initialCP + 10000);
+        // And purchase2 must be acknowledged to avoid dangling queue
+        expect(fakeIAP.completedPurchases.contains(purchase2), isTrue);
+      },
+    );
+
+    test(
+      '14. Client-Only Entitlement: Hardcoded mapping determines CP rewards',
+      () async {
+        await iapService.init(saveService);
+        final initialCP = saveService.player.cyberPoints.value; // 1000
+
+        // Purchase cp_1000 -> +5,000 CP
+        final purchase1 = createTestPurchaseDetails(
+          transactionId: 'GPA.CP1000-CLIENT',
+          productId: IAPService.idCP1000,
+          purchaseToken: 'token_cp1000_client',
+          status: PurchaseStatus.purchased,
+        );
+        await iapService.handlePurchaseUpdatesForTesting([purchase1]);
+        expect(saveService.player.cyberPoints.value, initialCP + 5000);
+        expect(iapService.successMessage, contains('5000'));
+        expect(fakeIAP.completedPurchases.contains(purchase1), isTrue);
+
+        // Purchase cp_5000 -> +10,000 CP ($2.99 shop item)
+        final purchase5 = createTestPurchaseDetails(
+          transactionId: 'GPA.CP5000-CLIENT',
+          productId: IAPService.idCP5000,
+          purchaseToken: 'token_cp5000_client',
+          status: PurchaseStatus.purchased,
+        );
+        await iapService.handlePurchaseUpdatesForTesting([purchase5]);
+        expect(saveService.player.cyberPoints.value, initialCP + 5000 + 10000);
+        expect(iapService.successMessage, contains('10000'));
+        expect(fakeIAP.completedPurchases.contains(purchase5), isTrue);
+
+        // Purchase cp_10000 -> +20,000 CP
+        final purchase10 = createTestPurchaseDetails(
+          transactionId: 'GPA.CP10000-CLIENT',
+          productId: IAPService.idCP10000,
+          purchaseToken: 'token_cp10000_client',
+          status: PurchaseStatus.purchased,
+        );
+        await iapService.handlePurchaseUpdatesForTesting([purchase10]);
+        expect(
+          saveService.player.cyberPoints.value,
+          initialCP + 5000 + 10000 + 20000,
+        );
+        expect(iapService.successMessage, contains('20000'));
+        expect(fakeIAP.completedPurchases.contains(purchase10), isTrue);
+      },
+    );
+
+    test(
+      '15. Consumable purchase consumption is completed on Google Play after grant',
+      () async {
+        await iapService.init(saveService);
+        final purchase = createTestPurchaseDetails(
+          transactionId: 'GPA.CONSUME-TEST',
+          productId: IAPService.idCP5000,
+          purchaseToken: 'token_consume_test',
+          status: PurchaseStatus.purchased,
+        );
+
+        expect(fakeIAP.completedPurchases.contains(purchase), isFalse);
+        await iapService.handlePurchaseUpdatesForTesting([purchase]);
+
+        // Must request consumption from Google Play Billing
+        expect(fakeIAP.completedPurchases.contains(purchase), isTrue);
+      },
+    );
+
+    test(
+      '16. PurchaseStatus.pending does NOT grant CP and does NOT complete purchase',
+      () async {
+        await iapService.init(saveService);
+        final initialCP = saveService.player.cyberPoints.value;
+
+        final pendingPurchase = createTestPurchaseDetails(
+          transactionId: 'GPA.PENDING-TEST',
+          productId: IAPService.idCP5000,
+          purchaseToken: 'token_pending_test',
+          status: PurchaseStatus.pending,
+        );
+
+        await iapService.handlePurchaseUpdatesForTesting([pendingPurchase]);
+
+        // CP must NOT increase
+        expect(saveService.player.cyberPoints.value, initialCP);
+        // Purchase must NOT be completed while pending
+        expect(fakeIAP.completedPurchases.contains(pendingPurchase), isFalse);
+        expect(iapService.isLoading, isTrue);
+      },
+    );
+
+    test('17. Empty purchase token is rejected without CP grant', () async {
+      await iapService.init(saveService);
+      final initialCP = saveService.player.cyberPoints.value;
+
+      final emptyTokenPurchase = PurchaseDetails(
+        purchaseID: 'GPA.EMPTY-TOKEN',
+        productID: IAPService.idCP5000,
+        verificationData: PurchaseVerificationData(
+          localVerificationData: '',
+          serverVerificationData: '',
+          source: 'google_play',
+        ),
+        transactionDate: DateTime.now().millisecondsSinceEpoch.toString(),
+        status: PurchaseStatus.purchased,
+      );
+      emptyTokenPurchase.pendingCompletePurchase = true;
+
+      await iapService.handlePurchaseUpdatesForTesting([emptyTokenPurchase]);
+
+      // CP must NOT be granted
+      expect(saveService.player.cyberPoints.value, initialCP);
+      expect(iapService.errorMessage, contains('missing purchase token'));
+    });
+
+    test(
+      '18. SaveService purchase token persistence & PlayerData serialization',
+      () async {
+        const token = 'TEST_GOOGLE_PLAY_PURCHASE_TOKEN_2026';
+        expect(saveService.isPurchaseTokenProcessed(token), isFalse);
+
+        saveService.recordProcessedPurchaseToken(token);
+        expect(saveService.isPurchaseTokenProcessed(token), isTrue);
+
+        // Verify JSON serialization includes processedPurchaseTokens
+        final json = saveService.player.toJson();
+        expect(json['processedPurchaseTokens'], contains(token));
+
+        // Verify deserialization into a fresh PlayerData instance
+        final freshPlayer = PlayerData();
+        freshPlayer.loadJson(json);
+        expect(freshPlayer.processedPurchaseTokens.contains(token), isTrue);
       },
     );
   });

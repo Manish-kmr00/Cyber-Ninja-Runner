@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import '../storage/save_service.dart';
 
 /// In-App Purchase Service for Cyber Ninja Runner.
@@ -9,6 +10,8 @@ class IAPService extends ChangeNotifier {
   static final IAPService _instance = IAPService._internal();
   factory IAPService() => _instance;
   IAPService._internal();
+
+  static const String kPackageName = 'com.moonedgestudio.cyberninjarunner';
 
   InAppPurchase? _customIap;
   InAppPurchase get _iap => _customIap ?? InAppPurchase.instance;
@@ -266,10 +269,11 @@ class IAPService extends ChangeNotifier {
   }
 
   /// Delivers the purchased Cyber Points to the player and consumes the item on Google Play
+  /// with local purchase-token idempotency protection.
   Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
     final productId = purchaseDetails.productID;
 
-    // Unknown product protection: unknown product IDs from purchaseStream NEVER receive CP
+    // 1. Unknown product protection: unknown product IDs NEVER receive CP
     if (!isValidProductId(productId)) {
       debugPrint(
         '[IAP] Unknown or unsupported product ID received: $productId. CP will NOT be granted.',
@@ -286,16 +290,32 @@ class IAPService extends ChangeNotifier {
       return;
     }
 
-    // Duplicate-delivery protection using transaction / purchase identifier
-    final String transactionId = _resolveTransactionId(purchaseDetails);
+    // 2. Resolve Google Play Purchase Token (FIX 1: primary idempotency key)
+    final String purchaseToken = _resolvePurchaseToken(purchaseDetails);
 
-    if (_saveService != null &&
-        transactionId.isNotEmpty &&
-        _saveService!.isTransactionDelivered(transactionId)) {
+    if (purchaseToken.isEmpty) {
       debugPrint(
-        '[IAP] Duplicate delivery blocked for transaction $transactionId ($productId). CP was already credited.',
+        '[IAP] Missing or empty Google Play purchase token for $productId. Cannot verify purchase.',
       );
-      // Still complete/consume if pending so Google Play doesn't keep resending
+      _errorMessage = 'Purchase verification failed: missing purchase token.';
+      if (purchaseDetails.pendingCompletePurchase) {
+        try {
+          await _iap.completePurchase(purchaseDetails);
+        } catch (e) {
+          debugPrint('[IAP] Error completing invalid purchase: $e');
+        }
+      }
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    // 3. Local Idempotency Check: was this purchase token already processed?
+    if (_saveService != null &&
+        _saveService!.isPurchaseTokenProcessed(purchaseToken)) {
+      debugPrint(
+        '[IAP] Duplicate purchase blocked for token $purchaseToken ($productId). CP was already credited.',
+      );
       if (purchaseDetails.pendingCompletePurchase) {
         try {
           await _iap.completePurchase(purchaseDetails);
@@ -308,26 +328,44 @@ class IAPService extends ChangeNotifier {
       return;
     }
 
-    // Determine CP amount ONLY from trusted product ID mapping
+    // 4. Authoritative client-side CP entitlement strictly determined by product ID mapping
     final int cpAmount = getCPAmount(productId);
+    if (cpAmount <= 0) {
+      debugPrint(
+        '[IAP] No CP reward mapped for product ID: $productId. Entitlement denied.',
+      );
+      if (purchaseDetails.pendingCompletePurchase) {
+        try {
+          await _iap.completePurchase(purchaseDetails);
+        } catch (e) {
+          debugPrint('[IAP] Error completing unmapped product purchase: $e');
+        }
+      }
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
 
-    if (cpAmount > 0 && _saveService != null) {
-      // 1. Credit the CP coins to the player's vault
+    // 5. Grant CP to player vault and persist purchase token
+    if (_saveService != null) {
       _saveService!.addCyberPoints(cpAmount);
 
-      // 2. Persist delivery record to prevent duplicate crediting
-      if (transactionId.isNotEmpty) {
-        _saveService!.recordDeliveredTransaction(transactionId);
+      // Persist purchase token as processed (and purchaseID for backward compatibility)
+      _saveService!.recordProcessedPurchaseToken(purchaseToken);
+      if (purchaseDetails.purchaseID != null &&
+          purchaseDetails.purchaseID!.trim().isNotEmpty) {
+        _saveService!.recordProcessedPurchaseToken(
+          purchaseDetails.purchaseID!.trim(),
+        );
       }
 
       _successMessage = '+$cpAmount Cyber Points (CP) added to Vault!';
       debugPrint(
-        '[IAP] Successfully credited $cpAmount CP to player (tx: $transactionId).',
+        '[IAP] Successfully credited $cpAmount CP to player (token: $purchaseToken).',
       );
     }
 
-    // 3. Acknowledge and consume the purchase on Google Play
-    // Crucial: Google refunds the user if purchases are not completed within 3 days!
+    // 6. Complete and consume purchase on Google Play Billing
     if (purchaseDetails.pendingCompletePurchase) {
       try {
         await _iap.completePurchase(purchaseDetails);
@@ -341,21 +379,17 @@ class IAPService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Resolves a non-empty unique transaction identifier from PurchaseDetails
-  String _resolveTransactionId(PurchaseDetails purchaseDetails) {
-    if (purchaseDetails.purchaseID != null &&
-        purchaseDetails.purchaseID!.trim().isNotEmpty) {
-      return purchaseDetails.purchaseID!.trim();
+  /// Resolves the authentic Google Play purchase token from PurchaseDetails.
+  /// Strictly rejects orderId / purchaseID as the primary idempotency key.
+  String _resolvePurchaseToken(PurchaseDetails purchaseDetails) {
+    if (purchaseDetails is GooglePlayPurchaseDetails) {
+      final token = purchaseDetails.billingClientPurchase.purchaseToken.trim();
+      if (token.isNotEmpty) return token;
     }
-    if (purchaseDetails.verificationData.serverVerificationData
-        .trim()
-        .isNotEmpty) {
-      return purchaseDetails.verificationData.serverVerificationData.trim();
-    }
-    if (purchaseDetails.verificationData.localVerificationData
-        .trim()
-        .isNotEmpty) {
-      return purchaseDetails.verificationData.localVerificationData.trim();
+    final serverData = purchaseDetails.verificationData.serverVerificationData
+        .trim();
+    if (serverData.isNotEmpty) {
+      return serverData;
     }
     return '';
   }

@@ -68,11 +68,9 @@ class SaveService extends ChangeNotifier {
 
   bool get isTenXUnlocked => player.isTenXUnlocked;
   bool get isFlightUnlocked => player.isFlightUnlocked;
-  bool isSkinUnlocked(PlayerSkin skin) =>
-      player.unlockedSkins.contains(skin);
+  bool isSkinUnlocked(PlayerSkin skin) => player.unlockedSkins.contains(skin);
 
-  int getBoosterCount(BoosterType type) =>
-      player.boosters[type]?.value ?? 0;
+  int getBoosterCount(BoosterType type) => player.boosters[type]?.value ?? 0;
 
   Future<void> saveAll() async {
     try {
@@ -128,18 +126,30 @@ class SaveService extends ChangeNotifier {
 
   bool spendCubePoints(int amount) => spendCyberNinjaPoints(amount);
 
-  /// Check whether a Google Play IAP transaction identifier has already been credited
-  bool isTransactionDelivered(String transactionId) {
-    if (transactionId.trim().isEmpty) return false;
-    return player.deliveredTransactionIds.contains(transactionId.trim());
+  /// Check whether a Google Play purchase token has already been processed for entitlement
+  bool isPurchaseTokenProcessed(String purchaseToken) {
+    final token = purchaseToken.trim();
+    if (token.isEmpty) return false;
+    return player.processedPurchaseTokens.contains(token) ||
+        player.deliveredTransactionIds.contains(token);
   }
 
-  /// Persistently record a Google Play IAP transaction as delivered to prevent duplicate grants
-  void recordDeliveredTransaction(String transactionId) {
-    if (transactionId.trim().isEmpty) return;
-    player.deliveredTransactionIds.add(transactionId.trim());
+  /// Persistently record a Google Play purchase token as processed to prevent duplicate grants
+  void recordProcessedPurchaseToken(String purchaseToken) {
+    final token = purchaseToken.trim();
+    if (token.isEmpty) return;
+    player.processedPurchaseTokens.add(token);
+    player.deliveredTransactionIds.add(token);
     saveAll();
   }
+
+  /// Backwards-compatible alias for transaction identifier checks
+  bool isTransactionDelivered(String transactionId) =>
+      isPurchaseTokenProcessed(transactionId);
+
+  /// Backwards-compatible alias for recording delivered transactions
+  void recordDeliveredTransaction(String transactionId) =>
+      recordProcessedPurchaseToken(transactionId);
 
   void unlockSkin(PlayerSkin skin) {
     player.unlockedSkins.add(skin);

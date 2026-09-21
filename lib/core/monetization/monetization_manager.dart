@@ -12,6 +12,7 @@ import 'shared_counter_service.dart';
 
 export 'monetization_config.dart';
 export 'monetization_events.dart';
+export 'monetization_platform.dart' show ConsentResult;
 export 'reward_animation_service.dart';
 
 /// Central Monetization Facade for Cyber Ninja Runner.
@@ -32,11 +33,37 @@ class MonetizationManager {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
+  ConsentResult? _consentResult;
+  ConsentResult? get consentResult => _consentResult;
+  bool get canRequestAds => _consentResult?.canRequestAds ?? true;
+  bool get isPrivacyOptionsRequired =>
+      _consentResult?.isPrivacyOptionsRequired ?? false;
+
+  /// Re-opens the official Google UMP privacy options form.
+  Future<bool> showPrivacyOptionsForm() => _platform.showPrivacyOptionsForm();
+
+  /// Refreshes whether a privacy options entry point is required.
+  Future<bool> checkPrivacyOptionsRequired() async {
+    final required = await _platform.isPrivacyOptionsRequired();
+    if (_consentResult != null) {
+      _consentResult = ConsentResult(
+        canRequestAds: _consentResult!.canRequestAds,
+        consentStatus: _consentResult!.consentStatus,
+        isPrivacyOptionsRequired: required,
+        error: _consentResult!.error,
+      );
+    }
+    return required;
+  }
+
   /// Initializes the complete monetization subsystem asynchronously.
   ///
   /// Safe to call during app startup: will NOT block splash screen or game loading.
   Future<void> init() async {
     if (_isInitialized) return;
+
+    // Fail immediately if environment IDs are misconfigured or cross-contaminated.
+    MonetizationConfig.validateConfiguration();
 
     MonetizationAnalytics.trackEvent(AdEventType.adInitStarted);
     debugPrint(
@@ -44,10 +71,29 @@ class MonetizationManager {
     );
 
     try {
-      // 1. Initialize MMKV key-value store for monetization
+      // 1. Google UMP Consent evaluation (must run BEFORE requesting ads)
+      _consentResult = await _platform.requestConsent(
+        isTestMode: MonetizationConfig.isTestMode,
+      );
+      debugPrint(
+        '[MonetizationManager] UMP Consent completed: status=${_consentResult?.consentStatus}, '
+        'canRequestAds=${_consentResult?.canRequestAds}, '
+        'privacyOptionsRequired=${_consentResult?.isPrivacyOptionsRequired}',
+      );
+
+      // 2. Initialize MMKV key-value store for monetization
       await _counter.init();
 
-      // 2. Initialize native TopOn mediation on Android
+      // If user/regulations explicitly restrict ads, do not proceed with ad requests
+      if (!(_consentResult?.canRequestAds ?? true)) {
+        debugPrint(
+          '[MonetizationManager] Ads restricted by UMP consent. Halting ad initialization.',
+        );
+        _isInitialized = true;
+        return;
+      }
+
+      // 3. Initialize native TopOn mediation on Android
       final initSuccess = await _platform.initMonetization(
         appId: MonetizationConfig.topOnAppId,
         appKey: MonetizationConfig.topOnAppKey,
