@@ -314,7 +314,7 @@ class IAPService extends ChangeNotifier {
     if (_saveService != null &&
         _saveService!.isPurchaseTokenProcessed(purchaseToken)) {
       debugPrint(
-        '[IAP] Duplicate purchase blocked for token $purchaseToken ($productId). CP was already credited.',
+        '[IAP] Duplicate purchase blocked for token ${_maskToken(purchaseToken)} ($productId). CP was already credited.',
       );
       if (purchaseDetails.pendingCompletePurchase) {
         try {
@@ -361,7 +361,7 @@ class IAPService extends ChangeNotifier {
 
       _successMessage = '+$cpAmount Cyber Points (CP) added to Vault!';
       debugPrint(
-        '[IAP] Successfully credited $cpAmount CP to player (token: $purchaseToken).',
+        '[IAP] Successfully credited $cpAmount CP to player (token: ${_maskToken(purchaseToken)}).',
       );
     }
 
@@ -392,6 +392,12 @@ class IAPService extends ChangeNotifier {
       return serverData;
     }
     return '';
+  }
+
+  /// Masks purchase tokens in logs to prevent full token leakage to device logcat.
+  String _maskToken(String token) {
+    if (token.length <= 8) return '***';
+    return '${token.substring(0, 8)}...';
   }
 
   /// Exposes purchase updates handling for automated unit tests

@@ -270,12 +270,15 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        chunk.collectibles.add(
-          CollectibleCP(
-            position: Vector2(plat1X + plat1W / 2, platSurfaceY - 115.0),
-            biome: biome,
-          ),
-        );
+        // 75% CP reduction on catwalks
+        if (random.nextDouble() < 0.25) {
+          chunk.collectibles.add(
+            CollectibleCP(
+              position: Vector2(plat1X + plat1W / 2, platSurfaceY - 115.0),
+              biome: biome,
+            ),
+          );
+        }
       } else if (layoutType == 1) {
         final bridgeX = 120.0;
         final bridgeW = length - 240.0;
@@ -287,12 +290,15 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        chunk.collectibles.add(
-          CollectibleCP(
-            position: Vector2(bridgeX + bridgeW / 2, bridgeSurfaceY - 125.0),
-            biome: biome,
-          ),
-        );
+        // 75% CP reduction on catwalks
+        if (random.nextDouble() < 0.25) {
+          chunk.collectibles.add(
+            CollectibleCP(
+              position: Vector2(bridgeX + bridgeW / 2, bridgeSurfaceY - 125.0),
+              biome: biome,
+            ),
+          );
+        }
       } else if (layoutType == 2 && hasPit) {
         final bridgeX = pitStartX - 30.0;
         final bridgeW = pitWidth + 60.0;
@@ -306,12 +312,18 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        chunk.collectibles.add(
-          CollectibleCP(
-            position: Vector2(pitStartX + pitWidth / 2, chasmSurfaceY - 115.0),
-            biome: biome,
-          ),
-        );
+        // 75% CP reduction on catwalks
+        if (random.nextDouble() < 0.25) {
+          chunk.collectibles.add(
+            CollectibleCP(
+              position: Vector2(
+                pitStartX + pitWidth / 2,
+                chasmSurfaceY - 115.0,
+              ),
+              biome: biome,
+            ),
+          );
+        }
       } else if (layoutType == 3) {
         final platX = 180.0 + random.nextDouble() * 80.0;
         const platW = 160.0;
@@ -323,12 +335,15 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        chunk.collectibles.add(
-          CollectibleCP(
-            position: Vector2(platX + platW / 2, islandSurfaceY - 120.0),
-            biome: biome,
-          ),
-        );
+        // 75% CP reduction on catwalks
+        if (random.nextDouble() < 0.25) {
+          chunk.collectibles.add(
+            CollectibleCP(
+              position: Vector2(platX + platW / 2, islandSurfaceY - 120.0),
+              biome: biome,
+            ),
+          );
+        }
       }
     }
 
@@ -345,8 +360,9 @@ class ProceduralGenerator {
       );
     }
 
-    // 3. Spawn Collectible Cyber Ninja Points (CP) along ground
-    for (int i = 0; i < 2; i++) {
+    // 3. Spawn Collectible Cyber Ninja Points (CP) along ground (75% removed permanently)
+    if (random.nextDouble() < 0.25) {
+      final i = random.nextBool() ? 0 : 1;
       final cpX = 120.0 + (i * 220.0) + random.nextDouble() * 40.0;
       if (!hasPit || (cpX < pitStartX || cpX > pitStartX + pitWidth)) {
         final surfaceY = chunk.getSurfaceY(startX + cpX);
@@ -879,7 +895,10 @@ class ProceduralGenerator {
               biome: b,
             ),
           );
-          final bonusCP = hDef.cpReward > 0 ? hDef.cpReward : 4;
+          // 75% CP coin reduction on elevated route across all tracks (1 coin instead of 4)
+          final bonusCP = ((hDef.cpReward > 0 ? hDef.cpReward : 4) * 0.25)
+              .floor()
+              .clamp(0, 1);
           for (int c = 0; c < bonusCP; c++) {
             final cpX = targetX + 20.0 + (c * 28.0);
             if (cpX < targetX + platW - 15.0) {

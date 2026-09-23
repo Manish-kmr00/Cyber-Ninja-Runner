@@ -73,10 +73,10 @@ class DifficultyConfig {
   static const double minObstaclePhysicalGap =
       160.0; // Absolute minimum gap between consecutive obstacles
 
-  // Risk / Reward Route Economy
+  // Risk / Reward Route Economy (Halved for track balancing)
   static const int safeRouteCPReward = 1;
-  static const int riskyRouteCPReward = 4;
-  static const int extremeRiskCPReward = 6;
+  static const int riskyRouteCPReward = 2;
+  static const int extremeRiskCPReward = 3;
 
   // Near-Miss Tuning
   static const double nearMissProximityPixels =
