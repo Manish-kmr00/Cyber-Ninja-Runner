@@ -27,13 +27,13 @@ void main() {
 
   test('PlayerData initialization & serialization test', () {
     final player = PlayerData();
-    expect(player.cyberPoints.value, 500);
-    expect(player.cubePoints.value, 500);
+    expect(player.cyberPoints.value, 0); // New install starts at 0 CP
+    expect(player.cubePoints.value, 0);
     expect(player.unlockedSkins.length, 1);
 
     final json = player.toJson();
-    expect(json['cyberPoints'], 500);
-    expect(json['cubePoints'], 500);
+    expect(json['cyberPoints'], 0);
+    expect(json['cubePoints'], 0);
   });
 
   test('Standard Progression and Content Lock Mechanics', () {

@@ -63,6 +63,7 @@ class SaveService extends ChangeNotifier {
     AudioService().hapticsEnabled = settings.hapticsEnabled;
 
     _isLoaded = true;
+    debugPrint('[CP_LOAD] persistent_cp=${player.cyberPoints.value}');
     notifyListeners();
   }
 
@@ -218,13 +219,6 @@ class SaveService extends ChangeNotifier {
     stats.totalShadowHides += shadowHides;
     stats.totalDeaths++;
     stats.updateBestForMode(mode, distance);
-
-    // Reward 1 CP per 10m traveled (multiplied if 10x mode)
-    final multiplier = mode == GameMode.tenXChallenge ? 10 : 1;
-    final earnedCP = (distance ~/ 10) * multiplier;
-    if (earnedCP > 0) {
-      player.cyberPoints.add(earnedCP);
-    }
 
     saveAll();
   }

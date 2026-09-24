@@ -2,7 +2,7 @@ import '../constants/game_enums.dart';
 import '../security/safe_types.dart';
 
 class PlayerData {
-  final SafeInt cyberPoints = SafeInt(500);
+  final SafeInt cyberPoints = SafeInt(0);
   SafeInt get cubePoints => cyberPoints;
   SafeInt get cyberNinjaPoints => cyberPoints;
 
@@ -41,7 +41,7 @@ class PlayerData {
   };
 
   void loadJson(Map<String, dynamic> json) {
-    cyberPoints.value = json['cyberPoints'] ?? json['cubePoints'] ?? 500;
+    cyberPoints.value = json['cyberPoints'] ?? json['cubePoints'] ?? 0;
     selectedHero = CharacterHero.values.firstWhere(
       (h) => h.name == json['selectedHero'],
       orElse: () => CharacterHero.cyberNinja,

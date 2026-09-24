@@ -85,6 +85,10 @@ class _HudOverlayState extends State<HudOverlay> with TickerProviderStateMixin {
       if (mounted) setState(() {});
     };
 
+    widget.game.onCPChanged = () {
+      if (mounted) setState(() {});
+    };
+
     widget.game.onSectorChanged = (newSector) {
       if (mounted) {
         setState(() {

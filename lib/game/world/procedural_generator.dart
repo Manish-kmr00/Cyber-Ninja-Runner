@@ -270,15 +270,6 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        // 75% CP reduction on catwalks
-        if (random.nextDouble() < 0.25) {
-          chunk.collectibles.add(
-            CollectibleCP(
-              position: Vector2(plat1X + plat1W / 2, platSurfaceY - 115.0),
-              biome: biome,
-            ),
-          );
-        }
       } else if (layoutType == 1) {
         final bridgeX = 120.0;
         final bridgeW = length - 240.0;
@@ -290,15 +281,6 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        // 75% CP reduction on catwalks
-        if (random.nextDouble() < 0.25) {
-          chunk.collectibles.add(
-            CollectibleCP(
-              position: Vector2(bridgeX + bridgeW / 2, bridgeSurfaceY - 125.0),
-              biome: biome,
-            ),
-          );
-        }
       } else if (layoutType == 2 && hasPit) {
         final bridgeX = pitStartX - 30.0;
         final bridgeW = pitWidth + 60.0;
@@ -312,18 +294,6 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        // 75% CP reduction on catwalks
-        if (random.nextDouble() < 0.25) {
-          chunk.collectibles.add(
-            CollectibleCP(
-              position: Vector2(
-                pitStartX + pitWidth / 2,
-                chasmSurfaceY - 115.0,
-              ),
-              biome: biome,
-            ),
-          );
-        }
       } else if (layoutType == 3) {
         final platX = 180.0 + random.nextDouble() * 80.0;
         const platW = 160.0;
@@ -335,15 +305,6 @@ class ProceduralGenerator {
             biome: biome,
           ),
         );
-        // 75% CP reduction on catwalks
-        if (random.nextDouble() < 0.25) {
-          chunk.collectibles.add(
-            CollectibleCP(
-              position: Vector2(platX + platW / 2, islandSurfaceY - 120.0),
-              biome: biome,
-            ),
-          );
-        }
       }
     }
 
@@ -360,16 +321,26 @@ class ProceduralGenerator {
       );
     }
 
-    // 3. Spawn Collectible Cyber Ninja Points (CP) along ground (75% removed permanently)
-    if (random.nextDouble() < 0.25) {
-      final i = random.nextBool() ? 0 : 1;
-      final cpX = 120.0 + (i * 220.0) + random.nextDouble() * 40.0;
+    // 3. Deterministic CP Pickup Placement — 1 pickup per chunk for first 5000m.
+    //    Each map: 100 chunks × 1 CP = 100 CP.  3 maps × 100 CP = 300 CP total.
+    //    Distance ONLY controls WHERE the pickup is placed, NOT the CP reward.
+    //    The reward is always pickup.value = 1, added only on physical collection.
+    if (!isSafeHaven && !isTitanArena && chunkStartM < 5000) {
+      // Alternate pickup X between two track zones each chunk for visual variety
+      final isEvenChunk = (chunkStartM ~/ 50).isEven;
+      final cpX = isEvenChunk
+          ? 130.0 +
+                (chunkStartM % 50) *
+                    0.6 // left zone ~130–160px
+          : 280.0 + (chunkStartM % 50) * 0.6; // right zone ~280–310px
+      // Skip placement if pickup would land inside a pit
       if (!hasPit || (cpX < pitStartX || cpX > pitStartX + pitWidth)) {
         final surfaceY = chunk.getSurfaceY(startX + cpX);
         chunk.collectibles.add(
           CollectibleCP(
-            position: Vector2(cpX, surfaceY - 45 - (i % 2 == 0 ? 0 : 35)),
+            position: Vector2(cpX, surfaceY - 48.0),
             biome: biome,
+            value: 1,
           ),
         );
       }
@@ -885,7 +856,7 @@ class ProceduralGenerator {
           );
           break;
         case 'platform':
-          // High-Risk / High-Reward elevated route
+          // High-Risk elevated route platform
           final platW = hDef.width;
           final platY = surfaceY - 85.0;
           chunk.elevatedPlatforms.add(
@@ -895,18 +866,6 @@ class ProceduralGenerator {
               biome: b,
             ),
           );
-          // 75% CP coin reduction on elevated route across all tracks (1 coin instead of 4)
-          final bonusCP = ((hDef.cpReward > 0 ? hDef.cpReward : 4) * 0.25)
-              .floor()
-              .clamp(0, 1);
-          for (int c = 0; c < bonusCP; c++) {
-            final cpX = targetX + 20.0 + (c * 28.0);
-            if (cpX < targetX + platW - 15.0) {
-              chunk.collectibles.add(
-                CollectibleCP(position: Vector2(cpX, platY - 35.0), biome: b),
-              );
-            }
-          }
           break;
       }
     }

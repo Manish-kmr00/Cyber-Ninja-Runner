@@ -1543,9 +1543,12 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                                 );
                               }
                             } else {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const ShopScreen(),
+                              Navigator.of(dialogCtx).pop();
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) => const CpBoostDialog(
+                                  initialTab: CpBoostTab.dataVault,
                                 ),
                               );
                             }
@@ -1553,7 +1556,7 @@ class _StartMenuScreenState extends State<StartMenuScreen>
                           child: Text(
                             canAfford
                                 ? context.l10n.tr('unlock_access_now')
-                                : '${context.l10n.tr('buy')} CP (${context.l10n.tr('section_armory')})',
+                                : '${context.l10n.tr('buy')} CP (DATA VAULT)',
                             style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 11,

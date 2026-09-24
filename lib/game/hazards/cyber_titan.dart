@@ -313,11 +313,6 @@ class CyberTitan extends BaseHazard
 
     try {
       game.shakeCamera(0.85);
-      final cpBonus = isBoss
-          ? (game.mode == GameMode.tenXChallenge ? 1000 : 500)
-          : (game.mode == GameMode.tenXChallenge ? 250 : 100);
-      game.collectedCP += cpBonus;
-      game.saveService.addCyberPoints(cpBonus);
     } catch (_) {}
 
     // Spawn 36 heavy flying mechanical scrap, armor shards & circuit sparks

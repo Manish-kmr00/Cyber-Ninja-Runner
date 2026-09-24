@@ -113,9 +113,14 @@ class CollectibleCP extends PositionComponent {
   double bobTimer = 0.0;
   bool isCollected = false;
 
+  /// The CP reward granted when the Ninja collects this pickup.
+  /// This is the EXACT amount added — no multipliers, no distance scaling.
+  final int value;
+
   CollectibleCP({
     required super.position,
     this.biome = SectorBiome.neonMetropolis,
+    this.value = 1,
   }) : super(size: Vector2(24, 24), anchor: Anchor.center);
 
   @override

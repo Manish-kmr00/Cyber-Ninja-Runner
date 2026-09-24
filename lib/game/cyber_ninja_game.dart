@@ -77,6 +77,7 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   // Callbacks for Flutter UI Overlays
   VoidCallback? onPlayerDied;
   VoidCallback? onDistanceChanged;
+  VoidCallback? onCPChanged;
   void Function(SectorBiome newSector)? onSectorChanged;
 
   // Dynamic Sector Biome Tracker
@@ -400,9 +401,21 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   .length;
           if (cpDist < 30.0) {
             cp.isCollected = true;
-            final cpMultiplier = mode == GameMode.tenXChallenge ? 10 : 1;
-            collectedCP += cpMultiplier;
-            saveService.addCyberPoints(cpMultiplier);
+            final earned = cp.value; // EXACT pickup value — no multipliers
+            final oldCp = saveService.player.cyberPoints.value;
+            collectedCP += earned;
+            saveService.addCyberPoints(
+              earned,
+            ); // IMMEDIATELY persist upon collection
+            final newCp = saveService.player.cyberPoints.value;
+            debugPrint(
+              '[CP_SAVE] reason=pickup_collection old_cp=$oldCp added=$earned new_cp=$newCp save_success=true',
+            );
+            debugPrint(
+              '[TRACK_CP] map=${mode.name} dist=${currentDistance}m '
+              'pickup_value=$earned old_cp=$oldCp added=$earned new_cp=$newCp',
+            );
+            onCPChanged?.call();
             AudioService().playCollect();
           }
         }
@@ -468,9 +481,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   shakeCamera(0.60);
                   AudioService().playSlash();
                   AudioService().playEnemyDestroy();
-                  final cpBonus = mode == GameMode.tenXChallenge ? 50 : 25;
-                  collectedCP += cpBonus;
-                  saveService.addCyberPoints(cpBonus);
                 }
               } else if (hazard is CyberTitan) {
                 if (!hazard.isSliced) {
@@ -479,9 +489,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   AudioService().playSlash();
                   if (hazard.isSliced) {
                     AudioService().playEnemyDestroy();
-                    final cpBonus = mode == GameMode.tenXChallenge ? 500 : 200;
-                    collectedCP += cpBonus;
-                    saveService.addCyberPoints(cpBonus);
                   }
                 }
               } else if (hazard is HoverDroneHazard) {
@@ -490,9 +497,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   shakeCamera(0.55);
                   AudioService().playSlash();
                   AudioService().playEnemyDestroy();
-                  final cpBonus = mode == GameMode.tenXChallenge ? 60 : 30;
-                  collectedCP += cpBonus;
-                  saveService.addCyberPoints(cpBonus);
                 }
               } else if (hazard is TrafficBarrierHazard) {
                 if (!hazard.isShattered) {
@@ -500,18 +504,12 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   shakeCamera(0.50);
                   AudioService().playSlash();
                   AudioService().playEnemyDestroy();
-                  final cpBonus = mode == GameMode.tenXChallenge ? 40 : 20;
-                  collectedCP += cpBonus;
-                  saveService.addCyberPoints(cpBonus);
                 }
               } else {
                 hazardsToDestroy.add(hazard);
                 shakeCamera(0.45);
                 AudioService().playSlash();
                 AudioService().playEnemyDestroy();
-                final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
-                collectedCP += cpBonus;
-                saveService.addCyberPoints(cpBonus);
               }
               continue;
             }
@@ -530,9 +528,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   shakeCamera(0.55);
                   AudioService().playSlash();
                   AudioService().playEnemyDestroy();
-                  final cpBonus = mode == GameMode.tenXChallenge ? 60 : 30;
-                  collectedCP += cpBonus;
-                  saveService.addCyberPoints(cpBonus);
                 }
               } else if (hazard is TrafficBarrierHazard) {
                 if (!hazard.isShattered) {
@@ -540,18 +535,12 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                   shakeCamera(0.50);
                   AudioService().playSlash();
                   AudioService().playEnemyDestroy();
-                  final cpBonus = mode == GameMode.tenXChallenge ? 40 : 20;
-                  collectedCP += cpBonus;
-                  saveService.addCyberPoints(cpBonus);
                 }
               } else {
                 hazardsToDestroy.add(hazard);
                 shakeCamera(0.40);
                 AudioService().playSlash();
                 AudioService().playEnemyDestroy();
-                final cpBonus = mode == GameMode.tenXChallenge ? 50 : 15;
-                collectedCP += cpBonus;
-                saveService.addCyberPoints(cpBonus);
               }
               continue;
             }
@@ -590,9 +579,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
                 clearance <= DifficultyConfig.nearMissProximityPixels) {
               _nearMissedHazards.add(hazard);
               difficultyManager.recordNearMiss();
-              const bonus = DifficultyConfig.nearMissCPBonus;
-              collectedCP += bonus;
-              saveService.addCyberPoints(bonus);
               AudioService().triggerHaptic();
             }
           }
@@ -665,6 +651,12 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       distance: currentDistance,
       jumps: player.jumpCount,
       shadowHides: player.hideController.isStealthActive ? 1 : 0,
+    );
+
+    // CP is already saved immediately at the moment of track pickup collection.
+    // Death MUST NOT reset the persistent CP balance.
+    debugPrint(
+      '[CP_DEATH] persistent_cp=${saveService.player.cyberPoints.value}',
     );
   }
 
@@ -762,6 +754,10 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     deathTimeScale = 1.0;
     currentDistance = 0;
     collectedCP = 0;
+    debugPrint(
+      '[CP_NEW_RUN] persistent_cp=${saveService.player.cyberPoints.value}',
+    );
+    onCPChanged?.call();
     AudioService().resetCombo();
     screenShakeIntensity = 0.0;
     currentSector = ProceduralGenerator.getBiomeForDistance(0, mode: mode);
@@ -860,7 +856,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     );
 
     // Destroy all active on-screen hazards & enemies
-    int neutralizedCount = 0;
     for (final chunk in worldGen.activeChunks) {
       final hazardsToDestroy = <BaseHazard>[];
       for (final hazard in chunk.hazards) {
@@ -870,16 +865,13 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
           if (hazard is DarkBox) {
             if (!hazard.isSliced) {
               hazard.sliceAndDestroy();
-              neutralizedCount++;
             }
           } else if (hazard is CyberTitan) {
             if (!hazard.isSliced) {
               hazard.takeDamage(amount: 3);
-              neutralizedCount += 2;
             }
           } else {
             hazardsToDestroy.add(hazard);
-            neutralizedCount++;
           }
         }
       }
@@ -887,13 +879,6 @@ class CyberNinjaRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
         h.removeFromParent();
         chunk.hazards.remove(h);
       }
-    }
-
-    if (neutralizedCount > 0) {
-      final cpBonus =
-          neutralizedCount * (mode == GameMode.tenXChallenge ? 60 : 30);
-      collectedCP += cpBonus;
-      saveService.addCyberPoints(cpBonus);
     }
   }
 
